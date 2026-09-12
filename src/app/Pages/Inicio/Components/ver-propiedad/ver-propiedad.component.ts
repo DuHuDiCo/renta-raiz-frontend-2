@@ -109,12 +109,12 @@ export class VerPropiedadComponent implements OnInit {
 
     this.getAsesor();
 
-
-
-
-    this.meta.updateTag({ property: 'og:description', content: this.propiedad.descripcion });
-    this.meta.updateTag({ property: 'og:image', content: this.propiedad.images[0].imageurl });
-
+    if (this.propiedad?.descripcion) {
+      this.meta.updateTag({ property: 'og:description', content: this.propiedad.descripcion });
+    }
+    if (this.propiedad?.images?.[0]?.imageurl) {
+      this.meta.updateTag({ property: 'og:image', content: this.propiedad.images[0].imageurl });
+    }
 
   }
 
@@ -134,13 +134,30 @@ export class VerPropiedadComponent implements OnInit {
   }
 
   getAsesor() {
-
-    this.asesor = this.dataasesoresService.getAsesorById(this.propiedad.broker[0].code);
+    const broker = this.propiedad?.broker?.[0];
+    if (broker) {
+      let asesorEncontrado = this.dataasesoresService.getAsesorById(broker.code);
+      if (asesorEncontrado) {
+        this.asesor = asesorEncontrado;
+      } else {
+        const nombreBroker = `${broker.name || ''} ${broker.last_name || ''}`.trim();
+        this.asesor = {
+          id: broker.code || 72656,
+          nombre: (nombreBroker && nombreBroker !== 'RENTA RAIZ') ? nombreBroker : 'Renta Raíz',
+          cargo: 'Equipo Comercial',
+          telefono: broker.movil_phone || broker.telephone || '314 543 8665',
+          email: broker.email || 'info@rentaraiz.co',
+          imagen: broker.picture || 'assets/images/rentaraiz.png'
+        };
+      }
+    } else {
+      this.asesor = this.dataasesoresService.getDefaultAsesor();
+    }
     console.log(this.asesor);
-
   }
 
-  abrirPortafolio(asesorCode: string) {
+  abrirPortafolio(asesorCode: any) {
+    if (!asesorCode) return;
     this.router.navigate(['/portafolio', asesorCode]).then(() => {
       window.scrollTo(0, 0); // opcional: para que siempre inicie arriba
     });
@@ -376,13 +393,15 @@ export class VerPropiedadComponent implements OnInit {
       this.media.push(video);
     }
 
-    for (let data of this.propiedad.images) {
-      var image = {
-        "type": "image",
-        "imageurl": data.imageurl,
-        "thumburl": data.thumbnurl
-      };
-      this.media.push(image);
+    if (this.propiedad?.images && Array.isArray(this.propiedad.images)) {
+      for (let data of this.propiedad.images) {
+        var image = {
+          "type": "image",
+          "imageurl": data.imageurl,
+          "thumburl": data.thumburl || data.thumbnurl
+        };
+        this.media.push(image);
+      }
     }
 
     console.log(this.media);
@@ -391,6 +410,7 @@ export class VerPropiedadComponent implements OnInit {
 
     this.prepararFiltros();
     this.enviarFiltros();
+    this.getAsesor();
 
     console.log(this.propiedad);
     // this.inmueblesService.getDatosPropiedad(this.codPro!).subscribe(

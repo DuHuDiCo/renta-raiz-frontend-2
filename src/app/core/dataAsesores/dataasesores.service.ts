@@ -54,6 +54,14 @@ export class DataasesoresService {
       "telefono": "350 223 9393",
       "email": "Juanpablo.rentaraiz@gmail.com",
       "imagen": "assets/images/JuanOspina-rr24-210x210.jpg"
+    },
+    {
+      "id": 72656,
+      "nombre": "Renta Raíz",
+      "cargo": "Equipo Comercial",
+      "telefono": "314 543 8665",
+      "email": "info@rentaraiz.co",
+      "imagen": "assets/images/rentaraiz.png"
     }
   ];
 
@@ -63,11 +71,22 @@ export class DataasesoresService {
     return this.asesores;
   }
 
-  getAsesorById(id: number): any {
-    return this.asesores.find(asesor => asesor.id === id);
+  getAsesorById(id: number | string): any {
+    return this.asesores.find(asesor => Number(asesor.id) === Number(id));
   }
 
   getAsesorByNombre(nombre: string): any {
     return this.asesores.find(asesor => asesor.nombre === nombre);
+  }
+
+  getDefaultAsesor(): any {
+    return {
+      id: 72656,
+      nombre: 'Renta Raíz',
+      cargo: 'Equipo Comercial',
+      telefono: '314 543 8665',
+      email: 'info@rentaraiz.co',
+      imagen: 'assets/images/rentaraiz.png'
+    };
   }
 }
