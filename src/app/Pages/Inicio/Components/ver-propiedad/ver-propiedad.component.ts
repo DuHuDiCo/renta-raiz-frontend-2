@@ -437,7 +437,7 @@ export class VerPropiedadComponent implements OnInit {
     codPro: number,
     accion: 'telefonos' | 'whatsapp' | 'soloEnviar'
   ) {
-    this.modalCrearContacto.abrirModal(codPro, accion);
+    this.modalCrearContacto.abrirModal(codPro, accion, this.propiedad?.biz_code);
   }
 
 

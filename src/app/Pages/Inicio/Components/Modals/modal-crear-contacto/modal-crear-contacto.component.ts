@@ -1,241 +1,187 @@
-import { CommonModule, Location } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
-import { InmueblesService } from '../../../../../core/Inmuebles/inmuebles.service';
+import { CommonModule } from '@angular/common';
+import { Component, HostListener, inject } from '@angular/core';
 import {
-  FormsModule,
   NonNullableFormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
-import { ActivatedRoute, Router } from '@angular/router';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
+import { InmueblesService } from '../../../../../core/Inmuebles/inmuebles.service';
+
+type Accion = 'telefonos' | 'whatsapp' | 'soloEnviar';
+type Canal = 'whatsapp' | 'llamada';
+type TipoNegocio = 'arriendo' | 'compra';
+type Estado = 'formulario' | 'enviando' | 'exito' | 'error';
+
+/** Número de WhatsApp comercial al que se redirige tras enviar el formulario (solo dígitos, con indicativo). */
+const WHATSAPP_COMERCIAL = '15556503779';
 
 @Component({
   selector: 'app-modal-crear-contacto',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './modal-crear-contacto.component.html',
   styleUrl: './modal-crear-contacto.component.scss',
 })
-export class ModalCrearContactoComponent implements OnInit {
-  iframeConfig: { [codPro: number]: {
-    url: string;
-    formId: string;
-    formName: string;
-    height?: number;
-  } } = {
-    5975: { url: 'https://api.leadconnectorhq.com/widget/form/DBQBxa2NZQgSAYMiukLJ', formId: 'DBQBxa2NZQgSAYMiukLJ', formName: 'Propiedad código 5975', height: 401 },
-    2531: { url: 'https://api.leadconnectorhq.com/widget/form/M1injuZo8jl0AFnLbjzu', formId: 'M1injuZo8jl0AFnLbjzu', formName: 'Propiedad código 2531', height: 401 },
-    5970: { url: 'https://api.leadconnectorhq.com/widget/form/XeOz8uDX43OxILBxg74S', formId: 'XeOz8uDX43OxILBxg74S', formName: 'Propiedad código 5970', height: 401 },
-    2411: { url: 'https://api.leadconnectorhq.com/widget/form/5CmVcLxMiLpUTEImetKC', formId: '5CmVcLxMiLpUTEImetKC', formName: 'Propiedad código 2411', height: 401 },
-    5689: { url: 'https://api.leadconnectorhq.com/widget/form/tanbgyswwkJ82IjFdrwz', formId: 'tanbgyswwkJ82IjFdrwz', formName: 'Lote en las Palmas (Yeferson Cossio)', height: 402 },
-    5024: { url: 'https://api.leadconnectorhq.com/widget/form/1H6XwJGDZfAL1YuEcp0d', formId: '1H6XwJGDZfAL1YuEcp0d', formName: 'Propiedad código 5024', height: 401 }
-  };
+export class ModalCrearContactoComponent {
+  private fb = inject(NonNullableFormBuilder);
+  private inmuebleService = inject(InmueblesService);
+  private activatedRoute = inject(ActivatedRoute);
 
-  iframeId = '';
-  iframeTitle = '';
-  iframeSrc: any = '';
-  
-  iframeHeight = 600;
+  readonly indicativos = [
+    { codigo: '57', pais: 'Colombia', iso: 'CO' },
+    { codigo: '1', pais: 'Estados Unidos / Canadá', iso: 'US' },
+    { codigo: '52', pais: 'México', iso: 'MX' },
+    { codigo: '34', pais: 'España', iso: 'ES' },
+    { codigo: '507', pais: 'Panamá', iso: 'PA' },
+    { codigo: '593', pais: 'Ecuador', iso: 'EC' },
+    { codigo: '51', pais: 'Perú', iso: 'PE' },
+    { codigo: '56', pais: 'Chile', iso: 'CL' },
+    { codigo: '54', pais: 'Argentina', iso: 'AR' },
+    { codigo: '58', pais: 'Venezuela', iso: 'VE' },
+  ];
 
   visible = false;
-  isLoading = false;
-  iframeListo = false;
   mostrarModalTelefonos = false;
-  private contactoEnviadoPorCodPro: { [codPro: number]: boolean } = {};
+  estado: Estado = 'formulario';
 
   codPro?: number;
-  fuente?: string;
-  accion: 'telefonos' | 'whatsapp' | 'soloEnviar' = 'soloEnviar';
-  utm_source = '';
+  accion: Accion = 'soloEnviar';
+  /** 1 = arriendo, 2 = venta, 3 = arriendo y venta */
+  bizCode?: number;
+  whatsappUrl = '';
 
-  urlBase!: SafeResourceUrl;
-
-  toastr = inject(ToastrService);
-  fb = inject(NonNullableFormBuilder);
-  inmuebleService = inject(InmueblesService);
-  location = inject(Location);
-  sanitizer = inject(DomSanitizer);
-  activatedRoute = inject(ActivatedRoute);
+  private contactoEnviadoPorCodPro: { [codPro: number]: boolean } = {};
 
   contacto = this.fb.group({
-    nombre: ['', Validators.required],
-    email: ['', Validators.required],
-    telefono: ['', Validators.required],
-    cedula: ['', Validators.required],
-    mensaje: ['', Validators.required],
+    nombre: ['', [Validators.required, Validators.minLength(3)]],
+    indicativo: ['57', Validators.required],
+    telefono: ['', [Validators.required, Validators.pattern(/^[0-9\s-]{7,15}$/)]],
+    email: ['', [Validators.required, Validators.email]],
+    canal: this.fb.control<Canal | ''>('', Validators.required),
+    tipoNegocio: this.fb.control<TipoNegocio | ''>('', Validators.required),
+    aceptaPolitica: [false, Validators.requiredTrue],
   });
 
-  ngOnInit(): void {
-    var queryParams = this.activatedRoute.snapshot.queryParams;
-    console.log(queryParams);
-
-    var urlIframe = '';
-
-    if (
-      queryParams['utm_source'] != undefined ||
-      queryParams['utm_source'] != null
-    ) {
-      console.log(queryParams['utm_source']);
-
-      switch (queryParams['utm_source']) {
-        case 'meta ads':
-          urlIframe =
-            'https://api.leadconnectorhq.com/widget/form/LArCYkvLIbfXbvaQMJ4Q';
-          break;
-
-        default:
-          urlIframe =
-            'https://api.leadconnectorhq.com/widget/form/9SRYMPh2FynzdxY045gg';
-          break;
-      }
-    } else {
-      urlIframe =
-        'https://api.leadconnectorhq.com/widget/form/9SRYMPh2FynzdxY045gg';
-    }
-
-    const url = `${urlIframe}?urlInmueble=${window.location.href}`;
-    //this.urlBase = this.urlBase + "?urlInmueble="+
-
-    this.urlBase = this.sanitizer.bypassSecurityTrustResourceUrl(url);
-    console.log(this.urlBase);
-
-    
-
+  get preguntarCanal(): boolean {
+    return this.accion !== 'whatsapp';
   }
 
-  abrirModal(codPro: number, accion: 'telefonos' | 'whatsapp' | 'soloEnviar') {
+  get preguntarTipoNegocio(): boolean {
+    return this.bizCode !== 1 && this.bizCode !== 2;
+  }
+
+  abrirModal(codPro: number, accion: Accion, bizCode?: number) {
+    const codProPrevio = this.codPro;
+    const accionPrevia = this.accion;
     this.codPro = codPro;
     this.accion = accion;
+    this.bizCode = bizCode;
 
-    const yaEnviado = this.contactoEnviadoPorCodPro[codPro];
-    if (accion === 'telefonos' && yaEnviado) {
+    if (accion === 'telefonos' && this.contactoEnviadoPorCodPro[codPro]) {
       this.abrirModalTelefonos();
       return;
     }
 
+    // Conserva lo que el usuario ya escribió si cerró el modal sin enviar.
+    if (this.estado === 'exito' || codPro !== codProPrevio) this.contacto.reset();
+    this.estado = 'formulario';
+
+    const canalActual = this.contacto.controls.canal.value;
+    this.contacto.patchValue({
+      canal: accion === 'whatsapp' ? 'whatsapp' : accionPrevia === 'whatsapp' ? '' : canalActual,
+      tipoNegocio: bizCode === 1 ? 'arriendo' : bizCode === 2 ? 'compra' : '',
+    });
     this.visible = true;
-
-    let urlIframe = '';
-    let formId = '';
-    let formName = '';
-    let iframeHeight = 600;
-
-    const cfg = this.iframeConfig[codPro];
-    if (cfg) {
-      urlIframe = cfg.url;
-      formId = cfg.formId;
-      formName = cfg.formName;
-      iframeHeight = cfg.height || 600;
-    } else {
-      const queryParams = this.activatedRoute.snapshot.queryParams;
-      const utmSource = queryParams['utm_source'];
-
-      if (utmSource === 'meta ads') {
-        urlIframe = 'https://api.leadconnectorhq.com/widget/form/LArCYkvLIbfXbvaQMJ4Q';
-      } else {
-        urlIframe = 'https://api.leadconnectorhq.com/widget/form/9SRYMPh2FynzdxY045gg';
-      }
-
-      formId = urlIframe.split('/').pop() || 'default';
-      formName = `Propiedad código ${codPro}`;
-    }
-
-    this.iframeId = `inline-${formId}`;
-    this.iframeTitle = formName;
-    this.iframeHeight = iframeHeight;
-  
-    const urlCurrent = window.location.href
-   const encodedUrl =  btoa(urlCurrent)
-    const url = `${urlIframe}?urlInmueble=${encodedUrl}&historial_web=${urlCurrent}`;
-    
-    this.iframeSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
   cerrarModal() {
     this.visible = false;
+  }
 
-    const iframe = document.getElementById('formIframe');
-    const wrapper = document.getElementById('iframe-wrapper');
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    if (this.visible && this.estado !== 'enviando') this.cerrarModal();
+  }
 
-    if (iframe && wrapper) {
-      wrapper.appendChild(iframe);
-      iframe.style.display = 'none';
+  invalido(campo: 'nombre' | 'telefono' | 'email' | 'canal' | 'tipoNegocio' | 'aceptaPolitica'): boolean {
+    const control = this.contacto.controls[campo];
+    return control.invalid && (control.touched || control.dirty);
+  }
+
+  enviarContacto() {
+    if (this.contacto.invalid) {
+      this.contacto.markAllAsTouched();
+      return;
     }
+
+    this.estado = 'enviando';
+
+    const { nombre, indicativo, telefono, email, canal, tipoNegocio } =
+      this.contacto.getRawValue();
+    const telefonoCompleto = `+${indicativo}${telefono.replace(/\D/g, '')}`;
+    const urlInmueble = window.location.href;
+    const query = this.activatedRoute.snapshot.queryParams;
+
+    const obj = {
+      nombre: nombre.trim(),
+      email: email.trim(),
+      telefono: telefonoCompleto,
+      mensaje: `Interesado en ${tipoNegocio === 'compra' ? 'comprar' : 'arrendar'} el inmueble código ${this.codPro}. Prefiere contacto por ${canal === 'whatsapp' ? 'WhatsApp' : 'llamada'}.`,
+      codPro: this.codPro,
+      fuente: 'propiedad',
+      accion: this.accion,
+      canal,
+      tipoNegocio,
+      aceptaPolitica: true,
+      urlInmueble,
+      utm_source: query['utm_source'] ?? null,
+      utm_medium: query['utm_medium'] ?? null,
+      utm_campaign: query['utm_campaign'] ?? null,
+      utm_content: query['utm_content'] ?? null,
+      utm_term: query['utm_term'] ?? null,
+    };
+
+    this.whatsappUrl = `https://wa.me/${WHATSAPP_COMERCIAL}?text=${encodeURIComponent(
+      `Hola, soy ${obj.nombre}. Me interesa el inmueble código ${this.codPro}: ${urlInmueble}`
+    )}`;
+
+    this.inmuebleService.createContacto(obj).subscribe({
+      next: () => {
+        if (this.accion === 'telefonos') {
+          this.contactoEnviadoPorCodPro[this.codPro!] = true;
+          this.cerrarModal();
+          this.abrirModalTelefonos();
+          return;
+        }
+
+        this.estado = 'exito';
+
+        if (this.accion === 'whatsapp') {
+          // Si el navegador bloquea la ventana, queda el botón "Abrir WhatsApp" en la vista de éxito.
+          window.open(this.whatsappUrl, '_blank', 'noopener');
+        }
+      },
+      error: (error) => {
+        console.error('Error al enviar el contacto:', error);
+        this.estado = 'error';
+      },
+    });
+  }
+
+  volverAlFormulario() {
+    this.estado = 'formulario';
   }
 
   abrirModalTelefonos() {
     this.mostrarModalTelefonos = true;
   }
 
-  abrirToCall(number:string){
-    window.location.href= `tel:${number}`
+  abrirToCall(number: string) {
+    window.location.href = `tel:${number}`;
   }
 
   cerrarModalTelefonos() {
     this.mostrarModalTelefonos = false;
-  }
-
-  enviarContacto() {
-    this.isLoading = true;
-
-    if (!this.contacto.valid) {
-      this.toastr.error('Complete todos los campos', 'Error', {
-        closeButton: true,
-        progressBar: true,
-        timeOut: 5000,
-      });
-      return;
-    }
-
-    const obj = {
-      nombre: this.contacto.value.nombre,
-      email: this.contacto.value.email,
-      telefono: this.contacto.value.telefono,
-      cedula: this.contacto.value.cedula,
-      mensaje: this.contacto.value.mensaje,
-      codPro: this.codPro,
-      fuente: 'propiedad',
-    };
-
-    this.inmuebleService.createContacto(obj).subscribe(
-      (response: any) => {
-        this.isLoading = false;
-        this.cerrarModal();
-
-        if (this.accion === 'whatsapp') {
-          this.abrirPestana(
-            `https://api.whatsapp.com/send?phone=${this.contacto.value.telefono}&text=${this.contacto.value.mensaje}`
-          );
-        }
-
-        if (this.accion === 'soloEnviar') {
-          this.toastr.success(
-            '¡Gracias!',
-            'Tu mensaje ha sido enviado con éxito!',
-            {
-              closeButton: true,
-              progressBar: true,
-              timeOut: 5000,
-            }
-          );
-          return;
-        }
-
-        if (this.accion === 'telefonos') {
-          this.contactoEnviadoPorCodPro[this.codPro!] = true;
-          this.abrirModalTelefonos();
-        }
-      },
-      (error: any) => {
-        console.error('Error al enviar el contacto:', error);
-        this.isLoading = false;
-      }
-    );
-  }
-
-  abrirPestana(url: string) {
-    window.open(url, '_blank');
   }
 }

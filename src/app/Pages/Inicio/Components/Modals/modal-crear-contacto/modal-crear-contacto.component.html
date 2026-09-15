@@ -1,32 +1,212 @@
-<div style="display: none">
-  <iframe src="https://api.leadconnectorhq.com/widget/form/9SRYMPh2FynzdxY045gg" id="preload-iframe"
-    style="width: 0; height: 0; border: 0" (load)="iframeListo = true" title="Preload Leads"></iframe>
-</div>
+@if (visible) {
+<div class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4"
+  (click)="estado !== 'enviando' && cerrarModal()">
+  <div role="dialog" aria-modal="true" aria-labelledby="contacto-titulo"
+    class="relative w-full sm:max-w-md max-h-[92vh] flex flex-col overflow-hidden bg-white rounded-t-2xl sm:rounded-xl shadow-xl"
+    (click)="$event.stopPropagation()">
 
-<div *ngIf="visible"
-  class="fixed top-0 left-0 right-0 z-50 flex items-center justify-center w-full h-full bg-black bg-opacity-50">
-  <div class="relative w-full max-w-md">
-    <div class="relative bg-white rounded-lg shadow-sm overflow-hidden">
-      <div class="flex items-center justify-between p-4 border-b border-gray-200">
-        <h3 class="text-xl font-semibold text-black w-full text-center">
-          ¿Te interesa este inmueble?
+    <div class="shrink-0 flex items-center justify-between gap-4 bg-white px-6 py-4 border-b border-gray-100">
+      <div>
+        <h3 id="contacto-titulo" class="text-lg font-semibold text-[#080E36]">
+          @if (accion === 'whatsapp') { Habla con un asesor por WhatsApp }
+          @else { ¿Te interesa este inmueble? }
         </h3>
-        <button (click)="cerrarModal()" class="text-gray-400 hover:text-black">
-          ✕
-        </button>
+        <p class="text-xs text-gray-500 mt-0.5">Inmueble código {{ codPro }}</p>
+      </div>
+      <button type="button" (click)="cerrarModal()" [disabled]="estado === 'enviando'" aria-label="Cerrar"
+        class="shrink-0 w-9 h-9 flex items-center justify-center rounded-full text-gray-400 hover:text-[#080E36] hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#CDAD60]">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="min-h-0 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+    @if (estado === 'exito') {
+    <div class="px-6 py-8 text-center flex flex-col items-center gap-4">
+      <div class="w-14 h-14 rounded-full flex items-center justify-center"
+        [ngClass]="accion === 'whatsapp' ? 'bg-green-50 text-green-600' : 'bg-[#CDAD60]/15 text-[#9c7d32]'">
+        <i class="text-2xl" [ngClass]="accion === 'whatsapp' ? 'fab fa-whatsapp' : 'fas fa-check'"></i>
+      </div>
+      <div class="space-y-1">
+        <p class="text-lg font-semibold text-[#080E36]">¡Gracias, {{ contacto.controls.nombre.value.split(' ')[0] }}!</p>
+        @if (accion === 'whatsapp') {
+        <p class="text-sm text-gray-600">Recibimos tus datos. Continúa la conversación con nuestro equipo en WhatsApp.</p>
+        } @else {
+        <p class="text-sm text-gray-600">
+          Un asesor te contactará
+          {{ contacto.controls.canal.value === 'whatsapp' ? 'por WhatsApp' : 'con una llamada' }}
+          muy pronto.
+        </p>
+        }
+      </div>
+      @if (accion === 'whatsapp') {
+      <a [href]="whatsappUrl" target="_blank" rel="noopener"
+        class="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg text-sm px-5 py-3 transition-colors focus:outline-none focus:ring-4 focus:ring-green-300">
+        <i class="fab fa-whatsapp"></i> Abrir WhatsApp
+      </a>
+      }
+      <button type="button" (click)="cerrarModal()"
+        class="text-sm font-medium text-gray-500 hover:text-[#080E36] underline underline-offset-4">
+        Cerrar
+      </button>
+    </div>
+    } @else if (estado === 'error') {
+    <div class="px-6 py-8 text-center flex flex-col items-center gap-4">
+      <div class="w-14 h-14 rounded-full flex items-center justify-center bg-red-50 text-red-600">
+        <i class="fas fa-exclamation text-2xl"></i>
+      </div>
+      <div class="space-y-1">
+        <p class="text-lg font-semibold text-[#080E36]">No pudimos enviar tus datos</p>
+        <p class="text-sm text-gray-600">Revisa tu conexión e inténtalo de nuevo.</p>
+      </div>
+      <button type="button" (click)="enviarContacto()"
+        class="w-full bg-[#080E36] hover:bg-[#0f1850] text-white font-medium rounded-lg text-sm px-5 py-3 focus:outline-none focus:ring-4 focus:ring-[#CDAD60]/50">
+        Reintentar
+      </button>
+      @if (accion === 'whatsapp') {
+      <a [href]="whatsappUrl" target="_blank" rel="noopener"
+        class="text-sm font-medium text-green-700 hover:text-green-800 underline underline-offset-4">
+        Ir a WhatsApp de todas formas
+      </a>
+      }
+      <button type="button" (click)="volverAlFormulario()"
+        class="text-sm font-medium text-gray-500 hover:text-[#080E36] underline underline-offset-4">
+        Editar mis datos
+      </button>
+    </div>
+    } @else {
+    <form [formGroup]="contacto" (ngSubmit)="enviarContacto()" novalidate class="px-6 pt-4 pb-5 flex flex-col gap-3.5">
+      <p class="text-sm text-gray-600">
+        @if (accion === 'whatsapp') {
+        Déjanos tus datos y te llevamos directo al chat con nuestro equipo.
+        } @else {
+        Déjanos tus datos y un asesor te dará más información.
+        }
+      </p>
+
+      <!-- Nombre -->
+      <div class="flex flex-col gap-1.5">
+        <label for="contacto-nombre" class="text-sm font-medium text-[#080E36]">Nombre completo</label>
+        <input id="contacto-nombre" type="text" formControlName="nombre" autocomplete="name"
+          placeholder="Ej. María Gómez"
+          class="w-full rounded-lg border px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CDAD60] focus:border-[#CDAD60]"
+          [ngClass]="invalido('nombre') ? 'border-red-400' : 'border-gray-300'">
+        @if (invalido('nombre')) {
+        <p class="text-xs text-red-600">Escribe tu nombre (mínimo 3 letras).</p>
+        }
       </div>
 
-      <div class="p-0 m-0">
-        <iframe *ngIf="iframeSrc" [src]="iframeSrc" [id]="iframeId" data-layout='{"id":"INLINE"}'
-          data-trigger-type="alwaysShow" data-trigger-value="" data-activation-type="alwaysActivated"
-          data-activation-value="" data-deactivation-type="neverDeactivate" data-deactivation-value=""
-          [attr.data-form-name]="iframeTitle" [attr.data-height]="iframeHeight" [attr.data-layout-iframe-id]="iframeId"
-          [attr.data-form-id]="iframeId.replace('inline-', '')" [title]="iframeTitle"
-          style="width: 100%; border: none; border-radius: 3px;" [style.height.px]="iframeHeight"></iframe>
+      <!-- Teléfono -->
+      <div class="flex flex-col gap-1.5">
+        <label for="contacto-telefono" class="text-sm font-medium text-[#080E36]">Celular</label>
+        <div class="flex rounded-lg border focus-within:ring-2 focus-within:ring-[#CDAD60] focus-within:border-[#CDAD60]"
+          [ngClass]="invalido('telefono') ? 'border-red-400' : 'border-gray-300'">
+          <label for="contacto-indicativo" class="sr-only">Indicativo del país</label>
+          <select id="contacto-indicativo" formControlName="indicativo"
+            class="shrink-0 rounded-l-lg border-0 border-r border-gray-200 bg-gray-50 pl-3 pr-8 py-2.5 text-sm text-gray-900 focus:ring-0">
+            @for (item of indicativos; track item.codigo) {
+            <option [value]="item.codigo" [attr.aria-label]="item.pais">{{ item.iso }} +{{ item.codigo }}</option>
+            }
+          </select>
+          <input id="contacto-telefono" type="tel" inputmode="numeric" formControlName="telefono" autocomplete="tel-national"
+            placeholder="300 123 4567"
+            class="min-w-0 flex-1 rounded-r-lg border-0 px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:ring-0">
+        </div>
+        @if (invalido('telefono')) {
+        <p class="text-xs text-red-600">Escribe un número válido, solo dígitos (entre 7 y 15).</p>
+        }
       </div>
+
+      <!-- Email -->
+      <div class="flex flex-col gap-1.5">
+        <label for="contacto-email" class="text-sm font-medium text-[#080E36]">Correo electrónico</label>
+        <input id="contacto-email" type="email" formControlName="email" autocomplete="email"
+          placeholder="tu@correo.com"
+          class="w-full rounded-lg border px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CDAD60] focus:border-[#CDAD60]"
+          [ngClass]="invalido('email') ? 'border-red-400' : 'border-gray-300'">
+        @if (invalido('email')) {
+        <p class="text-xs text-red-600">Escribe un correo válido, por ejemplo nombre&#64;correo.com.</p>
+        }
+      </div>
+
+      <!-- Canal: solo si no vino desde el botón de WhatsApp -->
+      @if (preguntarCanal) {
+      <fieldset class="flex flex-col gap-1.5">
+        <legend class="text-sm font-medium text-[#080E36] mb-1.5">¿Cómo prefieres que te contactemos?</legend>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm cursor-pointer transition-colors has-[:checked]:border-[#080E36] has-[:checked]:bg-[#080E36] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#CDAD60]"
+            [ngClass]="invalido('canal') ? 'border-red-400' : 'border-gray-300 text-gray-700'">
+            <input type="radio" id="contacto-canal-whatsapp" formControlName="canal" value="whatsapp" class="sr-only">
+            <i class="fab fa-whatsapp"></i> WhatsApp
+          </label>
+          <label class="flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm cursor-pointer transition-colors has-[:checked]:border-[#080E36] has-[:checked]:bg-[#080E36] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#CDAD60]"
+            [ngClass]="invalido('canal') ? 'border-red-400' : 'border-gray-300 text-gray-700'">
+            <input type="radio" id="contacto-canal-llamada" formControlName="canal" value="llamada" class="sr-only">
+            <i class="fas fa-phone-alt"></i> Llamada
+          </label>
+        </div>
+        @if (invalido('canal')) {
+        <p class="text-xs text-red-600">Elige cómo quieres que te contactemos.</p>
+        }
+      </fieldset>
+      }
+
+      <!-- Tipo de negocio: solo si el inmueble está en arriendo y venta -->
+      @if (preguntarTipoNegocio) {
+      <fieldset class="flex flex-col gap-1.5">
+        <legend class="text-sm font-medium text-[#080E36] mb-1.5">¿Te interesa arrendar o comprar?</legend>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="flex items-center justify-center rounded-lg border px-3 py-2.5 text-sm cursor-pointer transition-colors has-[:checked]:border-[#080E36] has-[:checked]:bg-[#080E36] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#CDAD60]"
+            [ngClass]="invalido('tipoNegocio') ? 'border-red-400' : 'border-gray-300 text-gray-700'">
+            <input type="radio" id="contacto-negocio-arriendo" formControlName="tipoNegocio" value="arriendo" class="sr-only">
+            Arrendar
+          </label>
+          <label class="flex items-center justify-center rounded-lg border px-3 py-2.5 text-sm cursor-pointer transition-colors has-[:checked]:border-[#080E36] has-[:checked]:bg-[#080E36] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#CDAD60]"
+            [ngClass]="invalido('tipoNegocio') ? 'border-red-400' : 'border-gray-300 text-gray-700'">
+            <input type="radio" id="contacto-negocio-compra" formControlName="tipoNegocio" value="compra" class="sr-only">
+            Comprar
+          </label>
+        </div>
+        @if (invalido('tipoNegocio')) {
+        <p class="text-xs text-red-600">Elige si quieres arrendar o comprar.</p>
+        }
+      </fieldset>
+      }
+
+      <!-- Política de datos -->
+      <div class="flex flex-col gap-1.5">
+        <label for="contacto-politica" class="flex items-start gap-3 text-sm text-gray-600 cursor-pointer">
+          <input id="contacto-politica" type="checkbox" formControlName="aceptaPolitica"
+            class="mt-0.5 w-4 h-4 shrink-0 rounded border-gray-300 text-[#080E36] focus:ring-[#CDAD60]">
+          <span>
+            Autorizo el tratamiento de mis datos personales según la
+            <a href="/politicas-de-privacidad" target="_blank" rel="noopener"
+              class="font-medium text-[#080E36] underline underline-offset-2 hover:text-[#9c7d32]">Política de privacidad</a>.
+          </span>
+        </label>
+        @if (invalido('aceptaPolitica')) {
+        <p class="text-xs text-red-600">Debes aceptar la política de privacidad para continuar.</p>
+        }
+      </div>
+
+      <button type="submit" [disabled]="estado === 'enviando'"
+        class="mt-1 w-full flex items-center justify-center gap-2 font-medium rounded-lg text-sm px-5 py-3 transition-colors focus:outline-none focus:ring-4 disabled:opacity-70 disabled:cursor-wait"
+        [ngClass]="accion === 'whatsapp'
+          ? 'bg-green-600 hover:bg-green-700 text-white focus:ring-green-300'
+          : 'bg-[#CDAD60] hover:bg-[#b9994d] text-[#080E36] focus:ring-[#CDAD60]/50'">
+        @if (estado === 'enviando') {
+        <i class="fas fa-spinner fa-spin"></i> Enviando…
+        } @else if (accion === 'whatsapp') {
+        <i class="fab fa-whatsapp"></i> Continuar a WhatsApp
+        } @else {
+        Enviar
+        }
+      </button>
+    </form>
+    }
     </div>
   </div>
 </div>
+}
 
 <!-- Modal para mostrar teléfonos -->
 <div *ngIf="mostrarModalTelefonos" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -40,7 +220,7 @@
 
 
     </button>
-    <br>  
+    <br>
 
     <button type="button" (click)="abrirToCall('+573145438665')"
       class="w-full flex items-center justify-center gap-2 text-gray-700 hover:text-white border border-[#080E36] hover:bg-[#cdad60] focus:ring-4 focus:outline-none focus:ring-[#080E36] font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-all duration-300">
@@ -53,9 +233,3 @@
     </button>
   </div>
 </div>
-
-<script>
-  window.addEventListener('message', (event) => {
-      alert('Form submitted');
-    });
-</script>
