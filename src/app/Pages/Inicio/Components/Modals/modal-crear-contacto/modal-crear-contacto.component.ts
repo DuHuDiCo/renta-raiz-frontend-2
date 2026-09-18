@@ -5,7 +5,6 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 import { InmueblesService } from '../../../../../core/Inmuebles/inmuebles.service';
 
 type Accion = 'telefonos' | 'whatsapp' | 'soloEnviar';
@@ -26,7 +25,6 @@ const WHATSAPP_COMERCIAL = '15556503779';
 export class ModalCrearContactoComponent {
   private fb = inject(NonNullableFormBuilder);
   private inmuebleService = inject(InmueblesService);
-  private activatedRoute = inject(ActivatedRoute);
 
   readonly indicativos = [
     { codigo: '57', pais: 'Colombia', iso: 'CO' },
@@ -121,7 +119,6 @@ export class ModalCrearContactoComponent {
       this.contacto.getRawValue();
     const telefonoCompleto = `+${indicativo}${telefono.replace(/\D/g, '')}`;
     const urlInmueble = window.location.href;
-    const query = this.activatedRoute.snapshot.queryParams;
 
     const obj = {
       nombre: nombre.trim(),
@@ -135,18 +132,18 @@ export class ModalCrearContactoComponent {
       tipoNegocio,
       aceptaPolitica: true,
       urlInmueble,
-      utm_source: query['utm_source'] ?? null,
-      utm_medium: query['utm_medium'] ?? null,
-      utm_campaign: query['utm_campaign'] ?? null,
-      utm_content: query['utm_content'] ?? null,
-      utm_term: query['utm_term'] ?? null,
+      utm_source: this.leerUtm('utm_source'),
+      utm_medium: this.leerUtm('utm_medium'),
+      utm_campaign: this.leerUtm('utm_campaign'),
+      utm_content: this.leerUtm('utm_content'),
+      utm_term: this.leerUtm('utm_term'),
     };
 
     this.whatsappUrl = `https://wa.me/${WHATSAPP_COMERCIAL}?text=${encodeURIComponent(
       `Hola, soy ${obj.nombre}. Me interesa el inmueble código ${this.codPro}: ${urlInmueble}`
     )}`;
 
-    this.inmuebleService.createContacto(obj).subscribe({
+    this.inmuebleService.createContactoInmueble(obj).subscribe({
       next: () => {
         if (this.accion === 'telefonos') {
           this.contactoEnviadoPorCodPro[this.codPro!] = true;
@@ -167,6 +164,21 @@ export class ModalCrearContactoComponent {
         this.estado = 'error';
       },
     });
+  }
+
+  /**
+   * Lee el UTM de la URL actual y, si no está, del que se guardó en localStorage al llegar al sitio
+   * (app.component). No se usa ActivatedRoute porque app.component agrega los UTM con history.replaceState
+   * y el router no ve ese cambio.
+   */
+  private leerUtm(param: string): string | null {
+    const enUrl = new URL(window.location.href).searchParams.get(param);
+    if (enUrl) return enUrl;
+    try {
+      return localStorage.getItem(param);
+    } catch {
+      return null;
+    }
   }
 
   volverAlFormulario() {

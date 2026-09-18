@@ -69,7 +69,7 @@
           const url = new URL(window.location.href);
 
           // Paso 1: guardar en localStorage si están en la URL
-          const utmParams = ['utm_source', 'utm_medium', 'utm_id', 'fbclid'];
+          const utmParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'utm_id', 'fbclid'];
 
           let updated = false;
 

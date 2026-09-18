@@ -45,6 +45,10 @@ export class InmueblesService {
     return this.http.post(`${environment.baseUrl}/contacto/`, contacto);
   }
 
+  createContactoInmueble(contacto: any) {
+    return this.http.post(`${environment.baseUrl}/contacto-inmueble`, contacto);
+  }
+
   getDatosPropiedad(codPro: number) {
     return this.http.get(`${environment.baseUrl}/properties/${codPro}`);
   }
