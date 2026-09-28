@@ -331,19 +331,14 @@
 
             <!-- Botones -->
             <div class="space-y-3">
-              <button type="button" (click)="openModalTelefono(propiedad.codpro, 'telefonos')"
-                class="w-full flex items-center justify-center gap-2 text-gray-700 hover:text-white border border-[#080E36] hover:bg-[#080E36] focus:ring-4 focus:outline-none focus:ring-[#080E36] font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-all duration-300">
-                <i class="fas fa-phone-alt fa-sm"></i> Ver teléfonos
-              </button>
-
               <button type="button" (click)="openModalCrearContacto(propiedad.codpro, 'whatsapp')"
                 class="w-full flex items-center justify-center gap-2 text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-all duration-300">
                 <i class="fab fa-whatsapp fa-sm"></i> Contactar por WhatsApp 😊
               </button>
 
-              <button type="button" (click)="openModalCrearContacto(propiedad.codpro, 'soloEnviar')"
-                class="w-full text-[#CDAD60] hover:text-white border border-[#CDAD60] hover:bg-[#CDAD60] focus:ring-4 focus:outline-none focus:ring-[#CDAD60] font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-all duration-300">
-                Quiero que me contacten
+              <button type="button" (click)="openModalCrearContacto(propiedad.codpro, 'email')"
+                class="w-full flex items-center justify-center gap-2 text-[#CDAD60] hover:text-white border border-[#CDAD60] hover:bg-[#CDAD60] focus:ring-4 focus:outline-none focus:ring-[#CDAD60] font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-all duration-300">
+                <i class="fas fa-envelope fa-sm"></i> Contactar por correo
               </button>
             </div>
 
@@ -579,19 +574,14 @@
 
             <!-- Botones -->
             <div class="space-y-3">
-              <button type="button" (click)="openModalTelefono(propiedad.codpro, 'telefonos')"
-                class="w-full flex items-center justify-center gap-2 text-gray-700 hover:text-white border border-[#080E36] hover:bg-[#080E36] focus:ring-4 focus:outline-none focus:ring-[#080E36] font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-all duration-300">
-                <i class="fas fa-phone-alt fa-sm"></i> Ver teléfonos
-              </button>
-
               <button type="button" (click)="openModalCrearContacto(propiedad.codpro, 'whatsapp')"
                 class="w-full flex items-center justify-center gap-2 text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-all duration-300">
                 <i class="fab fa-whatsapp fa-sm"></i> Contactar por WhatsApp 😊
               </button>
 
-              <button type="button" (click)="openModalCrearContacto(propiedad.codpro, 'soloEnviar')"
-                class="w-full text-[#CDAD60] hover:text-white border border-[#CDAD60] hover:bg-[#CDAD60] focus:ring-4 focus:outline-none focus:ring-[#CDAD60] font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-all duration-300">
-                Quiero que me contacten
+              <button type="button" (click)="openModalCrearContacto(propiedad.codpro, 'email')"
+                class="w-full flex items-center justify-center gap-2 text-[#CDAD60] hover:text-white border border-[#CDAD60] hover:bg-[#CDAD60] focus:ring-4 focus:outline-none focus:ring-[#CDAD60] font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-all duration-300">
+                <i class="fas fa-envelope fa-sm"></i> Contactar por correo
               </button>
             </div>
 
@@ -610,14 +600,6 @@
                 <p class="text-sm font-medium text-gray-900">
                   {{asesor?.cargo}}
                 </p>
-                <div *ngIf="asesor?.telefono" class="flex justify-center md:justify-start items-center text-gray-600 mt-2">
-                  <i class="fa-solid fa-phone text-lg"></i>
-                  <span class="ml-2 text-sm">{{asesor?.telefono}}</span>
-                </div>
-                <div *ngIf="asesor?.email" class="flex justify-center md:justify-start items-center text-gray-600 mt-1">
-                  <i class="fa-solid fa-envelope text-lg"></i>
-                  <span class="ml-2 text-sm">{{asesor?.email}}</span>
-                </div>
               </div>
             </div>
           </div>

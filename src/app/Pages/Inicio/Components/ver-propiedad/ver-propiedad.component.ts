@@ -435,19 +435,11 @@ export class VerPropiedadComponent implements OnInit {
 
   openModalCrearContacto(
     codPro: number,
-    accion: 'telefonos' | 'whatsapp' | 'soloEnviar'
+    accion: 'whatsapp' | 'email'
   ) {
     this.modalCrearContacto.abrirModal(codPro, accion, this.propiedad?.biz_code);
   }
 
-
-
-  openModalTelefono(
-    codPro: number,
-    accion: 'telefonos' | 'whatsapp' | 'soloEnviar'
-  ) {
-    this.modalCrearContacto.abrirModalTelefonos();
-  }
 
 
   prepararFiltros() {

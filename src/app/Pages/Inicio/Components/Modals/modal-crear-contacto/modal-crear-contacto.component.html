@@ -9,7 +9,7 @@
       <div>
         <h3 id="contacto-titulo" class="text-lg font-semibold text-[#080E36]">
           @if (accion === 'whatsapp') { Habla con un asesor por WhatsApp }
-          @else { ¿Te interesa este inmueble? }
+          @else { Recibe información por correo }
         </h3>
         <p class="text-xs text-gray-500 mt-0.5">Inmueble código {{ codPro }}</p>
       </div>
@@ -22,28 +22,21 @@
     <div class="min-h-0 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
     @if (estado === 'exito') {
     <div class="px-6 py-8 text-center flex flex-col items-center gap-4">
-      <div class="w-14 h-14 rounded-full flex items-center justify-center"
-        [ngClass]="accion === 'whatsapp' ? 'bg-green-50 text-green-600' : 'bg-[#CDAD60]/15 text-[#9c7d32]'">
-        <i class="text-2xl" [ngClass]="accion === 'whatsapp' ? 'fab fa-whatsapp' : 'fas fa-check'"></i>
+      <div class="w-14 h-14 rounded-full flex items-center justify-center bg-green-50 text-green-600">
+        <i class="fab fa-whatsapp text-2xl"></i>
       </div>
       <div class="space-y-1">
-        <p class="text-lg font-semibold text-[#080E36]">¡Gracias, {{ contacto.controls.nombre.value.split(' ')[0] }}!</p>
-        @if (accion === 'whatsapp') {
-        <p class="text-sm text-gray-600">Recibimos tus datos. Continúa la conversación con nuestro equipo en WhatsApp.</p>
+        <p class="text-lg font-semibold text-[#080E36]">¡Gracias, {{ primerNombre }}!</p>
+        @if (accion === 'email') {
+        <p class="text-sm text-gray-600">Recibimos tus datos; también te escribiremos a tu correo. Continúa la conversación con nuestro equipo en WhatsApp.</p>
         } @else {
-        <p class="text-sm text-gray-600">
-          Un asesor te contactará
-          {{ contacto.controls.canal.value === 'whatsapp' ? 'por WhatsApp' : 'con una llamada' }}
-          muy pronto.
-        </p>
+        <p class="text-sm text-gray-600">Recibimos tus datos. Continúa la conversación con nuestro equipo en WhatsApp.</p>
         }
       </div>
-      @if (accion === 'whatsapp') {
       <a [href]="whatsappUrl" target="_blank" rel="noopener"
         class="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg text-sm px-5 py-3 transition-colors focus:outline-none focus:ring-4 focus:ring-green-300">
         <i class="fab fa-whatsapp"></i> Abrir WhatsApp
       </a>
-      }
       <button type="button" (click)="cerrarModal()"
         class="text-sm font-medium text-gray-500 hover:text-[#080E36] underline underline-offset-4">
         Cerrar
@@ -62,12 +55,10 @@
         class="w-full bg-[#080E36] hover:bg-[#0f1850] text-white font-medium rounded-lg text-sm px-5 py-3 focus:outline-none focus:ring-4 focus:ring-[#CDAD60]/50">
         Reintentar
       </button>
-      @if (accion === 'whatsapp') {
       <a [href]="whatsappUrl" target="_blank" rel="noopener"
         class="text-sm font-medium text-green-700 hover:text-green-800 underline underline-offset-4">
         Ir a WhatsApp de todas formas
       </a>
-      }
       <button type="button" (click)="volverAlFormulario()"
         class="text-sm font-medium text-gray-500 hover:text-[#080E36] underline underline-offset-4">
         Editar mis datos
@@ -79,13 +70,13 @@
         @if (accion === 'whatsapp') {
         Déjanos tus datos y te llevamos directo al chat con nuestro equipo.
         } @else {
-        Déjanos tus datos y un asesor te dará más información.
+        Déjanos tus datos: te escribiremos al correo y te llevamos al chat con nuestro equipo.
         }
       </p>
 
       <!-- Nombre -->
       <div class="flex flex-col gap-1.5">
-        <label for="contacto-nombre" class="text-sm font-medium text-[#080E36]">Nombre completo</label>
+        <label for="contacto-nombre" class="text-sm font-medium text-[#080E36]">Nombre y apellido</label>
         <input id="contacto-nombre" type="text" formControlName="nombre" autocomplete="name"
           placeholder="Ej. María Gómez"
           class="w-full rounded-lg border px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CDAD60] focus:border-[#CDAD60]"
@@ -94,6 +85,20 @@
         <p class="text-xs text-red-600">Escribe tu nombre (mínimo 3 letras).</p>
         }
       </div>
+
+      <!-- Email: solo en contacto por correo -->
+      @if (accion === 'email') {
+      <div class="flex flex-col gap-1.5">
+        <label for="contacto-email" class="text-sm font-medium text-[#080E36]">Correo electrónico</label>
+        <input id="contacto-email" type="email" formControlName="email" autocomplete="email"
+          placeholder="tu@correo.com"
+          class="w-full rounded-lg border px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CDAD60] focus:border-[#CDAD60]"
+          [ngClass]="invalido('email') ? 'border-red-400' : 'border-gray-300'">
+        @if (invalido('email')) {
+        <p class="text-xs text-red-600">Escribe un correo válido, por ejemplo nombre&#64;correo.com.</p>
+        }
+      </div>
+      }
 
       <!-- Teléfono -->
       <div class="flex flex-col gap-1.5">
@@ -115,40 +120,6 @@
         <p class="text-xs text-red-600">Escribe un número válido, solo dígitos (entre 7 y 15).</p>
         }
       </div>
-
-      <!-- Email -->
-      <div class="flex flex-col gap-1.5">
-        <label for="contacto-email" class="text-sm font-medium text-[#080E36]">Correo electrónico</label>
-        <input id="contacto-email" type="email" formControlName="email" autocomplete="email"
-          placeholder="tu@correo.com"
-          class="w-full rounded-lg border px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#CDAD60] focus:border-[#CDAD60]"
-          [ngClass]="invalido('email') ? 'border-red-400' : 'border-gray-300'">
-        @if (invalido('email')) {
-        <p class="text-xs text-red-600">Escribe un correo válido, por ejemplo nombre&#64;correo.com.</p>
-        }
-      </div>
-
-      <!-- Canal: solo si no vino desde el botón de WhatsApp -->
-      @if (preguntarCanal) {
-      <fieldset class="flex flex-col gap-1.5">
-        <legend class="text-sm font-medium text-[#080E36] mb-1.5">¿Cómo prefieres que te contactemos?</legend>
-        <div class="grid grid-cols-2 gap-2">
-          <label class="flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm cursor-pointer transition-colors has-[:checked]:border-[#080E36] has-[:checked]:bg-[#080E36] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#CDAD60]"
-            [ngClass]="invalido('canal') ? 'border-red-400' : 'border-gray-300 text-gray-700'">
-            <input type="radio" id="contacto-canal-whatsapp" formControlName="canal" value="whatsapp" class="sr-only">
-            <i class="fab fa-whatsapp"></i> WhatsApp
-          </label>
-          <label class="flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm cursor-pointer transition-colors has-[:checked]:border-[#080E36] has-[:checked]:bg-[#080E36] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#CDAD60]"
-            [ngClass]="invalido('canal') ? 'border-red-400' : 'border-gray-300 text-gray-700'">
-            <input type="radio" id="contacto-canal-llamada" formControlName="canal" value="llamada" class="sr-only">
-            <i class="fas fa-phone-alt"></i> Llamada
-          </label>
-        </div>
-        @if (invalido('canal')) {
-        <p class="text-xs text-red-600">Elige cómo quieres que te contactemos.</p>
-        }
-      </fieldset>
-      }
 
       <!-- Tipo de negocio: solo si el inmueble está en arriendo y venta -->
       @if (preguntarTipoNegocio) {
@@ -189,16 +160,13 @@
       </div>
 
       <button type="submit" [disabled]="estado === 'enviando'"
-        class="mt-1 w-full flex items-center justify-center gap-2 font-medium rounded-lg text-sm px-5 py-3 transition-colors focus:outline-none focus:ring-4 disabled:opacity-70 disabled:cursor-wait"
-        [ngClass]="accion === 'whatsapp'
-          ? 'bg-green-600 hover:bg-green-700 text-white focus:ring-green-300'
-          : 'bg-[#CDAD60] hover:bg-[#b9994d] text-[#080E36] focus:ring-[#CDAD60]/50'">
+        class="mt-1 w-full flex items-center justify-center gap-2 font-medium rounded-lg text-sm px-5 py-3 transition-colors bg-green-600 hover:bg-green-700 text-white focus:outline-none focus:ring-4 focus:ring-green-300 disabled:opacity-70 disabled:cursor-wait">
         @if (estado === 'enviando') {
         <i class="fas fa-spinner fa-spin"></i> Enviando…
         } @else if (accion === 'whatsapp') {
         <i class="fab fa-whatsapp"></i> Continuar a WhatsApp
         } @else {
-        Enviar
+        <i class="fab fa-whatsapp"></i> Enviar y continuar a WhatsApp
         }
       </button>
     </form>
@@ -207,29 +175,3 @@
   </div>
 </div>
 }
-
-<!-- Modal para mostrar teléfonos -->
-<div *ngIf="mostrarModalTelefonos" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-  <div class="bg-white rounded-lg p-6 w-80 text-center shadow-lg">
-    <h2 class="text-xl font-bold mb-4 text-[#080E36]">Teléfonos de contacto</h2>
-
-
-    <button type="button" (click)="abrirToCall('6043227088')"
-      class="w-full flex items-center justify-center gap-2 text-gray-700 hover:text-white border border-[#080E36] hover:bg-[#cdad60] focus:ring-4 focus:outline-none focus:ring-[#080E36] font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-all duration-300">
-      <i class="fas fa-phone-alt fa-sm"></i>604 322-7088
-
-
-    </button>
-    <br>
-
-    <button type="button" (click)="abrirToCall('+573145438665')"
-      class="w-full flex items-center justify-center gap-2 text-gray-700 hover:text-white border border-[#080E36] hover:bg-[#cdad60] focus:ring-4 focus:outline-none focus:ring-[#080E36] font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-all duration-300">
-      <i class="fas fa-phone-alt fa-sm"></i>+57 300 708 80 61
-    </button>
-
-    <button (click)="cerrarModalTelefonos()"
-      class="mt-4 bg-[#080E36] text-white px-4 py-2 rounded hover:bg-[#0b1144] w-full">
-      Cerrar
-    </button>
-  </div>
-</div>
