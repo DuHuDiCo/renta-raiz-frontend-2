@@ -90,7 +90,7 @@ export class VerPropiedadComponent implements OnInit {
 
   ngOnInit(): void {
 
-    window.scrollTo(0, 0);
+    if (typeof window !== 'undefined') window.scrollTo(0, 0);
     this.initZoom();
 
     this.route.paramMap.subscribe((params) => {
@@ -183,6 +183,7 @@ export class VerPropiedadComponent implements OnInit {
   }
 
   initZoom(): void {
+    if (typeof document === 'undefined') return;
     this.destroyZoom();
 
     const images = document.querySelectorAll('[data-zoom-src]');

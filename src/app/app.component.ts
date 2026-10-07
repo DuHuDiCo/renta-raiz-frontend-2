@@ -43,17 +43,18 @@
     
 
     ngOnInit(): void {
-      if (isPlatformBrowser(this.platformId)) {
-        initFlowbite();
+      // Todo lo de aquí usa APIs del navegador (window, localStorage, fbq) que no existen en SSR.
+      if (!isPlatformBrowser(this.platformId)) return;
 
-        this.router.events.subscribe((event) => {
-          if (event instanceof NavigationEnd) {
-            setTimeout(() => {
-              initFlowbite();
-            }, 100);
-          }
-        });
-      }
+      initFlowbite();
+
+      this.router.events.subscribe((event) => {
+        if (event instanceof NavigationEnd) {
+          setTimeout(() => {
+            initFlowbite();
+          }, 100);
+        }
+      });
 
 
 

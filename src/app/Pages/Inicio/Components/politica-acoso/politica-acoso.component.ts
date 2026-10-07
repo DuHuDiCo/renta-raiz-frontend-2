@@ -78,6 +78,7 @@ export class PoliticaAcosoComponent implements OnInit {
   }
 
   private detectSafariOrIOS(): boolean {
+    if (typeof navigator === 'undefined') return false;
     const ua = navigator.userAgent;
     const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
     const isSafari = /^((?!chrome|android).)*safari/i.test(ua);

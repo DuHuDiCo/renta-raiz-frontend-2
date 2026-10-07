@@ -15,7 +15,6 @@ import { AvaluosComercialesComponent } from './Components/avaluos-comerciales/av
 import { EnvioExitosoComponent } from '../../shared/envio-exitoso/envio-exitoso.component';
 import { propiedadResolver } from '../../core/resolvers/propiedad.resolver';
 import { blogsResolver } from '../../core/resolvers/blogs.resolver';
-import { AppComponent } from '../../app.component';
 import { PoliticaAcosoComponent } from './Components/politica-acoso/politica-acoso.component';
 import { PortafolioAsesoresComponent } from './Components/portafolio-asesores/portafolio-asesores.component';
 import { PrioritariosComponent } from '../Prioritarios/Components/prioritarios/prioritarios.component';
@@ -25,7 +24,6 @@ export const routes: Routes = [
 
   {
     path: '',
-    component: AppComponent,
     children: [
       {
         path: '',

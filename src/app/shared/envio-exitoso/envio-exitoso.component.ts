@@ -14,6 +14,8 @@ export class EnvioExitosoComponent implements OnInit {
   router = inject(ActivatedRoute);
 
   ngOnInit(): void {
+    // La redirección a WhatsApp solo aplica en el navegador (en SSR retrasaría la respuesta 3 s).
+    if (typeof window === 'undefined') return;
     setTimeout(() => {
       this.enviarWthatsapp();
     }, 3000);

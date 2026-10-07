@@ -67,7 +67,7 @@ export class FiltrosComponent implements OnInit {
   paginaActual: number = 1;
   elementsPerPage = 12;
   bloqueActual: number = 0;
-  isDesktopView = window.innerWidth >= 768;
+  isDesktopView = typeof window !== 'undefined' ? window.innerWidth >= 768 : true;
   isSticky = false;
 
   seleccion = {
@@ -135,7 +135,7 @@ export class FiltrosComponent implements OnInit {
 
   // Para Inmueble
   isEstateDropdownOpen = false;
-  isMobileView = window.innerWidth < 768;
+  isMobileView = typeof window !== 'undefined' && window.innerWidth < 768;
   estateOptions: { code: string; name: string }[] = [];
   selectedEstates: { code: string; name: string }[] = [];
 
@@ -203,6 +203,15 @@ export class FiltrosComponent implements OnInit {
 
   @ViewChild('closeButton') closeButton!: ElementRef<HTMLButtonElement>;
 
+  /** En el servidor (SSR) no existe window. */
+  private urlActual(): string {
+    return typeof window !== 'undefined' ? window.location.href : '';
+  }
+
+  private estadoHistorial(): any {
+    return typeof window !== 'undefined' ? window.history.state : null;
+  }
+
   async ngOnInit(): Promise<void> {
     
     var data = this.urlParamService.obtenerParamLocalStorage('data');
@@ -210,7 +219,7 @@ export class FiltrosComponent implements OnInit {
       var obj = JSON.parse(data);
       if (obj.url === "") {
 
-        obj.url = window.location.href;
+        obj.url = this.urlActual();
         this.urlParamService.guardarParamLocalStorage('data', JSON.stringify(obj));
       }
     }
@@ -220,8 +229,8 @@ export class FiltrosComponent implements OnInit {
     this.filteredVentaMin = this.initAutoComplete(this.precioVentaMinimoCtrl);
     this.filteredVentaMax = this.initAutoComplete(this.precioVentaMaximoCtrl);
 
-    window.scrollTo(0, 0);
-    const state = window.history.state;
+    if (typeof window !== 'undefined') window.scrollTo(0, 0);
+    const state = this.estadoHistorial();
 
 
     if (!state?.paginacion && !state?.resultados) {
@@ -266,15 +275,6 @@ export class FiltrosComponent implements OnInit {
 
 
     //-----------------------------------------------------
-
-
-
-
-
-
-
-
-    console.log(window.history);
 
 
   }
@@ -376,7 +376,7 @@ export class FiltrosComponent implements OnInit {
           this.cargarDesdeState(newState);
           this.router.events.subscribe((event) => {
             if (event instanceof NavigationEnd) {
-              this.cargarDesdeState(window.history.state);
+              this.cargarDesdeState(this.estadoHistorial());
             }
           });
 
@@ -385,7 +385,7 @@ export class FiltrosComponent implements OnInit {
           this.router.events.subscribe((event) => {
             if (event instanceof NavigationEnd) {
 
-              this.cargarDesdeState(window.history.state);
+              this.cargarDesdeState(this.estadoHistorial());
             }
           });
 
@@ -445,7 +445,7 @@ export class FiltrosComponent implements OnInit {
             console.log(response);
 
             var data = {
-              "url": window.location.href,
+              "url": this.urlActual(),
               "state": {
                 resultados: response.data,
                 paginacion: response,
@@ -479,7 +479,7 @@ export class FiltrosComponent implements OnInit {
       this.cargarDesdeState(newState);
       this.router.events.subscribe((event) => {
         if (event instanceof NavigationEnd) {
-          this.cargarDesdeState(window.history.state);
+          this.cargarDesdeState(this.estadoHistorial());
         }
       });
 
@@ -490,11 +490,12 @@ export class FiltrosComponent implements OnInit {
       this.cargarDesdeState(state);
       this.router.events.subscribe((event) => {
         if (event instanceof NavigationEnd) {
-          this.cargarDesdeState(window.history.state);
+          this.cargarDesdeState(this.estadoHistorial());
         }
       });
     } else {
-      this.router.navigate(['']);
+      // En SSR no hay history.state: no se redirige para no servir el inicio bajo la URL /filtros.
+      if (typeof window !== 'undefined') this.router.navigate(['']);
     }
   }
 
@@ -685,7 +686,7 @@ export class FiltrosComponent implements OnInit {
       }
 
       var queryParams = this.activatedRoute.snapshot.queryParams;
-      const state = window.history.state;
+      const state = this.estadoHistorial();
       console.log(state)
 
       console.log();
@@ -721,7 +722,7 @@ export class FiltrosComponent implements OnInit {
     if (this.paginaActual < this.totalPaginas) {
       const nuevaPagina = this.paginaActual + 1;
       var queryParams = this.activatedRoute.snapshot.queryParams;
-      const state = window.history.state;
+      const state = this.estadoHistorial();
 
       if (Object.keys(queryParams).length >= 1) {
         this.paginaActual = nuevaPagina;
@@ -1020,7 +1021,7 @@ export class FiltrosComponent implements OnInit {
           console.log(response);
 
           var data = {
-            "url": window.location.href,
+            "url": this.urlActual(),
             "state": {
               resultados: response.data,
               paginacion: response,
@@ -1278,7 +1279,7 @@ export class FiltrosComponent implements OnInit {
           console.log(response);
 
           var data = {
-            "url": window.location.href,
+            "url": this.urlActual(),
             "state": {
               resultados: response.data,
               paginacion: response,

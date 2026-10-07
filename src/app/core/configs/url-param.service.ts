@@ -9,10 +9,12 @@ export class UrlParamService {
 
 
   guardarParamLocalStorage(key: string, value: string) {
+    if (typeof localStorage === 'undefined') return;
     localStorage.setItem(key, value);
   }
 
   obtenerParamLocalStorage(key: string) {
+    if (typeof localStorage === 'undefined') return null;
   var valor = localStorage.getItem(key);
     if (valor) {
       return valor;
@@ -21,6 +23,7 @@ export class UrlParamService {
   }
 
   eliminarParamLocalStorage(key: string) {
+    if (typeof localStorage === 'undefined') return;
     localStorage.removeItem(key);
   }
 

@@ -31,6 +31,8 @@ export class MapaComponent implements AfterViewInit {
   router = inject(Router);
 
   ngOnInit(): void {
+    // El mapa depende del SDK de Google Maps, que solo existe en el navegador.
+    if (typeof window === 'undefined') return;
     if (this.propiedades.length == 0) {
       this.inmueblesService.getTodosInmuebles().subscribe(
         (response: any) => {
@@ -68,6 +70,7 @@ export class MapaComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    if (typeof window === 'undefined') return;
     setTimeout(() => {
       this.forceResize();
       if (this.activarStreetView) {

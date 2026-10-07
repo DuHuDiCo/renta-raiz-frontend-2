@@ -10,10 +10,12 @@ export class UrlparamService {
 
 
   guardarParamLocalStorage(key: string, value: string) {
+    if (typeof localStorage === 'undefined') return;
     localStorage.setItem(key, value);
   }
 
   obtenerParamLocalStorage(key: string) {
+    if (typeof localStorage === 'undefined') return null;
   var valor = localStorage.getItem(key);
     if (valor) {
       return valor;

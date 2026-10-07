@@ -25,7 +25,7 @@ export class QuienesSomosComponent implements OnInit {
   favService = inject(WishlistServiceService);
 
   ngOnInit(): void {
-    window.scrollTo(0, 0);
+    if (typeof window !== 'undefined') window.scrollTo(0, 0);
   }
 
   abrirPestana(url: string) {

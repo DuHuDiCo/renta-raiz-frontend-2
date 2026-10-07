@@ -16,10 +16,12 @@ private favoritosSubject = new BehaviorSubject<any[]>(this.cargarFavoritos());
   favoritos$ = this.favoritosSubject.asObservable();
 
   public cargarFavoritos(): Favorito[] {
+    if (typeof localStorage === 'undefined') return [];
     return JSON.parse(localStorage.getItem('favoritos') || '[]');
   }
 
   private guardarFavoritos(favoritos: Favorito[]): void {
+    if (typeof localStorage === 'undefined') return;
     localStorage.setItem('favoritos', JSON.stringify(favoritos));
   }
 
@@ -44,7 +46,7 @@ private favoritosSubject = new BehaviorSubject<any[]>(this.cargarFavoritos());
   }
 
   eliminarAll(): void {
-    localStorage.removeItem('favoritos');
+    if (typeof localStorage !== 'undefined') localStorage.removeItem('favoritos');
     this.favoritosSubject.next([]);
   }
 }

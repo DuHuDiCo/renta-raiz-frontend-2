@@ -135,8 +135,13 @@ export class PortafolioAsesoresComponent implements OnInit {
   }
 
 
+  /** En el servidor (SSR) no existe window: se asume escritorio. */
+  private get anchoVentana(): number {
+    return typeof window !== 'undefined' ? window.innerWidth : 1280;
+  }
+
   private checkScreenSize() {
-    this.isSmallScreen = window.innerWidth <= 1024 && window.innerWidth >= 800; // lg breakpoint de Tailwind
+    this.isSmallScreen = this.anchoVentana <= 1024 && this.anchoVentana >= 800; // lg breakpoint de Tailwind
 
 
   }
@@ -156,11 +161,11 @@ export class PortafolioAsesoresComponent implements OnInit {
 
 
   actualizarInmueblesVisiblesArriendo() {
-    this.isSmallScreen = window.innerWidth <= 1024 && window.innerWidth >= 800; // lg breakpoint de Tailwind
+    this.isSmallScreen = this.anchoVentana <= 1024 && this.anchoVentana >= 800; // lg breakpoint de Tailwind
 
     if (this.isSmallScreen) {
       this.inmueblesVisiblesArriendo =
-        window.innerWidth <= 1000
+        this.anchoVentana <= 1000
           ? this.resultadosArriendo.slice(0, this.elementsPerPage - 4)
           : this.resultadosArriendo.slice(0, this.elementsPerPage - 2);
     } else {
@@ -172,10 +177,10 @@ export class PortafolioAsesoresComponent implements OnInit {
   }
 
   async actualizarInmueblesVisiblesVenta() {
-    this.isSmallScreen = window.innerWidth <= 1024 && window.innerWidth >= 800; // lg breakpoint de Tailwind
+    this.isSmallScreen = this.anchoVentana <= 1024 && this.anchoVentana >= 800; // lg breakpoint de Tailwind
     if (this.isSmallScreen) {
       this.inmueblesVisiblesVenta =
-        window.innerWidth <= 1000
+        this.anchoVentana <= 1000
           ? this.resultadosVenta.slice(0, this.elementsPerPage - 4)
           : this.resultadosVenta.slice(0, this.elementsPerPage - 2);
     } else {

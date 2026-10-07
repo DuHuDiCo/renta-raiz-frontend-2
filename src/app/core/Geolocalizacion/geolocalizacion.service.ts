@@ -13,7 +13,7 @@ export class GeolocalizacionService {
 
   getCurrentPosition(): Promise<{latitude: number, longitude: number}> {
     return new Promise((resolve, reject) => {
-      if ('geolocation' in navigator) {
+      if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
             resolve({
