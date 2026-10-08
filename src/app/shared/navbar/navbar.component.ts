@@ -10,7 +10,7 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { InmueblesService } from '../../core/Inmuebles/inmuebles.service';
 import { UrlParamService } from '../../core/configs/url-param.service';
 import { OffcanvasWishlistComponent } from '../../Pages/Inicio/Components/offcanvas-wishlist/offcanvas-wishlist.component';
@@ -19,7 +19,7 @@ import { WishlistServiceService } from '../../core/wishlist/wishlist-service.ser
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [RouterLink, CommonModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
 })
@@ -204,7 +204,4 @@ export class NavbarComponent implements OnInit {
     window.open('https://oferta.rentaraiz.co/flipbook/brochure-renta-raiz/', '_blank');
   }
 
-  redirigirVistaInicial() {
-    this._router.navigate(['/']);
-  }
 }

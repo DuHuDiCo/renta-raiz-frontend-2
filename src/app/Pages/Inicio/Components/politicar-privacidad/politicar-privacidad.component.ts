@@ -4,7 +4,7 @@ import { BotonesFlotantesComponent } from '../../../../shared/botones-flotantes/
 import { FooterComponent } from '../../../../shared/footer/footer.component';
 import { BarraFiltrosComponent } from '../../../../shared/barra-filtros/barra-filtros.component';
 import { InmueblesService } from '../../../../core/Inmuebles/inmuebles.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { VolverComponent } from '../../../../shared/volver/volver.component';
@@ -13,6 +13,7 @@ import { VolverComponent } from '../../../../shared/volver/volver.component';
   selector: 'app-politicar-privacidad',
   standalone: true,
   imports: [
+    RouterLink,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -54,10 +55,4 @@ export class PoliticarPrivacidadComponent implements OnInit {
     );
   }
 
-  verPropiedad(codPro: number) {
-    const url = this.router
-      .createUrlTree(['/ver-propiedad', codPro, 0])
-      .toString();
-    window.open(url, '_blank');
-  }
 }

@@ -12,11 +12,7 @@ import { NavbarComponent } from '../../../../shared/navbar/navbar.component';
 import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { InmueblesService } from '../../../../core/Inmuebles/inmuebles.service';
-import {
-  ActivatedRoute,
-  NavigationEnd,
-  Router,
-} from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterLink } from '@angular/router';
 import { firstValueFrom, forkJoin, map, Observable, startWith } from 'rxjs';
 import { GeolocalizacionService } from '../../../../core/Geolocalizacion/geolocalizacion.service';
 import { VolverComponent } from '../../../../shared/volver/volver.component';
@@ -34,6 +30,7 @@ import { BotonesFlotantesComponent } from '../../../../shared/botones-flotantes/
   selector: 'app-filtros',
   standalone: true,
   imports: [
+    RouterLink,
     NavbarComponent,
     FormsModule,
     ReactiveFormsModule,
@@ -1575,11 +1572,6 @@ export class FiltrosComponent implements OnInit {
     );
   }
 
-  verPropiedad(codPro: number) {
-    this.router.navigate(['/ver-propiedad', codPro, 0]).then(() => {
-      window.scrollTo(0, 0); // opcional: para que siempre inicie arriba
-    });
-  }
 
   scrollToTop() {
     window.scrollTo({

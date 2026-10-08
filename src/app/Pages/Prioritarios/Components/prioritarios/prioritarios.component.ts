@@ -1,5 +1,5 @@
 import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { InmueblesService } from '../../../../core/Inmuebles/inmuebles.service';
 import { CommonModule } from '@angular/common';
@@ -20,7 +20,7 @@ import { BotonesFlotantesComponent } from '../../../../shared/botones-flotantes/
 @Component({
   selector: 'app-prioritarios',
   standalone: true,
-  imports: [CommonModule, NavbarComponent2, BarraFiltrosPrioritariosComponent, OffcanvasWishlistComponent, ModalWishlistComponent, BotonesFlotantesComponent],
+  imports: [RouterLink, CommonModule, NavbarComponent2, BarraFiltrosPrioritariosComponent, OffcanvasWishlistComponent, ModalWishlistComponent, BotonesFlotantesComponent],
   templateUrl: './prioritarios.component.html',
   styleUrl: './prioritarios.component.scss'
 })
@@ -146,12 +146,6 @@ export class PrioritariosComponent implements OnInit {
 
   }
 
-  verPropiedad(codPro: number) {
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree(['/ver-propiedad', codPro, 1])
-    );
-    window.open(url, '_blank');
-  }
 
 
    agregarFavorito(propiedad: any) {

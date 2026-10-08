@@ -4,7 +4,7 @@
   <div class="banner-contacto w-full h-[40vh] md:h-[60vh] overflow-hidden">
     <div class="relative w-full h-full">
       <!-- Imagen de Fondo (No se corta en móvil) -->
-      <img src="assets/images/equipo-expertos.jpg" loading="lazy"
+      <img fetchpriority="high" src="assets/images/equipo-expertos.jpg"
         class="absolute inset-0 w-full h-full object-fill object-top md:object-cover md:object-top lg:object-cover lg:object-top xl:object-cover xl:object-top 2xl:object-cover 2xl:object-top z-10"
         alt="Fondo" />
 
@@ -39,9 +39,9 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 w-full max-w-6xl">
       <!-- Tarjeta -->
-      <div (click)="abrirPortafolio(asesoresCode['Juan Pablo Hoyos'])" style="cursor: pointer;"
+      <a [routerLink]="['/portafolio', asesoresCode['Juan Pablo Hoyos']]"
         class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img src="assets/images/JuanHoyos-rr24-210x210.jpg" alt="Juan Pablo Hoyos"
+        <img loading="lazy" decoding="async" src="assets/images/JuanHoyos-rr24-210x210.jpg" alt="Juan Pablo Hoyos"
           class="w-32 h-32 rounded-full object-cover" />
         <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
           Juan Pablo Hoyos
@@ -58,11 +58,11 @@
           <i class="fa-solid fa-envelope text-lg"></i>
           <span class="ml-2 text-sm">juanpabloh.rentaraiz&#64;gmail.com</span>
         </div>
-      </div>
+      </a>
 
-      <div (click)="abrirPortafolio(asesoresCode['Sebastián Ospina'])" style="cursor: pointer;"
+      <a [routerLink]="['/portafolio', asesoresCode['Sebastián Ospina']]"
         class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img src="assets/images/SebastianOspina-rr24-210x210.jpg" alt="Sebastián Ospina"
+        <img loading="lazy" decoding="async" src="assets/images/SebastianOspina-rr24-210x210.jpg" alt="Sebastián Ospina"
           class="w-32 h-32 rounded-full object-cover" />
         <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
           Sebastián Ospina
@@ -78,11 +78,11 @@
           <i class="fa-solid fa-envelope text-lg"></i>
           <span class="ml-2 text-sm">sebas.rentaraiz&#64;gmail.com</span>
         </div>
-      </div>
+      </a>
 
-      <div (click)="abrirPortafolio(asesoresCode['Lenys Cuberos'])" style="cursor: pointer;"
+      <a [routerLink]="['/portafolio', asesoresCode['Lenys Cuberos']]"
         class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img src="assets/images/Lenys-rr24-210x210.jpg" alt="Lenys Cuberos"
+        <img loading="lazy" decoding="async" src="assets/images/Lenys-rr24-210x210.jpg" alt="Lenys Cuberos"
           class="w-32 h-32 rounded-full object-cover" />
         <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
           Lenys Cuberos
@@ -98,11 +98,11 @@
           <i class="fa-solid fa-envelope text-lg"></i>
           <span class="ml-2 text-sm">direccioncomercial.com&#64;gmail.com</span>
         </div>
-      </div>
+      </a>
 
-      <div (click)="abrirPortafolio(asesoresCode['Andres Mejia'])" style="cursor: pointer;"
+      <a [routerLink]="['/portafolio', asesoresCode['Andres Mejia']]"
         class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img src="assets/images/AndresMejia-rr24-210x210.jpg" alt="Juan Pablo Hoyos"
+        <img loading="lazy" decoding="async" src="assets/images/AndresMejia-rr24-210x210.jpg" alt="Juan Pablo Hoyos"
           class="w-32 h-32 rounded-full object-cover" />
         <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
           Andres Mejia
@@ -118,15 +118,15 @@
           <i class="fa-solid fa-envelope text-lg"></i>
           <span class="ml-2 text-sm">andresmejia.rentaraiz&#64;gmail.com</span>
         </div>
-      </div>
+      </a>
     </div>
 
     <div class="flex flex-wrap justify-center gap-8 w-full max-w-6xl mt-12">
       <!-- Tarjeta -->
 
-      <div (click)="abrirPortafolio(asesoresCode['David Peláez'])" style="cursor: pointer;"
+      <a [routerLink]="['/portafolio', asesoresCode['David Peláez']]"
         class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img src="assets/images/DavidPelaez-rr24-210x210.jpg" alt="Sebastián Ospina"
+        <img loading="lazy" decoding="async" src="assets/images/DavidPelaez-rr24-210x210.jpg" alt="Sebastián Ospina"
           class="w-32 h-32 rounded-full object-cover" />
         <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
           David Peláez
@@ -142,11 +142,11 @@
           <i class="fa-solid fa-envelope text-lg"></i>
           <span class="ml-2 text-sm"> david.rentaraiz&#64;gmail.com</span>
         </div>
-      </div>
+      </a>
 
-      <div (click)="abrirPortafolio(asesoresCode['Juan Pablo Ospina'])" style="cursor: pointer;"
+      <a [routerLink]="['/portafolio', asesoresCode['Juan Pablo Ospina']]"
         class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img src="assets/images/JuanOspina-rr24-210x210.jpg" alt="Andrés Felipe Aldana"
+        <img loading="lazy" decoding="async" src="assets/images/JuanOspina-rr24-210x210.jpg" alt="Andrés Felipe Aldana"
           class="w-32 h-32 rounded-full object-cover" />
         <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
           Juan Pablo Ospina
@@ -162,7 +162,7 @@
           <i class="fa-solid fa-envelope text-lg"></i>
           <span class="ml-2 text-sm">Juanpablo.rentaraiz&#64;gmail.com</span>
         </div>
-      </div>
+      </a>
     </div>
   </section>
 </div>

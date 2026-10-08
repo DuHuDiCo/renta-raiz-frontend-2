@@ -4,13 +4,13 @@
   <div class="banner-contacto w-full h-[40vh] md:h-[60vh] overflow-hidden">
     <div class="relative w-full h-full">
       <!-- Imagen de Fondo (No se corta en móvil) -->
-      <img src="assets/images/SliderQUIENESOMOS.png" loading="lazy"
+      <img fetchpriority="high" src="assets/images/SliderQUIENESOMOS.png"
         class="absolute inset-0 w-full h-full object-fill md:object-cover lg:object-cover xl:object-cover 2xl:object-cover z-10"
         alt="Fondo" />
 
       <!-- Imagen de Texto (Más grande en móvil) -->
       <div class="absolute inset-0 z-30 flex items-center">
-        <img src="assets/images/TEXTOQUIENESOMOS.png" loading="lazy"
+        <img src="assets/images/TEXTOQUIENESOMOS.png"
           class="hidden lg:block w-[100%] md:w-[60%] lg:w-[70%] md:mb-16 2xl:mb-0 xl:w-[60%] 2xl:w-[50%] h-auto object-contain md:-translate-y-48 xl:-translate-y-[-50px] translate-x-26 md:translate-x-60 lg:translate-x-2 xl:ml-[195px] 2xl:translate-x-64 custom-1024:translate-x-custom-1024"
           alt="Quiénes Somos Desktop" />
         <!-- Mobile & Tablet Image (up to lg) -->
@@ -84,7 +84,7 @@
 
         <!-- Columna de imagen -->
         <div class="md:w-2/3 flex items-center justify-center">
-          <img src="assets/images/equipo-nuevo.png" alt="Renta Raiz - Inmobiliaria de lujo"
+          <img loading="lazy" decoding="async" src="assets/images/equipo-nuevo.png" alt="Renta Raiz - Inmobiliaria de lujo"
             class="rounded-3xl shadow-2xl object-contain w-auto h-auto max-h-[580px]" />
         </div>
       </div>
@@ -92,12 +92,12 @@
   </div>
   <!-- nuesta histrio -->
   <div class="max-w-4xl mx-auto px-6 py-12">
-    <h1 class="text-4xl text-center font-bold text-gray-800 mb-8">
+    <h2 class="text-4xl text-center font-bold text-gray-800 mb-8">
       Nuestra Historia
-    </h1>
+    </h2>
     <div class="flex flex-col md:flex-row gap-8">
       <div class="md:w-2/3">
-        <img src="assets/images/SOCIOS-1.jpg" alt="Renta Raiz - Inmobiliaria de lujo"
+        <img loading="lazy" decoding="async" src="assets/images/SOCIOS-1.jpg" alt="Renta Raiz - Inmobiliaria de lujo"
           class="rounded-lg shadow-lg object-cover w-full h-full max-h-[580px]" />
       </div>
 
@@ -132,7 +132,7 @@
 
   <!-- Sección azul recta y compacta -->
   <div class="w-full flex flex-col justify-center items-center py-16 md:py-24 mt-20 bg-[#060F29]">
-    <img src="assets/images/2TextoBarra2-e1675443584947.png" alt="Texto decorativo"
+    <img loading="lazy" decoding="async" src="assets/images/2TextoBarra2-e1675443584947.png" alt="Texto decorativo"
       class="w-[80%] sm:w-[60%] md:w-[50%] h-auto mb-6" />
 
     <div class="flex flex-wrap justify-center gap-3">
@@ -151,9 +151,9 @@
   <div class="bg-gray-200">
     <div class="w-full flex flex-col items-center px-4 py-28">
       <!-- Título -->
-      <h1 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center max-w-6xl mb-4">
+      <h2 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center max-w-6xl mb-4">
         ¿Por qué elegirnos?
-      </h1>
+      </h2>
 
       <!-- Subtítulo -->
       <h2 class="text-lg sm:text-2xl text-[#9a9b9c] text-center max-w-4xl mb-12">
@@ -167,7 +167,7 @@
         <div
           class="bg-white shadow-lg rounded-2xl p-6 text-center border-2 border-yellow-500 transition-transform duration-300 hover:scale-105">
           <div class="flex justify-center mb-6">
-            <img src="assets/images/card1.png" alt="Visión" class="w-24 h-24 sm:w-28 sm:h-28 object-contain" />
+            <img loading="lazy" decoding="async" src="assets/images/card1.png" alt="Visión" class="w-24 h-24 sm:w-28 sm:h-28 object-contain" />
           </div>
           <h3 class="text-lg font-semibold text-gray-800">
             Visión de Liderazgo en el Mercado de Lujo
@@ -183,7 +183,7 @@
         <div
           class="bg-white shadow-lg rounded-2xl p-6 text-center border-2 border-yellow-500 transition-transform duration-300 hover:scale-105">
           <div class="flex justify-center mb-6">
-            <img src="assets/images/card2.png" alt="Experiencia" class="w-24 h-24 sm:w-28 sm:h-28 object-contain" />
+            <img loading="lazy" decoding="async" src="assets/images/card2.png" alt="Experiencia" class="w-24 h-24 sm:w-28 sm:h-28 object-contain" />
           </div>
           <h3 class="text-lg font-semibold text-gray-800">
             Experiencia Personalizada
@@ -199,7 +199,7 @@
         <div
           class="bg-white shadow-lg rounded-2xl p-6 text-center border-2 border-yellow-500 transition-transform duration-300 hover:scale-105">
           <div class="flex justify-center mb-6">
-            <img src="assets/images/card3.png" alt="Marketing" class="w-24 h-24 sm:w-28 sm:h-28 object-contain" />
+            <img loading="lazy" decoding="async" src="assets/images/card3.png" alt="Marketing" class="w-24 h-24 sm:w-28 sm:h-28 object-contain" />
           </div>
           <h3 class="text-lg font-semibold text-gray-800">
             Publicidad y Marketing de Alto Impacto
@@ -215,9 +215,9 @@
 
   <!-- CARDS DE MIEMBROS DEL EQUIPO -->
   <section class="w-full px-4 py-16 bg-white flex flex-col items-center">
-    <h1 class="text-4xl md:text-5xl font-bold text-[#080E36] text-center mb-4">
+    <h2 class="text-4xl md:text-5xl font-bold text-[#080E36] text-center mb-4">
       Conoce al increíble equipo
-    </h1>
+    </h2>
     <h2 class="text-xl md:text-2xl font-normal text-[#9a9b9c] text-center mb-12">
       Que nadie venga a nosotros sin irse mejor y más feliz
     </h2>
@@ -226,7 +226,7 @@
       <!-- Tarjeta -->
       <div
         class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img src="assets/images/JuanHoyos-rr24-210x210.jpg" alt="Juan Pablo Hoyos"
+        <img loading="lazy" decoding="async" src="assets/images/JuanHoyos-rr24-210x210.jpg" alt="Juan Pablo Hoyos"
           class="w-32 h-32 rounded-full object-cover" />
         <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
           Juan Pablo Hoyos
@@ -246,7 +246,7 @@
 
       <div
         class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img src="assets/images/SebastianOspina-rr24-210x210.jpg" alt="Sebastián Ospina"
+        <img loading="lazy" decoding="async" src="assets/images/SebastianOspina-rr24-210x210.jpg" alt="Sebastián Ospina"
           class="w-32 h-32 rounded-full object-cover" />
         <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
           Sebastián Ospina
@@ -266,7 +266,7 @@
 
       <div
         class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img src="assets/images/Lenys-rr24-210x210.jpg" alt="Lenys Cuberos"
+        <img loading="lazy" decoding="async" src="assets/images/Lenys-rr24-210x210.jpg" alt="Lenys Cuberos"
           class="w-32 h-32 rounded-full object-cover" />
         <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
           Lenys Cuberos
@@ -286,7 +286,7 @@
 
       <div
         class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img src="assets/images/AndresMejia-rr24-210x210.jpg" alt="Juan Pablo Hoyos"
+        <img loading="lazy" decoding="async" src="assets/images/AndresMejia-rr24-210x210.jpg" alt="Juan Pablo Hoyos"
           class="w-32 h-32 rounded-full object-cover" />
         <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
           Andres Mejia
@@ -310,7 +310,7 @@
 
       <div
         class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img src="assets/images/DavidPelaez-rr24-210x210.jpg" alt="Sebastián Ospina"
+        <img loading="lazy" decoding="async" src="assets/images/DavidPelaez-rr24-210x210.jpg" alt="Sebastián Ospina"
           class="w-32 h-32 rounded-full object-cover" />
         <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
           David Peláez
@@ -330,7 +330,7 @@
 
       <div
         class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img src="assets/images/JuanOspina-rr24-210x210.jpg" alt="Andrés Felipe Aldana"
+        <img loading="lazy" decoding="async" src="assets/images/JuanOspina-rr24-210x210.jpg" alt="Andrés Felipe Aldana"
           class="w-32 h-32 rounded-full object-cover" />
         <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
           Juan Pablo Ospina

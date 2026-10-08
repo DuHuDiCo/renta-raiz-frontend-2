@@ -4,9 +4,8 @@
   <div class="banner-contacto w-full h-[40vh] md:h-[60vh] overflow-hidden">
     <div class="relative w-full h-full">
       <!-- Imagen de fondo -->
-      <img
+      <img fetchpriority="high"
         src="assets/images/SliderAVALUOS.png"
-        loading="lazy"
         class="absolute inset-0 w-full h-full object-fill md:object-cover lg:object-cover xl:object-cover 2xl:object-cover z-10"
         alt="Fondo"
       />
@@ -303,7 +302,7 @@
           <div
             class="w-12 h-12 rounded-full overflow-hidden border-2 border-pink-500 p-0.5 mr-3"
           >
-            <img
+            <img loading="lazy" decoding="async"
               src="assets/images/rentaraiz.png"
               alt="Perfil"
               class="w-full h-full object-cover rounded-full"
@@ -331,7 +330,7 @@
             rel="noopener noreferrer"
             class="aspect-square bg-gray-100 rounded-sm overflow-hidden cursor-pointer block"
           >
-            <img
+            <img loading="lazy" decoding="async"
               src="assets/images/post1.webp"
               alt="Post Instagram"
               class="w-full h-full object-cover hover:opacity-90 transition-opacity"
@@ -344,7 +343,7 @@
             rel="noopener noreferrer"
             class="aspect-square bg-gray-100 rounded-sm overflow-hidden cursor-pointer block"
           >
-            <img
+            <img loading="lazy" decoding="async"
               src="assets/images/post2.webp"
               alt="Post Instagram"
               class="w-full h-full object-cover hover:opacity-90 transition-opacity"
@@ -357,7 +356,7 @@
             rel="noopener noreferrer"
             class="aspect-square bg-gray-100 rounded-sm overflow-hidden cursor-pointer block"
           >
-            <img
+            <img loading="lazy" decoding="async"
               src="assets/images/post3.webp"
               alt="Post Instagram"
               class="w-full h-full object-cover hover:opacity-90 transition-opacity"
@@ -370,7 +369,7 @@
             rel="noopener noreferrer"
             class="aspect-square bg-gray-100 rounded-sm overflow-hidden cursor-pointer block"
           >
-            <img
+            <img loading="lazy" decoding="async"
               src="assets/images/post4.webp"
               alt="Post Instagram"
               class="w-full h-full object-cover hover:opacity-90 transition-opacity"
@@ -404,9 +403,9 @@
 
       <div class="mt-6 mb-10">
         <div class="mb-4 pl-2">
-          <h1 class="text-2xl font-bold text-[#080E36] text-center">
+          <h2 class="text-2xl font-bold text-[#080E36] text-center">
             Inmuebles destacados
-          </h1>
+          </h2>
           <p class="text-1xl text-[#9a9b9c] text-center">
             Encuentra tu lugar ideal
           </p>
@@ -419,7 +418,7 @@
           >
             <div class="relative group">
               <a href="#">
-                <img
+                <img loading="lazy" decoding="async"
                   class="w-full h-48 object-cover"
                   [src]="inmueble.image1 || 'assets/images/renta-1.jpg'"
                   [alt]="inmueble.address"
@@ -431,7 +430,7 @@
               >
                 <a
                   class="cursor-pointer bg-white text-[#080E36] px-4 py-2 font-semibold rounded shadow hover:bg-[#CDAD60] hover:text-white transition-colors"
-                  (click)="verPropiedad(inmueble.codpro)"
+                  [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" target="_blank"
                 >
                   Ver propiedad
                 </a>

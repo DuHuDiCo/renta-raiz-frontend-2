@@ -5,7 +5,7 @@
   <div [ngClass]="{ 'py-2': isScrolled, 'py-4': !isScrolled }"
     class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto px-4 transition-all duration-300">
     <!-- Logo -->
-    <a (click)="redirigirVistaInicial()" class="cursor-pointer flex items-center">
+    <a routerLink="/" class="cursor-pointer flex items-center">
       <img src="assets/images/RR DORADO.png" [ngClass]="{
           'h-8 sm:h-10 md:h-12': isScrolled,
           'h-12 sm:h-14 md:h-16': !isScrolled

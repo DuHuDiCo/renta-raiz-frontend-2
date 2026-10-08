@@ -35,8 +35,8 @@ COPY --from=build /usr/src/app/package*.json ./
 COPY --from=build /usr/src/app/robots.txt ./
 
 # Configuración final de archivos estáticos
-RUN cp /usr/src/app/dist/renta-raiz-frontend-2/sitemap.xml /usr/src/app/dist/renta-raiz-frontend-2/browser/ && \
-    cp /usr/src/app/robots.txt /usr/src/app/dist/renta-raiz-frontend-2/browser/
+# (el sitemap ya no es un archivo: lo genera server.ts en cada consulta)
+RUN cp /usr/src/app/robots.txt /usr/src/app/dist/renta-raiz-frontend-2/browser/
 
 EXPOSE 4000
 

@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { SeoService } from '../../core/seo/seo.service';
 
 @Component({
   selector: 'app-page-not-found',
@@ -8,4 +9,8 @@ import { RouterLink } from '@angular/router';
   templateUrl: './page-not-found.component.html',
   styleUrl: './page-not-found.component.scss',
 })
-export class PageNotFoundComponent {}
+export class PageNotFoundComponent {
+  constructor() {
+    inject(SeoService).responderCon(404);
+  }
+}

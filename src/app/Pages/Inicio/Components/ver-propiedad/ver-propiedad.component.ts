@@ -8,7 +8,7 @@ import {
 import { NavbarComponent } from '../../../../shared/navbar/navbar.component';
 import { NavbarComponent2 } from '../../../../shared/navbar-2/navbar-2.component';
 import { InmueblesService } from '../../../../core/Inmuebles/inmuebles.service';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule, RouterLink } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ModalCrearContactoComponent } from '../Modals/modal-crear-contacto/modal-crear-contacto.component';
@@ -20,7 +20,7 @@ import { BotonesFlotantesComponent } from '../../../../shared/botones-flotantes/
 import { VolverComponent } from '../../../../shared/volver/volver.component';
 import { SafeUrlPipePipe } from '../../../../shared/pipes/safe-url-pipe.pipe';
 import { DataasesoresService } from '../../../../core/dataAsesores/dataasesores.service';
-import { Meta, Title } from '@angular/platform-browser';
+import { SEO_DOMINIO, SEO_REF_AGENCIA, SEO_SUFIJO, seoMigas, SeoService } from '../../../../core/seo/seo.service';
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
 import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wishlist.component';
 
@@ -29,6 +29,7 @@ import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wish
   selector: 'app-ver-propiedad',
   standalone: true,
   imports: [
+    RouterLink,
     NavbarComponent,
     FormsModule,
     ReactiveFormsModule,
@@ -80,8 +81,9 @@ export class VerPropiedadComponent implements OnInit {
   cdRef = inject(ChangeDetectorRef);
   inmueblesService = inject(InmueblesService);
   dataasesoresService = inject(DataasesoresService);
-  meta = inject(Meta);
-  title = inject(Title);
+  seo = inject(SeoService);
+  /** Encabezado principal (h1) de la ficha; es el mismo texto del título SEO. */
+  tituloPagina = '';
   mostrarOffcanvas: boolean = false;
   minimizarOffcanvas: boolean = true;
 
@@ -94,6 +96,7 @@ export class VerPropiedadComponent implements OnInit {
     this.initZoom();
 
     this.route.paramMap.subscribe((params) => {
+      if (typeof window !== 'undefined') window.scrollTo(0, 0);
       this.propiedad = {}
       this.codPro = Number(params.get('codpro'));
       const ocultar = Number(params.get('ocultarContenido')) === 1;
@@ -109,12 +112,6 @@ export class VerPropiedadComponent implements OnInit {
 
     this.getAsesor();
 
-    if (this.propiedad?.descripcion) {
-      this.meta.updateTag({ property: 'og:description', content: this.propiedad.descripcion });
-    }
-    if (this.propiedad?.images?.[0]?.imageurl) {
-      this.meta.updateTag({ property: 'og:image', content: this.propiedad.images[0].imageurl });
-    }
 
   }
 
@@ -408,6 +405,7 @@ export class VerPropiedadComponent implements OnInit {
     console.log(this.media);
 
     this.datosCargados = true;
+    this.actualizarSeo();
 
     this.prepararFiltros();
     this.enviarFiltros();
@@ -432,6 +430,85 @@ export class VerPropiedadComponent implements OnInit {
     // );
 
     console.log(this.propiedad.images);
+  }
+
+  /** Título, descripción e imagen del inmueble para buscadores y redes sociales. */
+  private actualizarSeo() {
+    const p = this.propiedad;
+    if (!p?.codpro) return;
+
+    const capitalizar = (texto: string) =>
+      (texto || '').trim().toLowerCase().replace(/(^|\s)\S/g, (letra) => letra.toUpperCase());
+    const pesos = (valor: number) => `$${Math.round(valor).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+
+    const tipo = capitalizar(p.type) || 'Inmueble';
+    const negocio = p.biz_code == 3 ? 'arriendo y venta' : p.biz_code == 2 ? 'venta' : 'arriendo';
+    const lugar = [capitalizar(p.neighborhood), capitalizar(p.city)].filter(Boolean).join(', ');
+    const encabezado = `${tipo} en ${negocio}${lugar ? ` en ${lugar}` : ''}`;
+    this.tituloPagina = encabezado;
+
+    const detalles = [
+      p.area_cons > 0 ? `${p.area_cons} m²` : '',
+      p.bedrooms > 0 ? `${p.bedrooms} ${p.bedrooms == 1 ? 'habitación' : 'habitaciones'}` : '',
+      p.bathrooms > 0 ? `${p.bathrooms} ${p.bathrooms == 1 ? 'baño' : 'baños'}` : '',
+      p.parking > 0 ? `${p.parking} ${p.parking == 1 ? 'parqueadero' : 'parqueaderos'}` : '',
+    ].filter(Boolean).join(', ');
+    const precios = [
+      p.biz_code != 2 && p.rent > 0 ? `Arriendo ${pesos(p.rent)}` : '',
+      p.biz_code != 1 && p.saleprice > 0 ? `Venta ${pesos(p.saleprice)}` : '',
+    ].filter(Boolean).join(' · ');
+
+    const descripcion = [`${encabezado}${detalles ? `: ${detalles}` : ''}.`, precios ? `${precios}.` : '', `Código ${p.codpro}.`]
+      .filter(Boolean).join(' ');
+    // La variante /1 (contenido oculto) apunta a la ficha completa para no duplicar la página.
+    const ruta = `/ver-propiedad/${p.codpro}/0`;
+
+    // No se publica la dirección exacta ni las coordenadas: la ficha solo muestra barrio y ciudad.
+    const tipoSchema = /APARTA/i.test(p.type) ? 'Apartment' : /CASA/i.test(p.type) ? 'House' : 'Accommodation';
+    const oferta = (precio: number, funcion: 'LeaseOut' | 'Sell') => ({
+      '@type': 'Offer',
+      price: precio,
+      priceCurrency: 'COP',
+      businessFunction: `http://purl.org/goodrelations/v1#${funcion}`,
+      availability: 'https://schema.org/InStock',
+      seller: SEO_REF_AGENCIA,
+    });
+    const anuncio = {
+      '@type': 'RealEstateListing',
+      '@id': `${SEO_DOMINIO}${ruta}`,
+      url: `${SEO_DOMINIO}${ruta}`,
+      name: encabezado,
+      description: descripcion,
+      ...(p.consignation_date ? { datePosted: p.consignation_date } : {}),
+      ...(p.images?.length ? { image: p.images.slice(0, 6).map((img: any) => img.imageurl) } : {}),
+      mainEntity: {
+        '@type': tipoSchema,
+        name: encabezado,
+        address: {
+          '@type': 'PostalAddress',
+          ...(p.city ? { addressLocality: capitalizar(p.city) } : {}),
+          ...(p.estate ? { addressRegion: capitalizar(p.estate) } : {}),
+          addressCountry: 'CO',
+        },
+        ...(p.area_cons > 0 ? { floorSize: { '@type': 'QuantitativeValue', value: p.area_cons, unitCode: 'MTK' } } : {}),
+        ...(p.bedrooms > 0 ? { numberOfBedrooms: p.bedrooms } : {}),
+        ...(p.bathrooms > 0 ? { numberOfBathroomsTotal: p.bathrooms } : {}),
+      },
+      offers: [
+        ...(p.biz_code != 2 && p.rent > 0 ? [oferta(p.rent, 'LeaseOut')] : []),
+        ...(p.biz_code != 1 && p.saleprice > 0 ? [oferta(p.saleprice, 'Sell')] : []),
+      ],
+    };
+
+    this.seo.actualizar({
+      titulo: `${encabezado}${SEO_SUFIJO}`,
+      descripcion,
+      ruta,
+      imagen: p.images?.[0]?.imageurl,
+      // Si el inmueble tiene video, lo primero que se muestra es el video y no la foto.
+      precarga: p.video ? undefined : p.images?.[0]?.imageurl,
+      datosEstructurados: [anuncio, seoMigas([['Inicio', '/'], ['Inmuebles', '/filtros'], [encabezado, ruta]])],
+    });
   }
 
   openModalCrearContacto(
@@ -495,11 +572,6 @@ export class VerPropiedadComponent implements OnInit {
     );
   }
 
-  verPropiedad(codPro: number) {
-    this.router.navigate(['/ver-propiedad', codPro, 0]).then(() => {
-      window.scrollTo(0, 0);
-    });
-  }
 
   enviarFiltrosMigajas(tipo: string, value: string) {
     this.filtrosSeleccionados = new Map();

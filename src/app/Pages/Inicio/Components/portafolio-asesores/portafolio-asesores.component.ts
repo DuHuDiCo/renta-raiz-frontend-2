@@ -1,7 +1,7 @@
 import { Component, ElementRef, HostListener, inject, OnInit, ViewChild } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { InmueblesService } from '../../../../core/Inmuebles/inmuebles.service';
 import { NavbarComponent2 } from '../../../../shared/navbar-2/navbar-2.component';
 import { PortafolioEnum } from '../../../../core/enums/PortafolioEnum';
@@ -11,12 +11,14 @@ import { FooterPortafolioComponent } from '../../../../shared/footer-portafolio/
 import { WishlistServiceService } from '../../../../core/wishlist/wishlist-service.service';
 import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wishlist.component';
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
+import { DataasesoresService } from '../../../../core/dataAsesores/dataasesores.service';
+import { SEO_SUFIJO, seoMigas, SeoService } from '../../../../core/seo/seo.service';
 
 
 @Component({
   selector: 'app-portafolio-asesores',
   standalone: true,
-  imports: [CommonModule, NavbarComponent2, FooterPortafolioComponent,
+  imports: [RouterLink, CommonModule, NavbarComponent2, FooterPortafolioComponent,
     BotonesFlotantesComponent, OffcanvasWishlistComponent, ModalWishlistComponent],
   templateUrl: './portafolio-asesores.component.html',
   styleUrl: './portafolio-asesores.component.scss'
@@ -61,6 +63,9 @@ export class PortafolioAsesoresComponent implements OnInit {
   // router = inject(Router);
   inmubeService = inject(InmueblesService);
   favService = inject(WishlistServiceService);
+  dataasesoresService = inject(DataasesoresService);
+  seo = inject(SeoService);
+  tituloPagina = '';
 
 
 
@@ -68,6 +73,18 @@ export class PortafolioAsesoresComponent implements OnInit {
 
 
     this.asesorId = this.activatedRoute.snapshot.paramMap.get('asesor')!;
+
+    const asesor = this.dataasesoresService.getAsesorById(this.asesorId);
+    const nombre = asesor?.nombre || 'Renta Raíz';
+    this.tituloPagina = `Portafolio de inmuebles de ${nombre}`;
+    this.seo.actualizar({
+      titulo: `Portafolio de inmuebles de ${nombre}${SEO_SUFIJO}`,
+      descripcion: `Inmuebles en arriendo y venta en Medellín y el Valle de Aburrá del portafolio de ${nombre}${asesor?.cargo ? `, ${asesor.cargo} de Renta Raíz` : ''}.`,
+      ruta: `/portafolio/${this.asesorId}`,
+      datosEstructurados: [
+        seoMigas([['Inicio', '/'], ['Nuestro equipo', '/nuestro-equipo'], [`Portafolio de ${nombre}`, `/portafolio/${this.asesorId}`]]),
+      ],
+    });
 
 
     // var tamano = window.innerWidth <= 1024 && window.innerWidth >= 1000;
@@ -189,12 +206,6 @@ export class PortafolioAsesoresComponent implements OnInit {
   }
 
 
-  verPropiedad(codPro: number) {
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree(['/ver-propiedad', codPro, 0])
-    );
-    window.open(url, '_blank');
-  }
 
 
   obtenerPropiedadesVenta(asesorID: number, page: number, elementsPerPage: number) {

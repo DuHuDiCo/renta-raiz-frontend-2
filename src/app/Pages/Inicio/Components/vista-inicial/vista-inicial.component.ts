@@ -16,7 +16,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../../../shared/navbar/navbar.component';
 import { InmueblesService } from '../../../../core/Inmuebles/inmuebles.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FooterComponent } from '../../../../shared/footer/footer.component';
 import { BotonesFlotantesComponent } from '../../../../shared/botones-flotantes/botones-flotantes.component';
 import { BarraFiltrosComponent } from '../../../../shared/barra-filtros/barra-filtros.component';
@@ -31,6 +31,7 @@ declare const Carousel: any;
   selector: 'app-vista-inicial',
   standalone: true,
   imports: [
+    RouterLink,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -355,11 +356,6 @@ export class VistaInicialComponent implements OnInit {
     this.router.navigate(['/contacto']);
   }
 
-  verPropiedad(codPro: number) {
-    this.router.navigate(['/ver-propiedad', codPro, 0]).then(() => {
-      window.scrollTo(0, 0); // opcional: para que siempre inicie arriba
-    });
-  }
 
   abrirBrochure() {
     const url = 'https://oferta.rentaraiz.co/flipbook/brochure-renta-raiz/';

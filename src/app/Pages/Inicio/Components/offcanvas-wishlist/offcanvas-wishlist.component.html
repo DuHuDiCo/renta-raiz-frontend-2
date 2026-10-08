@@ -40,7 +40,7 @@
 
         <ng-container *ngIf="favoritos.length > 0; else vacio">
           <div *ngFor="let fav of favoritos" class="flex items-center mb-3 border rounded-lg p-2 shadow-sm relative bg-white">
-            <img [src]="fav.image1" [alt]="fav.nombre" class="w-16 h-16 object-cover rounded-lg mr-3" />
+            <img loading="lazy" decoding="async" [src]="fav.image1" [alt]="fav.nombre" class="w-16 h-16 object-cover rounded-lg mr-3" />
             <div class="flex-1 pr-6"> <p class="font-bold text-gray-800 text-sm leading-tight mb-1">{{ fav.address }}</p>
               <p class="text-gray-500 text-xs">{{ fav.city }}</p>
             </div>

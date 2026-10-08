@@ -4,7 +4,7 @@ import { BotonesFlotantesComponent } from "../../../../shared/botones-flotantes/
 import { FooterComponent } from "../../../../shared/footer/footer.component";
 import { VolverComponent } from "../../../../shared/volver/volver.component";
 import { BarraFiltrosComponent } from "../../../../shared/barra-filtros/barra-filtros.component";
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wishlist.component';
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
 import { WishlistServiceService } from '../../../../core/wishlist/wishlist-service.service';
@@ -13,7 +13,7 @@ import { WishlistServiceService } from '../../../../core/wishlist/wishlist-servi
 @Component({
   selector: 'app-nuestro-equipo',
   standalone: true,
-  imports: [NavbarComponent, FooterComponent, BotonesFlotantesComponent, VolverComponent, BarraFiltrosComponent, OffcanvasWishlistComponent, ModalWishlistComponent],
+  imports: [RouterLink, NavbarComponent, FooterComponent, BotonesFlotantesComponent, VolverComponent, BarraFiltrosComponent, OffcanvasWishlistComponent, ModalWishlistComponent],
   templateUrl: './nuestro-equipo.component.html',
   styleUrl: './nuestro-equipo.component.scss'
 })
@@ -78,10 +78,5 @@ export class NuestroEquipoComponent implements OnInit {
     window.open(url, '_blank');
   }
 
-  abrirPortafolio(asesorCode: string) {
-    this.router.navigate(['/portafolio', asesorCode]).then(() => {
-      window.scrollTo(0, 0); // opcional: para que siempre inicie arriba
-    });
-  }
 
 }

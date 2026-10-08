@@ -1,4 +1,5 @@
 <app-navbar (abrir)="toggleOffcanvas()"></app-navbar>
+<h1 class="sr-only">Renta Raíz: inmobiliaria en Medellín y el Valle de Aburrá</h1>
 
 <div class="flex flex-col">
   <div class="banner-contacto w-full max-h-[60vh] overflow-hidden" data-carousel="slide" data-carousel-interval="5000">
@@ -6,7 +7,7 @@
       <div *ngFor="let imagen of sliderFotos; let i = index"
         class="absolute top-0 left-0 w-full h-full transition-opacity duration-700"
         [attr.data-carousel-item]="i === 0 ? 'active' : ''">
-        <img [src]="imagen" class="w-full h-full object-cover" alt="Slide {{ i + 1 }}" />
+        <img [attr.fetchpriority]="i === 0 ? 'high' : 'low'" [src]="imagen" class="w-full h-full object-cover" alt="Slide {{ i + 1 }}" />
       </div>
 
       <div class="absolute inset-0 z-30 bg-black/50 flex items-center justify-center">
@@ -26,9 +27,9 @@
 
     <!-- Sección de inmuebles destacados -->
     <div class="w-full flex flex-col items-center pt-16 md:pt-24 px-4">
-      <h1 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center w-full max-w-6xl">
+      <h2 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center w-full max-w-6xl">
         Nuestros destacados
-      </h1>
+      </h2>
 
       <h2 class="text-2xl font-normal text-[#9a9b9c] text-center w-full max-w-6xl mt-4">
         Encuentra tu lugar ideal
@@ -48,7 +49,7 @@
             <div class="relative group">
               <div class="bg-black w-full h-[280px] flex items-center justify-center overflow-hidden rounded-t-lg">
                 <a href="#">
-                  <img class="max-w-full max-h-full object-contain"
+                  <img loading="lazy" decoding="async" class="max-w-full max-h-full object-contain"
                     [src]="inmueble.image1 || 'assets/images/renta-1.jpg'" [alt]="inmueble.address" />
                 </a>
               </div>
@@ -56,7 +57,7 @@
               <div
                 class="absolute inset-0 bg-[#080E36] bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-t-lg z-10">
                 <a class="cursor-pointer bg-white text-[#080E36] px-6 py-2 font-semibold rounded shadow hover:bg-[#CDAD60] hover:text-white transition-colors"
-                  (click)="verPropiedad(inmueble.codpro)">
+                  [routerLink]="['/ver-propiedad', inmueble.codpro, 0]">
                   Ver propiedad
                 </a>
               </div>
@@ -107,7 +108,7 @@
             </div>
 
             <div class="p-5">
-              <a (click)="verPropiedad(inmueble.codpro)" class="cursor-pointer">
+              <a [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" class="cursor-pointer">
                 <h5 class="mb-2 text-xl font-semibold tracking-tight text-[#080E36]">
                   {{
                   inmueble.neighborhood || "Sin barrio especificado"
@@ -212,9 +213,9 @@
 
   <!-- Seccion de inmuebles en venta -->
   <div class="w-full flex flex-col items-center pt-16 md:pt-24 px-4">
-    <h1 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center mb-4">
+    <h2 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center mb-4">
       Nuestros inmuebles en venta
-    </h1>
+    </h2>
     <h2 class="text-xl md:text-2xl font-normal text-[#9a9b9c] text-center mb-12">
       No sueñes, ¡hagamos que suceda!
     </h2>
@@ -234,14 +235,14 @@
           <div class="relative group">
             <div class="bg-black w-full h-[280px] flex items-center justify-center overflow-hidden rounded-t-lg">
               <a href="#">
-                <img class="max-w-full max-h-full object-contain"
+                <img loading="lazy" decoding="async" class="max-w-full max-h-full object-contain"
                   [src]="inmueble?.image1 || 'assets/images/renta-1.jpg'" [alt]="inmueble?.address" />
               </a>
             </div>
             <div
               class="absolute inset-0 bg-[#080E36] bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-t-lg z-10">
               <a class="cursor-pointer bg-white text-[#080E36] px-6 py-2 font-semibold rounded shadow hover:bg-[#CDAD60] hover:text-white transition-colors"
-                (click)="verPropiedad(inmueble.codpro)">
+                [routerLink]="['/ver-propiedad', inmueble.codpro, 0]">
                 Ver propiedad
               </a>
             </div>
@@ -296,7 +297,7 @@
           </div>
 
           <div class="p-5">
-            <a (click)="verPropiedad(inmueble.codpro)" class="cursor-pointer">
+            <a [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" class="cursor-pointer">
               <h5 class="mb-2 text-xl font-semibold tracking-tight text-[#080E36]">
                 {{
                 inmueble?.neighborhood || "Sin barrio especificado"
@@ -400,9 +401,9 @@
   <!-- Seccion de inmuebles en arriendo -->
   <div class="bg-gray-200">
     <div class="w-full flex flex-col items-center pt-16 md:pt-24 px-4">
-      <h1 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center mb-4">
+      <h2 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center mb-4">
         Nuestros inmuebles en arriendo
-      </h1>
+      </h2>
       <h2 class="text-xl md:text-2xl font-normal text-[#9a9b9c] text-center mb-12">
         Somos la llave al hogar que buscas
       </h2>
@@ -420,7 +421,7 @@
             <div class="relative group">
               <div class="bg-black w-full h-[280px] flex items-center justify-center overflow-hidden rounded-t-lg">
                 <a href="#">
-                  <img class="max-w-full max-h-full object-contain"
+                  <img loading="lazy" decoding="async" class="max-w-full max-h-full object-contain"
                     [src]="inmueble.image1 || 'assets/images/renta-1.jpg'" [alt]="inmueble.address" />
                 </a>
               </div>
@@ -428,7 +429,7 @@
               <div
                 class="absolute inset-0 bg-[#080E36] bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-t-lg z-10">
                 <a class="cursor-pointer bg-white text-[#080E36] px-6 py-2 font-semibold rounded shadow hover:bg-[#CDAD60] hover:text-white transition-colors"
-                  (click)="verPropiedad(inmueble.codpro)">
+                  [routerLink]="['/ver-propiedad', inmueble.codpro, 0]">
                   Ver propiedad
                 </a>
               </div>
@@ -484,7 +485,7 @@
             </div>
 
             <div class="p-5">
-              <a (click)="verPropiedad(inmueble.codpro)" class="cursor-pointer">
+              <a [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" class="cursor-pointer">
                 <h5 class="mb-2 text-xl font-semibold tracking-tight text-[#080E36]">
                   {{
                   inmueble.neighborhood || "Sin barrio especificado"
@@ -589,7 +590,7 @@
 
   <!-- Sección azul con frase -->
   <div class="relative w-full flex flex-col justify-center items-center py-12 md:py-24 bg-[#060F29]">
-    <img src="assets/images/frase3.png" alt="Texto decorativo"
+    <img loading="lazy" decoding="async" src="assets/images/frase3.png" alt="Texto decorativo"
       class="w-[80%] sm:w-[60%] md:w-[50%] h-auto relative z-10 mb-6" />
 
     <div class="flex flex-wrap justify-center gap-3 relative z-10">
@@ -637,7 +638,7 @@
           <div
             class="bg-white shadow-md rounded-xl overflow-hidden w-64 h-24 transition-all duration-300 ease-in-out transform hover:scale-105 hover:border-2 hover:border-[#CDAD60] hover:shadow-lg">
             <div class="flex h-full" (click)="redirigirAvaluosComerciales()">
-              <img src="assets/images/MiniaturaAVALUOSCOMERCIALES.png" alt="avaluos comerciales"
+              <img loading="lazy" decoding="async" src="assets/images/MiniaturaAVALUOSCOMERCIALES.png" alt="avaluos comerciales"
                 class="w-24 h-full object-cover" />
               <div class="cursor-pointer flex items-center px-4 py-2 text-sm font-semibold text-gray-800">
                 Avalúos Comerciales
@@ -648,7 +649,7 @@
           <div
             class="bg-white shadow-md rounded-xl overflow-hidden w-64 h-24 transition-all duration-300 ease-in-out transform hover:scale-105 hover:border-2 hover:border-[#CDAD60] hover:shadow-lg">
             <div class="flex h-full" (click)="redirigirRentasCortas()">
-              <img src="assets/images/servicio-2.jpg" alt="Avalúos en línea" class="w-24 h-full object-cover" />
+              <img loading="lazy" decoding="async" src="assets/images/servicio-2.jpg" alt="Avalúos en línea" class="w-24 h-full object-cover" />
               <div class="cursor-pointer flex items-center px-4 py-2 text-sm font-semibold text-gray-800">
                 Rentas Cortas
               </div>
@@ -658,7 +659,7 @@
           <div
             class="bg-white shadow-md rounded-xl overflow-hidden w-64 h-24 transition-all duration-300 ease-in-out transform hover:scale-105 hover:border-2 hover:border-[#CDAD60] hover:shadow-lg">
             <div class="flex h-full" (click)="abrirBrochure()">
-              <img src="assets/images/MiniaturadeADMINISTRACION.png" alt="Desvara tu trámite"
+              <img loading="lazy" decoding="async" src="assets/images/MiniaturadeADMINISTRACION.png" alt="Desvara tu trámite"
                 class="w-24 h-full object-cover" />
               <div class="cursor-pointer flex items-center px-4 py-2 text-sm font-semibold text-gray-800">
                 Administración de propiedades
@@ -669,7 +670,7 @@
           <div
             class="bg-white shadow-md rounded-xl overflow-hidden w-64 h-24 transition-all duration-300 ease-in-out transform hover:scale-105 hover:border-2 hover:border-[#CDAD60] hover:shadow-lg">
             <div class="flex h-full" (click)="redirigirPublicarPropiedad()">
-              <img src="assets/images/MiniaturaPUBLICATUPROPIEDAD.png" alt="Remodelación y acabados"
+              <img loading="lazy" decoding="async" src="assets/images/MiniaturaPUBLICATUPROPIEDAD.png" alt="Remodelación y acabados"
                 class="w-24 h-full object-cover" />
               <div class="cursor-pointer flex items-center px-4 py-2 text-sm font-semibold text-gray-800">
                 Publica tu propiedad
@@ -704,7 +705,7 @@
               $event.preventDefault()
             " class="cursor-pointer">
             <div class="h-40 overflow-hidden">
-              <img src="assets/images/blog-4.jpg" alt="Decisiones de inmueble" class="w-full h-full object-cover" />
+              <img loading="lazy" decoding="async" src="assets/images/blog-4.jpg" alt="Decisiones de inmueble" class="w-full h-full object-cover" />
             </div>
             <div class="p-4">
               <h4 class="text-sm font-bold text-gray-800 mb-2">
@@ -738,7 +739,7 @@
               $event.preventDefault()
             " class="cursor-pointer">
             <div class="h-40 overflow-hidden">
-              <img src="assets/images/blog-1.jpg" alt="Medellín brilla en los Stella Awards 2025" class="w-full h-full object-cover" />
+              <img loading="lazy" decoding="async" src="assets/images/blog-1.jpg" alt="Medellín brilla en los Stella Awards 2025" class="w-full h-full object-cover" />
             </div>
             <div class="p-4">
               <h3 class="text-sm font-bold text-gray-800 mb-2">
@@ -773,7 +774,7 @@
               $event.preventDefault()
             " class="cursor-pointer">
             <div class="h-40 overflow-hidden">
-              <img src="assets/images/blog-2.jpg" alt="Medellín lujo" class="w-full h-full object-cover" />
+              <img loading="lazy" decoding="async" src="assets/images/blog-2.jpg" alt="Medellín lujo" class="w-full h-full object-cover" />
             </div>
             <div class="p-4">
               <h3 class="text-sm font-bold text-gray-800 mb-2">
@@ -814,7 +815,7 @@
 
     <div class="absolute top-0 left-0 w-full h-full bg-[#060F29]/90 z-0"></div>
 
-    <img src="assets/images/frase-confia.png" alt="Texto decorativo"
+    <img loading="lazy" decoding="async" src="assets/images/frase-confia.png" alt="Texto decorativo"
       class="w-[80%] sm:w-[60%] md:w-[50%] h-auto relative z-10 mb-6" />
 
     <div class="flex gap-3 justify-center relative z-10 space-x-4">
@@ -843,9 +844,9 @@
   <!-- Sección nuestros aliados -->
   <section class="py-10 mt-20 mb-20">
     <div class="max-w-screen-xl mx-auto text-center">
-      <h1 class="text-4xl sm:text-5xl font-bold text-[#080E36] mb-4">
+      <h2 class="text-4xl sm:text-5xl font-bold text-[#080E36] mb-4">
         Nuestros Aliados
-      </h1>
+      </h2>
       <h2 class="text-lg sm:text-2xl text-[#9a9b9c] mb-12">
         Tenemos el honor de poder contar con nuestros socios
       </h2>
@@ -855,7 +856,7 @@
           data-carousel="slide">
           <div *ngFor="let grupo of aliadosPorGrupo; let i = index" [attr.data-carousel-item]="i === 0 ? 'active' : ''"
             class="flex items-center justify-center h-full absolute top-0 left-0 w-full transition-transform duration-700 ease-in-out mb-10">
-            <img *ngFor="let aliado of grupo" [src]="aliado"
+            <img loading="lazy" decoding="async" *ngFor="let aliado of grupo" [src]="aliado"
               class="object-contain ;duration-300 h-[80px] w-full sm:h-24 sm:w-full md:h-28 md:w-full lg:h-32 lg:w-full hover:scale-105 transition-transform"
               alt="Logo aliado" />
           </div>

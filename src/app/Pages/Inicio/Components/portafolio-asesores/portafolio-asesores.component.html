@@ -1,3 +1,4 @@
+<h1 class="sr-only">{{ tituloPagina }}</h1>
 <!-- navbar  -->
 <!-- <app-navbar-2 [alwaysScrolled]="true" *ngIf=" !mostrarContenido"></app-navbar-2> -->
 
@@ -20,9 +21,9 @@
 
 
       <div class="w-full flex flex-col items-center  ">
-        <h1 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center mb-1">
+        <h2 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center mb-1">
           Nuestros inmuebles en venta
-        </h1>
+        </h2>
         <h2 class="text-xl md:text-2xl font-normal text-[#9a9b9c] text-center ">
           No sueñes, ¡hagamos que suceda!
         </h2>
@@ -38,13 +39,13 @@
             class="z-10 relative bg-white border border-[#CDAD60] rounded-lg shadow-md border-b-4 pb-4 text-sm w-full mx-auto">
             <div class="relative group">
               <a href="#">
-                <img class="rounded-t-lg w-full h-44 object-cover"
+                <img loading="lazy" decoding="async" class="rounded-t-lg w-full h-44 object-cover"
                   [src]="inmueble.image1 || 'assets/images/renta-1.jpg'" [alt]="inmueble.address" />
               </a>
 
               <div
                 class="absolute inset-0 bg-[#080E36] bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-t-lg z-10">
-                <a (click)="verPropiedad(inmueble.codpro)"
+                <a [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" target="_blank"
                   class="cursor-pointer bg-white text-[#080E36] px-4 py-1 font-medium rounded shadow hover:bg-[#CDAD60] hover:text-white text-xs">
                   Ver propiedad
                 </a>
@@ -106,7 +107,7 @@
             </div>
 
             <div class="p-3">
-              <a (click)="verPropiedad(inmueble.codpro)" class="cursor-pointer">
+              <a [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" target="_blank" class="cursor-pointer">
                 <h5 class="mb-1 text-base font-semibold tracking-tight text-[#080E36] leading-snug">
                   {{
                   inmueble.neighborhood || "Sin barrio especificado" | titlecase
@@ -180,13 +181,13 @@
             class="snap-center flex-none w-72 sm:w-80 md:w-96 bg-white border border-[#CDAD60] rounded-lg shadow-md pb-4 text-sm">
             <div class="relative group">
               <a href="#">
-                <img class="rounded-t-lg w-full h-44 object-cover"
+                <img loading="lazy" decoding="async" class="rounded-t-lg w-full h-44 object-cover"
                   [src]="inmueble.image1 || 'assets/images/renta-1.jpg'" [alt]="inmueble.address" />
               </a>
 
               <div
                 class="absolute inset-0 bg-[#080E36] bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-t-lg z-10">
-                <a (click)="verPropiedad(inmueble.codpro)"
+                <a [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" target="_blank"
                   class="cursor-pointer bg-white text-[#080E36] px-4 py-1 font-medium rounded shadow hover:bg-[#CDAD60] hover:text-white text-xs">
                   Ver propiedad
                 </a>
@@ -248,7 +249,7 @@
             </div>
 
             <div class="p-3">
-              <a (click)="verPropiedad(inmueble.codpro)" class="cursor-pointer">
+              <a [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" target="_blank" class="cursor-pointer">
                 <h5 class="mb-1 text-base font-semibold tracking-tight text-[#080E36] leading-snug">
                   {{
                   inmueble.neighborhood || "Sin barrio especificado" | titlecase
@@ -398,9 +399,9 @@
 
 
         <div class="w-full flex flex-col items-center  px-4">
-          <h1 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center mb-1">
+          <h2 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center mb-1">
             Nuestros inmuebles en arriendo
-          </h1>
+          </h2>
           <h2 class="text-xl md:text-2xl font-normal text-[#9a9b9c] text-center ">
             Somos la llave al hogar que buscas
           </h2>
@@ -417,13 +418,13 @@
               class="z-10 relative bg-white border border-[#CDAD60] rounded-lg shadow-md border-b-4 pb-4 text-sm w-full mx-auto">
               <div class="relative group">
                 <a href="#">
-                  <img class="rounded-t-lg w-full h-44 object-cover"
+                  <img loading="lazy" decoding="async" class="rounded-t-lg w-full h-44 object-cover"
                     [src]="inmueble.image1 || 'assets/images/renta-1.jpg'" [alt]="inmueble.address" />
                 </a>
 
                 <div
                   class="absolute inset-0 bg-[#080E36] bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-t-lg z-10">
-                  <a (click)="verPropiedad(inmueble.codpro)"
+                  <a [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" target="_blank"
                     class="cursor-pointer bg-white text-[#080E36] px-4 py-1 font-medium rounded shadow hover:bg-[#CDAD60] hover:text-white text-xs">
                     Ver propiedad
                   </a>
@@ -477,7 +478,7 @@
               </div>
 
               <div class="p-3">
-                <a (click)="verPropiedad(inmueble.codpro)" class="cursor-pointer">
+                <a [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" target="_blank" class="cursor-pointer">
                   <h5 class="mb-1 text-base font-semibold tracking-tight text-[#080E36] leading-snug">
                     {{
                     inmueble.neighborhood || "Sin barrio especificado" | titlecase
@@ -551,13 +552,13 @@
             <!-- contenido de tarjeta igual al actual -->
             <div class="relative group">
               <a href="#">
-                <img class="rounded-t-lg w-full h-44 object-cover"
+                <img loading="lazy" decoding="async" class="rounded-t-lg w-full h-44 object-cover"
                   [src]="inmueble.image1 || 'assets/images/renta-1.jpg'" [alt]="inmueble.address" />
               </a>
 
               <div
                 class="absolute inset-0 bg-[#080E36] bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-t-lg z-10">
-                <a (click)="verPropiedad(inmueble.codpro)"
+                <a [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" target="_blank"
                   class="cursor-pointer bg-white text-[#080E36] px-4 py-1 font-medium rounded shadow hover:bg-[#CDAD60] hover:text-white text-xs">
                   Ver propiedad
                 </a>
@@ -611,7 +612,7 @@
             </div>
 
             <div class="p-3">
-              <a (click)="verPropiedad(inmueble.codpro)" class="cursor-pointer">
+              <a [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" target="_blank" class="cursor-pointer">
                 <h5 class="mb-1 text-base font-semibold tracking-tight text-[#080E36] leading-snug">
                   {{
                   inmueble.neighborhood || "Sin barrio especificado" | titlecase

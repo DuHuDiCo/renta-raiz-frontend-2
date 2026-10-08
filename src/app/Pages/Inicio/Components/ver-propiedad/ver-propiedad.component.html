@@ -1,4 +1,5 @@
 <app-navbar (abrir)="toggleOffcanvas()" *ngIf=" mostrarContenido" [alwaysScrolled]="true"></app-navbar>
+<h1 class="sr-only" *ngIf="tituloPagina">{{ tituloPagina }}</h1>
 
 
 
@@ -80,7 +81,7 @@
 
                     <!-- Si es imagen -->
                     <ng-template #imageTemplate>
-                      <img [src]="img.imageurl" alt="Imagen ampliada"
+                      <img [attr.fetchpriority]="i === 0 ? 'high' : null" [attr.loading]="i === 0 ? null : 'lazy'" [src]="img.imageurl" alt="Imagen ampliada"
                         class="absolute inset-0 w-full h-full object-cover rounded-xl" (click)="openModal(i)" />
                     </ng-template>
                     <!-- <img
@@ -168,7 +169,7 @@
                     <div *ngFor="let img of propiedad.images; let i = index" [class.block]="i === selectedIndex"
                       [class.hidden]="i !== selectedIndex"
                       class="duration-700 ease-in-out flex items-center justify-center h-full">
-                      <img [src]="img.imageurl" class="max-w-full max-h-full object-contain cursor-zoom-in"
+                      <img loading="lazy" decoding="async" [src]="img.imageurl" class="max-w-full max-h-full object-contain cursor-zoom-in"
                         alt="Imagen de propiedad" [attr.data-zoom-src]="img.imageurl" (click)="handleImageClick($event)"
                         zoom-template />
                     </div>
@@ -589,7 +590,7 @@
               class="bg-white rounded-xl mt-6 shadow-md p-6 flex flex-col md:flex-row items-center md:items-center justify-center transition hover:scale-105 duration-300 md:space-x-6 space-y-4 md:space-y-0 overflow-hidden">
 
               <!-- Imagen -->
-              <img [src]="asesor?.imagen || 'assets/images/rentaraiz.png'" [alt]="asesor?.nombre || 'Asesor'"
+              <img loading="lazy" decoding="async" [src]="asesor?.imagen || 'assets/images/rentaraiz.png'" [alt]="asesor?.nombre || 'Asesor'"
                 class="w-32 h-32 rounded-full object-cover flex-shrink-0" />
 
               <!-- Datos -->
@@ -611,9 +612,9 @@
   <!-- inmuebles similares -->
   <div class="bg-gray-200" *ngIf="mostrarContenido && resultadosFiltros.length > 0">
     <div class="w-full flex flex-col items-center pt-16 md:pt-24 px-4 mb-24">
-      <h1 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center w-full max-w-6xl">
+      <h2 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center w-full max-w-6xl">
         Inmuebles similares
-      </h1>
+      </h2>
       <h2 class="text-2xl font-normal text-[#9a9b9c] text-center w-full max-w-6xl mt-4">
         Busca inmuebles similares a tus propios
       </h2>
@@ -624,7 +625,7 @@
           <div class="relative group">
             <div class="bg-black w-full h-[280px] flex items-center justify-center overflow-hidden rounded-t-lg">
               <a href="#">
-                <img class="max-w-full max-h-full object-contain" [src]="inmueble.image1 || 'assets/images/renta-1.jpg'"
+                <img loading="lazy" decoding="async" class="max-w-full max-h-full object-contain" [src]="inmueble.image1 || 'assets/images/renta-1.jpg'"
                   [alt]="inmueble.address" />
               </a>
             </div>
@@ -632,7 +633,7 @@
             <div
               class="absolute inset-0 bg-[#080E36] bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-t-lg z-10">
               <a class="cursor-pointer bg-white text-[#080E36] px-6 py-2 font-semibold rounded shadow hover:bg-[#CDAD60] hover:text-white transition-colors"
-                (click)="verPropiedad(inmueble.codpro)">
+                [routerLink]="['/ver-propiedad', inmueble.codpro, 0]">
                 Ver propiedad
               </a>
             </div>

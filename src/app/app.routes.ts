@@ -11,6 +11,13 @@ export const routes: Routes = [
   {
     path: '**',
     component: PageNotFoundComponent,
+    data: {
+      seo: {
+        titulo: 'Página no encontrada | Renta Raíz',
+        descripcion: 'La página que buscas no existe o fue movida. Vuelve al inicio para seguir explorando inmuebles con Renta Raíz.',
+        noindex: true,
+      },
+    },
   },
 
 ];

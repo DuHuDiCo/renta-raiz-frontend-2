@@ -5,11 +5,10 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build --configuration production",
-    "postbuild": "node scripts/generate-sitemap.js",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "dev:ssr": "ng serve --ssr",
-    "build:ssr": "ng build && ng run renta-raiz-frontend-2:server && node scripts/generate-sitemap.js",
+    "build:ssr": "ng build && ng run renta-raiz-frontend-2:server",
     "serve:ssr": "node dist/renta-raiz-frontend-2/server/server.mjs"
   },
   "private": true,

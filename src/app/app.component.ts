@@ -5,6 +5,7 @@
   import { NgxUiLoaderModule, NgxUiLoaderService } from 'ngx-ui-loader';
 
   import { filter } from 'rxjs/operators';
+  import { SEO_AGENCIA, SEO_POR_DEFECTO, SEO_SITIO_WEB, SeoService } from './core/seo/seo.service';
 
   declare let fbq: Function; // Importante para que TypeScript no dé error
 
@@ -18,8 +19,14 @@
   export class AppComponent implements OnInit {
 
     platformId = inject(PLATFORM_ID);
+    private seo = inject(SeoService);
 
     constructor(private router: Router, private loaderService: NgxUiLoaderService) {
+      // Corre también en SSR: los buscadores leen el título y la descripción del HTML del servidor.
+      this.router.events
+        .pipe(filter((event) => event instanceof NavigationEnd))
+        .subscribe(() => this.aplicarSeoDeRuta());
+
       // this.router.events.pipe(
       //   // Filtramos los eventos que nos interesan
       //   filter(event =>
@@ -41,6 +48,22 @@
     }
 
     
+
+    /** Aplica el SEO definido en `data.seo` de la ruta activa. Las rutas con `seoDinamico` lo arman en su componente. */
+    private aplicarSeoDeRuta() {
+      let ruta = this.router.routerState.snapshot.root;
+      while (ruta.firstChild) ruta = ruta.firstChild;
+      if (ruta.data['seoDinamico']) return;
+
+      const url = this.router.url.split(/[?#]/)[0];
+      this.seo.actualizar({
+        ...SEO_POR_DEFECTO,
+        ...ruta.data['seo'],
+        ruta: url,
+        // Los datos de la empresa solo van en el inicio; el resto de páginas la referencian por su @id.
+        datosEstructurados: url === '/' ? [SEO_AGENCIA, SEO_SITIO_WEB] : undefined,
+      });
+    }
 
     ngOnInit(): void {
       // Todo lo de aquí usa APIs del navegador (window, localStorage, fbq) que no existen en SSR.

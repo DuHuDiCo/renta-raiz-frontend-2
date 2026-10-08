@@ -6,7 +6,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { NavbarComponent } from '../../../../shared/navbar/navbar.component';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InmueblesService } from '../../../../core/Inmuebles/inmuebles.service';
 import { CommonModule } from '@angular/common';
@@ -20,6 +20,7 @@ import { VolverComponent } from '../../../../shared/volver/volver.component';
   selector: 'app-avaluos-comerciales',
   standalone: true,
   imports: [
+    RouterLink,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -87,10 +88,4 @@ export class AvaluosComercialesComponent {
     window.open(url, '_blank');
   }
 
-  verPropiedad(codPro: number) {
-    const url = this.router
-      .createUrlTree(['/ver-propiedad', codPro, 0])
-      .toString();
-    window.open(url, '_blank');
-  }
 }

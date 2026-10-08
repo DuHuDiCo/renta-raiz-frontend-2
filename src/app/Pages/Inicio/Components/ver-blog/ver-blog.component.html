@@ -8,7 +8,7 @@
             <div class="absolute inset-0 w-full h-full bg-cover bg-center z-10"
                 style="background-image: url('assets/images/Noticias-fondo.png')"></div>
             <!-- Imagen de fondo (No se corta en móvil) -->
-            <img src="assets/images/Noticias-fondo.png"
+            <img fetchpriority="high" src="assets/images/Noticias-fondo.png"
                 class="absolute inset-0 w-full h-full object-fill md:object-cover lg:object-cover xl:object-cover 2xl:object-cover z-10"
                 alt="Fondo" />
 
@@ -86,22 +86,22 @@
 
         <div class="w-full h-64 md:h-96">
             @if (blogId === blog1) {
-            <img src="/assets/images/blog-1.jpg" alt="Medellín de noche con edificios iluminados"
+            <img loading="lazy" decoding="async" src="/assets/images/blog-1.jpg" alt="Medellín de noche con edificios iluminados"
                 class="w-full h-full object-cover">
             }
 
             @if (blogId === blog2) {
-            <img src="/assets/images/blog-2.jpg" alt="Medellín de noche con edificios iluminados"
+            <img loading="lazy" decoding="async" src="/assets/images/blog-2.jpg" alt="Medellín de noche con edificios iluminados"
                 class="w-full h-full object-cover">
             }
 
             @if (blogId === blog3) {
-            <img src="/assets/images/blog-3.jpg" alt="Medellín de noche con edificios iluminados"
+            <img loading="lazy" decoding="async" src="/assets/images/blog-3.jpg" alt="Medellín de noche con edificios iluminados"
                 class="w-full h-full object-cover">
             }
 
             @if (blogId === blog4) {
-            <img src="/assets/images/blog-4.jpg" alt="Decisiones sobre el inmueble"
+            <img loading="lazy" decoding="async" src="/assets/images/blog-4.jpg" alt="Decisiones sobre el inmueble"
                 class="w-full h-full object-cover">
             }
         </div>
@@ -533,9 +533,9 @@
 
     <div class="bg-gray-200">
         <div class="w-full flex flex-col items-center pt-20 md:pt-16 px-4">
-            <h1 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center w-full max-w-6xl">
+            <h2 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center w-full max-w-6xl">
                 Nuestros destacados
-            </h1>
+            </h2>
 
             <h2 class="text-2xl font-normal text-[#9a9b9c] text-center w-full max-w-6xl mt-4">
                 Encuentra tu lugar ideal
@@ -549,14 +549,14 @@
                         <div
                             class="bg-black w-full h-[280px] flex items-center justify-center overflow-hidden rounded-t-lg">
                             <a href="#">
-                                <img class="max-w-full max-h-full object-contain"
+                                <img loading="lazy" decoding="async" class="max-w-full max-h-full object-contain"
                                     [src]="inmueble.image1 || 'assets/images/renta-1.jpg'" [alt]="inmueble.address" />
                             </a>
                         </div>
                         <div
                             class="absolute inset-0 bg-[#080E36] bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-t-lg z-10">
                             <a class="cursor-pointer bg-white text-[#080E36] px-6 py-2 font-semibold rounded shadow hover:bg-[#CDAD60] hover:text-white transition-colors"
-                                (click)="verPropiedad(inmueble.codpro)">
+                                [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" target="_blank">
                                 Ver propiedad
                             </a>
                         </div>
@@ -598,7 +598,7 @@
                     </div>
 
                     <div class="p-5">
-                        <a (click)="verPropiedad(inmueble.codpro)" class="cursor-pointer">
+                        <a [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" target="_blank" class="cursor-pointer">
                             <h5 class="mb-2 text-xl font-semibold tracking-tight text-[#080E36]">
                                 {{ inmueble.neighborhood || "Sin barrio especificado" | titlecase }}
                                 <span class="text-[#080E36] text-sm font-semibold">(Barrio)</span>

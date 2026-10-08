@@ -1,7 +1,7 @@
 import { AfterContentInit, Component, inject, OnInit } from '@angular/core';
 import { NavbarComponent } from '../../../../shared/navbar/navbar.component';
 import { InmueblesService } from '../../../../core/Inmuebles/inmuebles.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FooterComponent } from '../../../../shared/footer/footer.component';
@@ -12,6 +12,7 @@ import { VolverComponent } from '../../../../shared/volver/volver.component';
   selector: 'app-blogs',
   standalone: true,
   imports: [
+    RouterLink,
     CommonModule,
     FormsModule,
     NavbarComponent,
@@ -244,11 +245,6 @@ export class BlogsComponent implements OnInit {
       : `${base} bg-blue-100 text-blue-700`;
   }
 
-  verPropiedad(codPro: number) {
-    this.router.navigate(['/ver-propiedad', codPro, 0], {
-      state: { codPro: codPro },
-    });
-  }
 
   redirigirFiltros() {
     this.prepararFiltros();
