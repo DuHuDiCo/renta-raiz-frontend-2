@@ -13,12 +13,14 @@ import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wish
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
 import { DataasesoresService } from '../../../../core/dataAsesores/dataasesores.service';
 import { SEO_SUFIJO, seoMigas, SeoService } from '../../../../core/seo/seo.service';
+import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
 
 
 @Component({
   selector: 'app-portafolio-asesores',
   standalone: true,
-  imports: [RouterLink, CommonModule, NavbarComponent2, FooterPortafolioComponent,
+  imports: [
+    RutaFichaPipe,RouterLink, CommonModule, NavbarComponent2, FooterPortafolioComponent,
     BotonesFlotantesComponent, OffcanvasWishlistComponent, ModalWishlistComponent],
   templateUrl: './portafolio-asesores.component.html',
   styleUrl: './portafolio-asesores.component.scss'

@@ -333,7 +333,7 @@ export class BarraFiltrosPrioritariosComponent implements OnChanges {
     }
   
     verPropiedad(codPro: number) {
-      this.router.navigate(['/ver-propiedad', codPro, 0]);
+      this.router.navigate(['/inmueble', codPro]);
     }
   
     filterLocations() {

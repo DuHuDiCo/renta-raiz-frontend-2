@@ -6,9 +6,9 @@
 
             <!-- Imagen de fondo como background CSS -->
             <div class="absolute inset-0 w-full h-full bg-cover bg-center z-10"
-                style="background-image: url('assets/images/Noticias-fondo.png')"></div>
+                style="background-image: url('assets/images/Noticias-fondo.webp')"></div>
             <!-- Imagen de fondo (No se corta en móvil) -->
-            <img fetchpriority="high" src="assets/images/Noticias-fondo.png"
+            <img fetchpriority="high" src="assets/images/Noticias-fondo.webp"
                 class="absolute inset-0 w-full h-full object-fill md:object-cover lg:object-cover xl:object-cover 2xl:object-cover z-10"
                 alt="Fondo" />
 
@@ -556,7 +556,7 @@
                         <div
                             class="absolute inset-0 bg-[#080E36] bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-t-lg z-10">
                             <a class="cursor-pointer bg-white text-[#080E36] px-6 py-2 font-semibold rounded shadow hover:bg-[#CDAD60] hover:text-white transition-colors"
-                                [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" target="_blank">
+                                [routerLink]="inmueble | rutaFicha" target="_blank">
                                 Ver propiedad
                             </a>
                         </div>
@@ -598,7 +598,7 @@
                     </div>
 
                     <div class="p-5">
-                        <a [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" target="_blank" class="cursor-pointer">
+                        <a [routerLink]="inmueble | rutaFicha" target="_blank" class="cursor-pointer">
                             <h5 class="mb-2 text-xl font-semibold tracking-tight text-[#080E36]">
                                 {{ inmueble.neighborhood || "Sin barrio especificado" | titlecase }}
                                 <span class="text-[#080E36] text-sm font-semibold">(Barrio)</span>

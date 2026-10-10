@@ -25,6 +25,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import { WishlistServiceService } from '../../../../core/wishlist/wishlist-service.service';
 import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wishlist.component';
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
+import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
 var document: any;
 declare const Carousel: any;
 
@@ -32,6 +33,7 @@ declare const Carousel: any;
   selector: 'app-vista-inicial',
   standalone: true,
   imports: [
+    RutaFichaPipe,
     RouterLink,
     CommonModule,
     ReactiveFormsModule,
@@ -81,9 +83,9 @@ export class VistaInicialComponent implements OnInit {
   ];
 
   sliderFotos: string[] = [
-    'assets/images/vistaInicial-slider-1.png',
-    'assets/images/vistaInicial-slider-2.png',
-    'assets/images/vistaInicial-slider-3.png',
+    'assets/images/vistaInicial-slider-1.webp',
+    'assets/images/vistaInicial-slider-2.webp',
+    'assets/images/vistaInicial-slider-3.webp',
   ];
 
   cargando = false;

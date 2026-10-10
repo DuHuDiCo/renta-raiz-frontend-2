@@ -21,15 +21,17 @@ import { VolverComponent } from '../../../../shared/volver/volver.component';
 import { SafeUrlPipePipe } from '../../../../shared/pipes/safe-url-pipe.pipe';
 import { DataasesoresService } from '../../../../core/dataAsesores/dataasesores.service';
 import { SEO_DOMINIO, SEO_REF_AGENCIA, SEO_SUFIJO, seoMigas, SeoService } from '../../../../core/seo/seo.service';
-import { encabezadoListado, negocioDeBiz, rutaListado, slugListado, tipoPorCodigo } from '../../../../core/listados/listados';
+import { encabezadoListado, negocioDeBiz, rutaFicha, rutaListado, slugListado, tipoPorCodigo } from '../../../../core/listados/listados';
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
 import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wishlist.component';
+import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
 
 
 @Component({
   selector: 'app-ver-propiedad',
   standalone: true,
   imports: [
+    RutaFichaPipe,
     RouterLink,
     NavbarComponent,
     FormsModule,
@@ -101,7 +103,7 @@ export class VerPropiedadComponent implements OnInit {
     this.route.paramMap.subscribe((params) => {
       if (typeof window !== 'undefined') window.scrollTo(0, 0);
       this.propiedad = {}
-      this.codPro = Number(params.get('codpro'));
+      this.codPro = Number(this.route.snapshot.data['propiedad'].data.codpro);
       const ocultar = Number(params.get('ocultarContenido')) === 1;
       this.getDatosPropiedad();
       this.updateParams();
@@ -464,7 +466,7 @@ export class VerPropiedadComponent implements OnInit {
     const descripcion = [`${encabezado}${detalles ? `: ${detalles}` : ''}.`, precios ? `${precios}.` : '', `Código ${p.codpro}.`]
       .filter(Boolean).join(' ');
     // La variante /1 (contenido oculto) apunta a la ficha completa para no duplicar la página.
-    const ruta = `/ver-propiedad/${p.codpro}/0`;
+    const ruta = rutaFicha(p);
 
     const negocioListado = negocioDeBiz(p.biz_code);
     const tipoListado = tipoPorCodigo(p.type_code);

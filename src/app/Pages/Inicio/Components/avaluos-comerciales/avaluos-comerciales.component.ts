@@ -15,11 +15,13 @@ import { BotonesFlotantesComponent } from '../../../../shared/botones-flotantes/
 import { log } from 'console';
 import { BarraFiltrosComponent } from '../../../../shared/barra-filtros/barra-filtros.component';
 import { VolverComponent } from '../../../../shared/volver/volver.component';
+import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
 
 @Component({
   selector: 'app-avaluos-comerciales',
   standalone: true,
   imports: [
+    RutaFichaPipe,
     RouterLink,
     CommonModule,
     ReactiveFormsModule,

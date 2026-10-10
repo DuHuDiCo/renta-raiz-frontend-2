@@ -27,13 +27,15 @@ import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wish
 import { BotonesFlotantesComponent } from '../../../../shared/botones-flotantes/botones-flotantes.component';
 import { EnlacesListadosComponent } from '../../../../shared/enlaces-listados/enlaces-listados.component';
 import { DatosListado } from '../../../../core/resolvers/listado.resolver';
-import { BIZ_DE_NEGOCIO, MINIMO_BARRIO, Negocio, encabezadoListado, rutaListado, slugListado } from '../../../../core/listados/listados';
+import { BIZ_DE_NEGOCIO, MINIMO_BARRIO, Negocio, encabezadoListado, rutaFicha, rutaListado, slugListado } from '../../../../core/listados/listados';
 import { SEO_DOMINIO, SEO_POR_DEFECTO, SEO_SUFIJO, seoMigas, SeoService } from '../../../../core/seo/seo.service';
+import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
 
 @Component({
   selector: 'app-filtros',
   standalone: true,
   imports: [
+    RutaFichaPipe,
     RouterLink,
     NavbarComponent,
     FormsModule,
@@ -608,7 +610,7 @@ export class FiltrosComponent implements OnInit {
           itemListElement: (listado.respuesta.data || []).map((inmueble: any, i: number) => ({
             '@type': 'ListItem',
             position: (pagina - 1) * this.elementsPerPage + i + 1,
-            url: `${SEO_DOMINIO}/ver-propiedad/${inmueble.codpro}/0`,
+            url: `${SEO_DOMINIO}${rutaFicha(inmueble)}`,
           })),
         },
         seoMigas([['Inicio', '/'], ...this.migasListado]),

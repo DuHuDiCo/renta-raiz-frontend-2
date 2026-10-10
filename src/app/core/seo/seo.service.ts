@@ -111,6 +111,17 @@ export class SeoService {
     if (this.estadoHttp && this.estadoHttp.codigo === 200) this.estadoHttp.codigo = codigo;
   }
 
+  /**
+   * Pide al servidor que responda con una redirección permanente (301) a `ruta`.
+   * Devuelve false en el navegador, donde quien llama debe navegar por su cuenta.
+   */
+  redirigirA(ruta: string): boolean {
+    if (!this.estadoHttp) return false;
+    this.estadoHttp.codigo = 301;
+    this.estadoHttp.redireccion = ruta;
+    return true;
+  }
+
   actualizar(datos: DatosSeo) {
     const descripcion = this.recortar(datos.descripcion, 160);
     const url = `${SEO_DOMINIO}${datos.ruta === '/' ? '' : datos.ruta}`;

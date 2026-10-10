@@ -529,7 +529,7 @@
 
             <div
               class="absolute inset-0 bg-[#080E36] bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-t-lg z-10">
-              <a [routerLink]="['/ver-propiedad', inmueble.codpro, 0]"
+              <a [routerLink]="inmueble | rutaFicha"
                 class="cursor-pointer bg-white text-[#080E36] px-4 py-1 font-medium rounded shadow hover:bg-[#CDAD60] hover:text-white text-xs">
                 Ver propiedad
               </a>
@@ -591,7 +591,7 @@
           </div>
 
           <div class="p-3">
-            <a [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" class="cursor-pointer">
+            <a [routerLink]="inmueble | rutaFicha" class="cursor-pointer">
               <h5 class="mb-1 text-base font-semibold tracking-tight text-[#080E36] leading-snug">
                 {{
                 inmueble.neighborhood || "Sin barrio especificado" | titlecase

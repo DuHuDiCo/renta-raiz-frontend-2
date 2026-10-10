@@ -4,7 +4,27 @@ import { GoogleMap, GoogleMapsModule } from '@angular/google-maps';
 import { Router } from '@angular/router';
 import { InmueblesService } from '../../../../core/Inmuebles/inmuebles.service';
 import { GeolocalizacionService } from '../../../../core/Geolocalizacion/geolocalizacion.service';
+import { rutaFicha } from '../../../../core/listados/listados';
 
+const CLAVE_GOOGLE_MAPS = 'AIzaSyDOhR1u0pvve78PeYEdUsVRTs1hLOU9VVg';
+let sdkGoogleMaps: Promise<void> | null = null;
+
+/** Descarga el SDK de Google Maps la primera vez que se necesita. Antes se cargaba en todas las páginas. */
+function cargarGoogleMaps(): Promise<void> {
+  if ((window as any).google?.maps) return Promise.resolve();
+  sdkGoogleMaps ??= new Promise<void>((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${CLAVE_GOOGLE_MAPS}`;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => {
+      sdkGoogleMaps = null;
+      reject(new Error('No se pudo cargar Google Maps'));
+    };
+    document.head.appendChild(script);
+  });
+  return sdkGoogleMaps;
+}
 
 @Component({
   selector: 'app-mapa',
@@ -30,9 +50,23 @@ export class MapaComponent implements AfterViewInit {
 
   router = inject(Router);
 
+  /** true cuando el SDK de Google Maps ya está disponible y se puede pintar el mapa. */
+  sdkListo = false;
+
   ngOnInit(): void {
     // El mapa depende del SDK de Google Maps, que solo existe en el navegador.
     if (typeof window === 'undefined') return;
+    cargarGoogleMaps().then(
+      () => {
+        this.sdkListo = true;
+        this.iniciarMapa();
+        this.ajustarTrasPintar();
+      },
+      (error) => console.error(error)
+    );
+  }
+
+  private iniciarMapa(): void {
     if (this.propiedades.length == 0) {
       this.inmueblesService.getTodosInmuebles().subscribe(
         (response: any) => {
@@ -71,6 +105,10 @@ export class MapaComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     if (typeof window === 'undefined') return;
+    this.ajustarTrasPintar();
+  }
+
+  private ajustarTrasPintar(): void {
     setTimeout(() => {
       this.forceResize();
       if (this.activarStreetView) {
@@ -108,7 +146,7 @@ export class MapaComponent implements AfterViewInit {
 
   verDetalle(propiedad: any) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/ver-propiedad/${propiedad.codpro}`])
+      this.router.createUrlTree([rutaFicha(propiedad)])
     );
 
     // abre la nueva pestaña con la URL completa

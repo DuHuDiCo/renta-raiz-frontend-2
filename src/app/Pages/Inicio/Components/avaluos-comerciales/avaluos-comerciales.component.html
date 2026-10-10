@@ -5,7 +5,7 @@
     <div class="relative w-full h-full">
       <!-- Imagen de fondo -->
       <img fetchpriority="high"
-        src="assets/images/SliderAVALUOS.png"
+        src="assets/images/SliderAVALUOS.webp"
         class="absolute inset-0 w-full h-full object-fill md:object-cover lg:object-cover xl:object-cover 2xl:object-cover z-10"
         alt="Fondo"
       />
@@ -430,7 +430,7 @@
               >
                 <a
                   class="cursor-pointer bg-white text-[#080E36] px-4 py-2 font-semibold rounded shadow hover:bg-[#CDAD60] hover:text-white transition-colors"
-                  [routerLink]="['/ver-propiedad', inmueble.codpro, 0]" target="_blank"
+                  [routerLink]="inmueble | rutaFicha" target="_blank"
                 >
                   Ver propiedad
                 </a>

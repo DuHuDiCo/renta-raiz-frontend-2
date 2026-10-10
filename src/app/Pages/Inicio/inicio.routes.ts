@@ -32,7 +32,7 @@ export const routes: Routes = [
         component: VistaInicialComponent,
         data: {
           seo: {
-            precarga: '/assets/images/vistaInicial-slider-1.png',
+            precarga: '/assets/images/vistaInicial-slider-1.webp',
             titulo: 'Renta Raíz | Inmobiliaria en Medellín y el Valle de Aburrá',
             descripcion:
               'Apartamentos, casas, oficinas y locales para arrendar o comprar en Medellín, Envigado, Sabaneta, Itagüí y el Oriente antioqueño. Asesoría experta.',
@@ -65,7 +65,7 @@ export const routes: Routes = [
         component: ContactanosComponent,
         data: {
           seo: {
-            precarga: '/assets/images/SLIDERCONTACTANOS.png',
+            precarga: '/assets/images/SLIDERCONTACTANOS.webp',
             titulo: 'Contáctanos | Renta Raíz',
             descripcion:
               '¿Quieres arrendar, comprar o vender un inmueble en Medellín, Envigado o el Oriente antioqueño? Escríbenos y un asesor de Renta Raíz te acompañará.',
@@ -73,6 +73,15 @@ export const routes: Routes = [
         },
       },
       {
+        // Ficha del inmueble: /inmueble/apartamento-arriendo-el-poblado-medellin-7434
+        path: 'inmueble/:slug',
+        component: VerPropiedadComponent,
+        // El componente arma el SEO con los datos que carga.
+        data: { seoDinamico: true },
+        resolve: { propiedad: propiedadResolver }
+      },
+      {
+        // Dirección antigua: /0 redirige a la ficha; /1 es la vista reducida que usa Prioritarios.
         path: 'ver-propiedad/:codpro/:ocultarContenido',
         component: VerPropiedadComponent,
         // El componente arma el SEO con los datos que carga.
@@ -97,7 +106,7 @@ export const routes: Routes = [
         component: QuienesSomosComponent,
         data: {
           seo: {
-            precarga: '/assets/images/SliderQUIENESOMOS.png',
+            precarga: '/assets/images/SliderQUIENESOMOS.webp',
             titulo: 'Quiénes somos | Renta Raíz',
             descripcion:
               'Conoce a Renta Raíz, inmobiliaria en Medellín, el Valle de Aburrá y el Oriente antioqueño especializada en arriendo, venta y administración de inmuebles.',
@@ -140,7 +149,7 @@ export const routes: Routes = [
         component: PublicarInmuebleComponent,
         data: {
           seo: {
-            precarga: '/assets/images/SLIDERPUBLICATUPROPIEDAD.png',
+            precarga: '/assets/images/SLIDERPUBLICATUPROPIEDAD.webp',
             titulo: 'Publica tu inmueble para arriendo o venta | Renta Raíz',
             descripcion:
               'Consigna tu inmueble con Renta Raíz: lo promocionamos, encontramos al cliente ideal y te acompañamos en el arriendo o la venta.',
@@ -152,7 +161,7 @@ export const routes: Routes = [
         component: PoliticarPrivacidadComponent,
         data: {
           seo: {
-            precarga: '/assets/images/SLIDERPOLITICAS.png',
+            precarga: '/assets/images/SLIDERPOLITICAS.webp',
             titulo: 'Política de privacidad | Renta Raíz',
             descripcion:
               'Consulta la política de privacidad y de tratamiento de datos personales de Renta Raíz Soluciones Inmobiliarias.',
@@ -175,7 +184,7 @@ export const routes: Routes = [
         component: AvaluosComercialesComponent,
         data: {
           seo: {
-            precarga: '/assets/images/SliderAVALUOS.png',
+            precarga: '/assets/images/SliderAVALUOS.webp',
             titulo: 'Avalúos comerciales en Medellín y el Valle de Aburrá | Renta Raíz',
             descripcion:
               'Conoce el valor real de tu inmueble con un avalúo comercial de Renta Raíz, realizado por expertos del mercado inmobiliario de Medellín y el Valle de Aburrá.',

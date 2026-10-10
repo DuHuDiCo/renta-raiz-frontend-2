@@ -8,11 +8,13 @@ import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { VolverComponent } from '../../../../shared/volver/volver.component';
+import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
 
 @Component({
   selector: 'app-politicar-privacidad',
   standalone: true,
   imports: [
+    RutaFichaPipe,
     RouterLink,
     CommonModule,
     ReactiveFormsModule,

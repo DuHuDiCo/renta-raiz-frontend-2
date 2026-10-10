@@ -9,11 +9,13 @@ import { BotonesFlotantesComponent } from '../../../../shared/botones-flotantes/
 import { BarraFiltrosComponent } from '../../../../shared/barra-filtros/barra-filtros.component';
 import { VolverComponent } from '../../../../shared/volver/volver.component';
 import { SEO_DOMINIO, SEO_REF_AGENCIA, SEO_SUFIJO, seoMigas, SeoService } from '../../../../core/seo/seo.service';
+import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
 
 @Component({
   selector: 'app-ver-blog',
   standalone: true,
   imports: [
+    RutaFichaPipe,
     RouterLink,
     CommonModule,
     ReactiveFormsModule,
@@ -101,7 +103,7 @@ export class VerBlogComponent implements OnInit {
       descripcion: articulo?.descripcion || 'El artículo que buscas no existe o fue movido. Visita el blog de Renta Raíz.',
       ruta,
       imagen,
-      precarga: '/assets/images/Noticias-fondo.png',
+      precarga: '/assets/images/Noticias-fondo.webp',
       tipo: articulo ? 'article' : 'website',
       noindex: !articulo,
       datosEstructurados: articulo

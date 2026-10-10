@@ -1,6 +1,6 @@
 import * as CryptoJS from 'crypto-js';
 import { DataasesoresService } from './src/app/core/dataAsesores/dataasesores.service';
-import { IndiceListados, calcularIndiceListados, enlacesDeIndice } from './src/app/core/listados/listados';
+import { IndiceListados, calcularIndiceListados, enlacesDeIndice, rutaFicha } from './src/app/core/listados/listados';
 import { SEO_DOMINIO } from './src/app/core/seo/seo.service';
 import { Login, environment } from './src/environments/environment';
 
@@ -105,7 +105,7 @@ async function generarSitemap(): Promise<string> {
   const inmuebles: EntradaSitemap[] = inventario.map((inmueble) => {
     const fecha = String(inmueble.registry_date || '').slice(0, 10);
     return {
-      ruta: `/ver-propiedad/${Number(inmueble.codpro)}/0`,
+      ruta: rutaFicha(inmueble),
       modificado: /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : undefined,
     };
   });

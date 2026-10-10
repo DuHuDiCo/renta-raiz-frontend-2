@@ -1,4 +1,4 @@
-<google-map #map height="800px" width="820px" [center]="center" [zoom]="zoom">
+<google-map *ngIf="sdkListo" #map height="800px" width="820px" [center]="center" [zoom]="zoom">
   <map-marker *ngFor="let m of markers" [position]="m.position" [icon]="m.icon" (mapClick)="verDetalle(m.propiedad)">
   </map-marker>
 </google-map>

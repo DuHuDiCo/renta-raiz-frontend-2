@@ -2,6 +2,7 @@ import { APP_BASE_HREF } from '@angular/common';
 import { CommonEngine } from '@angular/ssr';
 import express from 'express';
 import { fileURLToPath } from 'node:url';
+import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import bootstrap from './src/main.server';
 import compression from 'compression';
@@ -69,10 +70,20 @@ export function app(): express.Express {
     res.type('application/xml').send(xml);
   });
 
-  // Servir archivos estáticos
+  // Servir archivos estáticos.
+  // Solo se guardan un año los archivos con huella en el nombre (main-ABC123.js): si cambian, cambia el nombre.
+  // El resto (imágenes de assets, robots.txt) se guarda un día, para que un reemplazo llegue a los visitantes.
+  // El build de desarrollo no pone huella (main.js), así que ahí no se guarda nada.
+  const buildConHuella = !existsSync(join(browserDistFolder, 'main.js'));
   server.get('*.*', express.static(browserDistFolder, {
-    maxAge: '1y',
-    etag: false // Deshabilita etag para ahorrar procesamiento en estáticos cacheados
+    etag: false, // Deshabilita etag para ahorrar procesamiento en estáticos cacheados
+    setHeaders: (res, ruta) => {
+      const conHuella = buildConHuella && /-[A-Z0-9]{8}\.[a-z0-9]+$/.test(ruta);
+      res.setHeader(
+        'Cache-Control',
+        conHuella ? 'public, max-age=31536000, immutable' : buildConHuella ? 'public, max-age=86400' : 'no-cache'
+      );
+    },
   }));
 
   // Rutas Angular
@@ -122,6 +133,13 @@ export function app(): express.Express {
           html,
           timestamp: Date.now()
         });
+      }
+
+      if (estadoHttp.redireccion) {
+        // Se conservan los parámetros de la dirección original (campañas, etc.).
+        const consulta = originalUrl.includes('?') ? originalUrl.slice(originalUrl.indexOf('?')) : '';
+        res.redirect(301, `${estadoHttp.redireccion}${consulta}`);
+        return;
       }
 
       if (estadoHttp.codigo === 503) res.setHeader('Retry-After', '300');

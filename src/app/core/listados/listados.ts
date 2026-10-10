@@ -67,6 +67,18 @@ export function negocioDeBiz(biz: string | number): Negocio {
   return String(biz) === '2' ? 'venta' : 'arriendo';
 }
 
+/** Dirección de la ficha de un inmueble: /inmueble/apartamento-arriendo-el-poblado-medellin-7434. */
+export function rutaFicha(inmueble: any): string {
+  const negocio = String(inmueble.biz_code) === '3' ? 'arriendo-venta' : negocioDeBiz(inmueble.biz_code);
+  const texto = slugListado([inmueble.type, negocio, inmueble.neighborhood, inmueble.city].filter(Boolean).join(' '));
+  return `/inmueble/${texto ? `${texto}-` : ''}${Number(inmueble.codpro)}`;
+}
+
+/** Código del inmueble a partir del último tramo de la dirección de su ficha. Lo único que identifica la ficha es el código. */
+export function codigoDeFicha(slug: string): number {
+  return Number(/(?:^|-)(\d+)$/.exec(slug)?.[1]);
+}
+
 /** Segmentos de la ruta, listos para `routerLink`. */
 export function segmentosListado(negocio: Negocio, tipoSlug?: string, ciudadSlug?: string, barrioSlug?: string): string[] {
   const segmentos = ['/', negocio];

@@ -365,7 +365,7 @@ export class BarraFiltrosComponent {
   }
 
   verPropiedad(codPro: number) {
-    this.router.navigate(['/ver-propiedad', codPro, 0]);
+    this.router.navigate(['/inmueble', codPro]);
   }
 
   filterLocations() {
