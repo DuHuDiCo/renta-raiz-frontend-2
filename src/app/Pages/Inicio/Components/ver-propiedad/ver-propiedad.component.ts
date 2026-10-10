@@ -21,6 +21,7 @@ import { VolverComponent } from '../../../../shared/volver/volver.component';
 import { SafeUrlPipePipe } from '../../../../shared/pipes/safe-url-pipe.pipe';
 import { DataasesoresService } from '../../../../core/dataAsesores/dataasesores.service';
 import { SEO_DOMINIO, SEO_REF_AGENCIA, SEO_SUFIJO, seoMigas, SeoService } from '../../../../core/seo/seo.service';
+import { encabezadoListado, negocioDeBiz, rutaListado, slugListado, tipoPorCodigo } from '../../../../core/listados/listados';
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
 import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wishlist.component';
 
@@ -84,6 +85,8 @@ export class VerPropiedadComponent implements OnInit {
   seo = inject(SeoService);
   /** Encabezado principal (h1) de la ficha; es el mismo texto del título SEO. */
   tituloPagina = '';
+  /** Listados a los que enlazan las migas de la ficha: negocio, tipo y ciudad. */
+  migasListado: { negocio: string; tipo: string; ciudad: string } | null = null;
   mostrarOffcanvas: boolean = false;
   minimizarOffcanvas: boolean = true;
 
@@ -463,6 +466,15 @@ export class VerPropiedadComponent implements OnInit {
     // La variante /1 (contenido oculto) apunta a la ficha completa para no duplicar la página.
     const ruta = `/ver-propiedad/${p.codpro}/0`;
 
+    const negocioListado = negocioDeBiz(p.biz_code);
+    const tipoListado = tipoPorCodigo(p.type_code);
+    const ciudadListado = slugListado(p.city);
+    this.migasListado = {
+      negocio: rutaListado(negocioListado),
+      tipo: rutaListado(negocioListado, tipoListado?.slug),
+      ciudad: rutaListado(negocioListado, tipoListado?.slug, ciudadListado),
+    };
+
     // No se publica la dirección exacta ni las coordenadas: la ficha solo muestra barrio y ciudad.
     const tipoSchema = /APARTA/i.test(p.type) ? 'Apartment' : /CASA/i.test(p.type) ? 'House' : 'Accommodation';
     const oferta = (precio: number, funcion: 'LeaseOut' | 'Sell') => ({
@@ -507,7 +519,15 @@ export class VerPropiedadComponent implements OnInit {
       imagen: p.images?.[0]?.imageurl,
       // Si el inmueble tiene video, lo primero que se muestra es el video y no la foto.
       precarga: p.video ? undefined : p.images?.[0]?.imageurl,
-      datosEstructurados: [anuncio, seoMigas([['Inicio', '/'], ['Inmuebles', '/filtros'], [encabezado, ruta]])],
+      datosEstructurados: [
+        anuncio,
+        seoMigas([
+          ['Inicio', '/'],
+          [negocioListado === 'venta' ? 'Venta' : 'Arriendo', this.migasListado.negocio],
+          [encabezadoListado(negocioListado, tipoListado?.plural, capitalizar(p.city)), this.migasListado.ciudad],
+          [encabezado, ruta],
+        ]),
+      ],
     });
   }
 
@@ -572,38 +592,6 @@ export class VerPropiedadComponent implements OnInit {
     );
   }
 
-
-  enviarFiltrosMigajas(tipo: string, value: string) {
-    this.filtrosSeleccionados = new Map();
-
-    this.filtrosSeleccionados.set(tipo, String(value));
-
-    const filtrosObj = Object.fromEntries(this.filtrosSeleccionados);
-
-    const obj = {
-      ...filtrosObj,
-      sort: 'desc',
-      order: 'consignation_date',
-      page: 1,
-    };
-
-    console.log(obj);
-
-    this.inmueblesService.getFiltrosEnviar(obj, this.elementsPerPage).subscribe(
-      (response: any) => {
-        this.router.navigate(['/filtros'], {
-          state: {
-            resultados: response.data,
-            paginacion: response,
-            filtros: obj,
-          },
-        });
-      },
-      (error: any) => {
-        console.error('Error al enviar los filtros:', error);
-      }
-    );
-  }
 
   selectImage(index: number) {
     this.selectedIndex = index;

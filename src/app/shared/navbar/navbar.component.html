@@ -25,10 +25,10 @@
     <div class="hidden md:block">
       <ul class="flex flex-col md:flex-row md:space-x-8 font-medium text-white items-center">
         <li>
-          <a (click)="enviarFiltroVenta()" class="cursor-pointer hover:text-gray-300 block py-2">Venta</a>
+          <a routerLink="/venta" class="cursor-pointer hover:text-gray-300 block py-2">Venta</a>
         </li>
         <li class="relative group">
-          <a (click)="enviarFiltroArriendo('otro')" class="cursor-pointer hover:text-gray-300 block py-2">Arriendo</a>
+          <a routerLink="/arriendo" class="cursor-pointer hover:text-gray-300 block py-2">Arriendo</a>
 
           <!-- Submenú -->
           <ul
@@ -62,13 +62,13 @@
             class="absolute top-full left-0 mt-2 bg-white text-black rounded shadow-lg z-50 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
             <li>
               <a class="cursor-pointer flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
-                (click)="navigateTo('quienes-somos')">
+                routerLink="/quienes-somos">
                 <i class="fas fa-building" style="color: #CDAD60 !important;"></i> Quiénes Somos
               </a>
             </li>
             <li>
               <a class="cursor-pointer flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
-                (click)="navigateTo('nuestro-equipo')">
+                routerLink="/nuestro-equipo">
                 <i class="fas fa-users" style="color: #CDAD60 !important;"></i> Expertos
               </a>
             </li>
@@ -102,14 +102,14 @@
           </ul>
         </li>
         <li>
-          <button type="button" (click)="redirectTo('publicar-inmueble')"
-            class="text-[#CDAD60] bg-transparent hover:text-white hover:bg-[#CDAD60] border border-[#CDAD60] focus:ring-4 focus:outline-none focus:ring-[#CDAD60] font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 transition-colors duration-300">
+          <a routerLink="/publicar-inmueble"
+            class="inline-block text-[#CDAD60] bg-transparent hover:text-white hover:bg-[#CDAD60] border border-[#CDAD60] focus:ring-4 focus:outline-none focus:ring-[#CDAD60] font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 transition-colors duration-300">
             Publica tu propiedad
-          </button>
+          </a>
         </li>
 
         <li>
-          <a class="cursor-pointer hover:text-gray-300 block py-2" (click)="redirectTo('contacto')">Contáctanos</a>
+          <a class="cursor-pointer hover:text-gray-300 block py-2" routerLink="/contacto">Contáctanos</a>
         </li>
         <li class="hidden md:block ml-4 relative group">
 
@@ -154,7 +154,7 @@
     <div *ngIf="isMobileMenuOpen" class="md:hidden w-full bg-[#060F29] mt-4 rounded-lg shadow-lg">
       <ul class="flex flex-col space-y-2 p-4 font-medium text-white">
         <li>
-          <a (click)="enviarFiltroVenta()" class="hover:text-gray-300 block py-2">Venta</a>
+          <a routerLink="/venta" (click)="toggleMobileMenu()" class="hover:text-gray-300 block py-2">Venta</a>
         </li>
 
         <li>
@@ -169,6 +169,12 @@
 
           <!-- Submenú desplegable de Arriendo -->
           <ul *ngIf="showArriendosDropdown" class="pl-4 mt-2 space-y-1 text-sm">
+            <li>
+              <a class="block py-1 hover:text-gray-300 cursor-pointer" routerLink="/arriendo"
+                (click)="toggleMobileMenu()">
+                <i class="fas fa-list-ul"></i> Todos
+              </a>
+            </li>
             <li>
               <a class="block py-1 hover:text-gray-300 cursor-pointer" (click)="enviarFiltroArriendo('diamante')">
                 <i class="fas fa-gem text-blue-500"></i> Diamante
@@ -200,13 +206,13 @@
           <!-- Submenú desplegable de Nosotros -->
           <ul *ngIf="showNosotrosDropdown" class="pl-4 mt-2 space-y-1 text-sm nosotros-menu">
             <li>
-              <a href="/quienes-somos" class="block py-1" (click)="toggleMobileMenu()">
+              <a routerLink="/quienes-somos" class="block py-1" (click)="toggleMobileMenu()">
                 <i class="fas fa-building"></i> Quiénes Somos
               </a>
 
             </li>
             <li>
-              <a href="/nuestro-equipo" class="block py-1 hover:text-gray-300" (click)="toggleMobileMenu()">
+              <a routerLink="/nuestro-equipo" class="block py-1 hover:text-gray-300" (click)="toggleMobileMenu()">
                 <i class="fas fa-users"></i> Expertos
               </a>
             </li>
@@ -247,14 +253,14 @@
         </li>
 
         <li>
-          <button type="button" (click)="redirectTo('publicar-inmueble')"
-            class="text-[#CDAD60] bg-transparent hover:text-white hover:bg-[#CDAD60] border border-[#CDAD60] focus:ring-4 focus:outline-none focus:ring-[#CDAD60] font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 transition-colors duration-300">
+          <a routerLink="/publicar-inmueble"
+            class="inline-block text-[#CDAD60] bg-transparent hover:text-white hover:bg-[#CDAD60] border border-[#CDAD60] focus:ring-4 focus:outline-none focus:ring-[#CDAD60] font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 transition-colors duration-300">
             Publica tu propiedad
-          </button>
+          </a>
         </li>
 
         <li>
-          <a (click)="redirectTo('contacto')" class="hover:text-gray-300 block py-2">Contáctanos</a>
+          <a routerLink="/contacto" class="hover:text-gray-300 block py-2">Contáctanos</a>
         </li>
       </ul>
     </div>

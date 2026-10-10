@@ -41,7 +41,6 @@ export class NavbarComponent implements OnInit {
   @Input() alwaysScrolled = false;
   isMobileMenuOpen: boolean = false;
 
-  filtrosInmueblesVenta: Map<string, any> = new Map();
   filtrosInmueblesArriendo: Map<string, any> = new Map();
   filtrosInmueblesDestacados: Map<string, any> = new Map();
 
@@ -73,10 +72,6 @@ export class NavbarComponent implements OnInit {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;
   }
 
-  redirectTo(url: string): void {
-    this._router.navigate([url]);
-  }
-
   toggleNosotrosDropdown(event: MouseEvent) {
     event.preventDefault();
     this.showNosotrosDropdown = !this.showNosotrosDropdown;
@@ -95,55 +90,6 @@ export class NavbarComponent implements OnInit {
   toggleDestacadosDropdown(event: MouseEvent) {
     event.preventDefault();
     this.showDestacadosDropdown = !this.showDestacadosDropdown;
-  }
-
-  closeDropdown() {
-    this.showNosotrosDropdown = false;
-  }
-
-  navigateTo(route: string) {
-    this._router.navigate([route]);
-    this.closeDropdown();
-  }
-
-  enviarFiltroVenta() {
-    this.filtrosInmueblesVenta.clear();
-    this.filtrosInmueblesVenta.set('biz', '2');
-
-    const filtrosObj = Object.fromEntries(this.filtrosInmueblesVenta);
-    const obj = {
-      ...filtrosObj,
-      page: 1,
-    };
-    this.inmueblesService.getFiltrosEnviar(obj, this.elementsPerPage).subscribe(
-      (response: any) => {
-        this._router
-          .navigateByUrl('/', { skipLocationChange: true })
-          .then(() => {
-            this._router.navigate(['/filtros'], {
-              state: {
-                resultados: response.data,
-                paginacion: response,
-                filtros: obj,
-              },
-            });
-          });
-
-           var data = {
-          "url": "",
-          "state": {
-            resultados: response.data,
-            paginacion: response,
-            filtros: obj,
-          },
-        }
-
-        this.urlParamService.guardarParamLocalStorage('data', JSON.stringify(data));
-      },
-      (error: any) => {
-        console.error('Error al enviar los filtros:', error);
-      }
-    );
   }
 
   enviarFiltroArriendo(tipo: string) {

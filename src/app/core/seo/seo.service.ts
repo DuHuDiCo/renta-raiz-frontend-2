@@ -6,7 +6,10 @@ import { ESTADO_HTTP } from './estado-http';
 export interface DatosSeo {
   titulo: string;
   descripcion: string;
-  /** Ruta de la página sin dominio ni parámetros, por ejemplo '/quienes-somos'. Se usa para el canonical. */
+  /**
+   * Ruta de la página sin dominio, por ejemplo '/quienes-somos'. Se usa para el canonical, así que solo lleva
+   * parámetros cuando cambian el contenido (la paginación de un listado: '/arriendo?page=2').
+   */
   ruta: string;
   /** URL absoluta de la imagen para redes sociales. Si no se envía se usa la imagen general del portal. */
   imagen?: string;

@@ -18,6 +18,7 @@ import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 
 import { log } from 'console';
 import { TipoPropiedadEnum } from '../../core/enums/TipoPropiedadEnum';
+import { BIZ_DE_NEGOCIO, Negocio, segmentosListado, slugListado, tipoPorCodigo } from '../../core/listados/listados';
 
 @Component({
   selector: 'app-barra-filtros',
@@ -420,8 +421,39 @@ export class BarraFiltrosComponent {
     this.filtrosSeleccionados.set('isManualSelection', 'true');
   }
 
+  /**
+   * Si la búsqueda solo usa negocio, tipo, ciudad y barrio, devuelve la ruta del listado con URL propia
+   * (/arriendo/apartamentos/medellin). Con cualquier otro filtro devuelve null y se usa /filtros.
+   */
+  private rutaDeListado(): string[] | null {
+    const filtros = new Map([...this.filtrosSeleccionados].filter(([, valor]) => valor !== undefined && valor !== null && valor !== ''));
+    const claves = ['biz', 'type', 'city', 'neighborhood_code'];
+    if ([...filtros.keys()].some((clave) => !claves.includes(clave))) return null;
+
+    const negocio = (Object.keys(BIZ_DE_NEGOCIO) as Negocio[]).find((n) => BIZ_DE_NEGOCIO[n] === String(filtros.get('biz')));
+    if (!negocio) return null;
+
+    const tipo = filtros.has('type') ? tipoPorCodigo(filtros.get('type')) : undefined;
+    if (filtros.has('type') && !tipo) return null;
+
+    const ciudad = this.ciudades.find((c) => String(c.code) === String(filtros.get('city')));
+    if (filtros.has('city') && !ciudad) return null;
+
+    const barrio = this.barrios.data.find((b) => String(b.code) === String(filtros.get('neighborhood_code')));
+    if (filtros.has('neighborhood_code') && (!barrio || !ciudad)) return null;
+
+    return segmentosListado(negocio, tipo?.slug, slugListado(ciudad?.name), slugListado(barrio?.name));
+  }
+
   getEnviarFiltros() {
     this.prepararFiltros();
+
+    const rutaListado = this.rutaDeListado();
+    if (rutaListado) {
+      this.cargando = false;
+      this.router.navigate(rutaListado);
+      return;
+    }
 
     const filtrosObj = Object.fromEntries(this.filtrosSeleccionados);
     const obj = {

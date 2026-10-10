@@ -81,6 +81,8 @@ export class PortafolioAsesoresComponent implements OnInit {
       titulo: `Portafolio de inmuebles de ${nombre}${SEO_SUFIJO}`,
       descripcion: `Inmuebles en arriendo y venta en Medellín y el Valle de Aburrá del portafolio de ${nombre}${asesor?.cargo ? `, ${asesor.cargo} de Renta Raíz` : ''}.`,
       ruta: `/portafolio/${this.asesorId}`,
+      // Un asesor que no está en la lista del equipo no tiene página propia que posicionar.
+      noindex: !asesor,
       datosEstructurados: [
         seoMigas([['Inicio', '/'], ['Nuestro equipo', '/nuestro-equipo'], [`Portafolio de ${nombre}`, `/portafolio/${this.asesorId}`]]),
       ],

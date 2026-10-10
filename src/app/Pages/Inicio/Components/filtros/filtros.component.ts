@@ -25,6 +25,10 @@ import { WishlistServiceService } from '../../../../core/wishlist/wishlist-servi
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
 import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wishlist.component';
 import { BotonesFlotantesComponent } from '../../../../shared/botones-flotantes/botones-flotantes.component';
+import { EnlacesListadosComponent } from '../../../../shared/enlaces-listados/enlaces-listados.component';
+import { DatosListado } from '../../../../core/resolvers/listado.resolver';
+import { BIZ_DE_NEGOCIO, MINIMO_BARRIO, Negocio, encabezadoListado, rutaListado, slugListado } from '../../../../core/listados/listados';
+import { SEO_DOMINIO, SEO_POR_DEFECTO, SEO_SUFIJO, seoMigas, SeoService } from '../../../../core/seo/seo.service';
 
 @Component({
   selector: 'app-filtros',
@@ -41,7 +45,8 @@ import { BotonesFlotantesComponent } from '../../../../shared/botones-flotantes/
     MatInputModule,
     ModalWishlistComponent,
     OffcanvasWishlistComponent,
-    BotonesFlotantesComponent
+    BotonesFlotantesComponent,
+    EnlacesListadosComponent,
   ],
   templateUrl: './filtros.component.html',
   styleUrl: './filtros.component.scss',
@@ -180,6 +185,16 @@ export class FiltrosComponent implements OnInit {
   activatedRoute = inject(ActivatedRoute);
   urlParamService = inject(UrlParamService);
   favService = inject(WishlistServiceService);
+  seo = inject(SeoService);
+
+  /** Listado con URL propia que se está mostrando. Pasa a null cuando el usuario aplica filtros desde el panel. */
+  listado: DatosListado | null = null;
+  /** Encabezado principal (h1) del listado; es el mismo texto del título SEO. */
+  tituloListado = '';
+  /** Ruta de navegación del listado. Cada elemento es [nombre, ruta]. */
+  migasListado: [string, string][] = [];
+  /** Páginas enlazadas en el paginador del listado; null representa un salto ("..."). */
+  paginasListado: (number | null)[] = [];
   
 
   mostrarMapa = false;
@@ -225,6 +240,14 @@ export class FiltrosComponent implements OnInit {
     this.filteredMax = this.initAutoComplete(this.precioMaximoCtrl);
     this.filteredVentaMin = this.initAutoComplete(this.precioVentaMinimoCtrl);
     this.filteredVentaMax = this.initAutoComplete(this.precioVentaMaximoCtrl);
+
+    // Listados con URL propia (/arriendo/apartamentos/medellin): el resolver ya trae los resultados.
+    if (this.activatedRoute.snapshot.data['listado']) {
+      await this.getDatos();
+      this.isDrawerOpen = this.isDesktopView;
+      this.activatedRoute.data.subscribe((data) => this.cargarListado(data['listado']));
+      return;
+    }
 
     if (typeof window !== 'undefined') window.scrollTo(0, 0);
     const state = this.estadoHistorial();
@@ -394,9 +417,10 @@ export class FiltrosComponent implements OnInit {
     const biz = queryParams['biz'];
     const elementsPerPage = queryParams['elementsPerPage'];
 
-    if (biz && elementsPerPage) {
+    // elementsPerPage es opcional: sin él la página mostraba el inventario completo ignorando biz y city.
+    if (biz) {
       this.filtrosSeleccionados.set('biz', biz);
-      this.filtrosSeleccionados.set('elementsPerPage', elementsPerPage);
+      if (elementsPerPage) this.filtrosSeleccionados.set('elementsPerPage', elementsPerPage);
 
       const city = queryParams['city'];
       if (city) {
@@ -407,6 +431,8 @@ export class FiltrosComponent implements OnInit {
       if (barrio) {
         this.filtrosSeleccionados.set('neighborhood_code', barrio);
       }
+
+      this.apuntarAListado(String(biz), city, barrio);
 
 
 
@@ -491,9 +517,103 @@ export class FiltrosComponent implements OnInit {
         }
       });
     } else {
-      // En SSR no hay history.state: no se redirige para no servir el inicio bajo la URL /filtros.
-      if (typeof window !== 'undefined') this.router.navigate(['']);
+      // Sin búsqueda previa (entrada directa o SSR) se muestra el inventario completo.
+      this.enviarFiltros(1, false);
     }
+  }
+
+  /** Parámetros de la URL que usa la búsqueda antigua (?biz=, ?tipo=). En un listado con URL propia no aplican. */
+  private parametrosUrl(): any {
+    return this.activatedRoute.snapshot.data['listado'] ? {} : this.activatedRoute.snapshot.queryParams;
+  }
+
+  /**
+   * La búsqueda antigua (?biz=&city=&neighborhood_code=) muestra lo mismo que un listado con URL propia,
+   * así que declara ese listado como su dirección canónica.
+   */
+  private apuntarAListado(biz: string, codigoCiudad?: string, codigoBarrio?: string) {
+    const negocio = (Object.keys(BIZ_DE_NEGOCIO) as Negocio[]).find((n) => BIZ_DE_NEGOCIO[n] === biz);
+    if (!negocio) return;
+
+    forkJoin([this.inmueblesService.getCiudades(), this.inmueblesService.getBarrios()]).subscribe({
+      next: ([ciudades, barrios]: any[]) => {
+        const ciudad = (ciudades?.data || []).find((c: any) => String(c.code) === String(codigoCiudad));
+        if (codigoCiudad && !ciudad) return;
+        const barrio = (barrios?.data || []).find(
+          (b: any) => String(b.code) === String(codigoBarrio) && String(b.city_code) === String(codigoCiudad)
+        );
+        if (codigoBarrio && !barrio) return;
+
+        this.seo.actualizar({
+          ...SEO_POR_DEFECTO,
+          ...this.activatedRoute.snapshot.data['seo'],
+          ruta: rutaListado(negocio, undefined, slugListado(ciudad?.name), slugListado(barrio?.name)),
+        });
+      },
+      // Sin catálogos se queda el canonical general de /filtros.
+      error: () => {},
+    });
+  }
+
+  private cargarListado(listado: DatosListado) {
+    if (typeof window !== 'undefined') window.scrollTo(0, 0);
+
+    this.listado = listado;
+    this.loadingResultados = false;
+    this.filtrosSeleccionados.clear();
+    this.selectedEstates = [];
+    this.searchTerm = this.ubicacion = [listado.ciudad?.nombre, listado.barrio?.nombre].filter(Boolean).join(', ');
+    this.bloqueActual = Math.floor((listado.pagina - 1) / 3);
+
+    this.cargarDesdeState({
+      resultados: listado.respuesta.data || [],
+      paginacion: listado.respuesta,
+      filtros: listado.filtros,
+    });
+
+    const ultima = Number(listado.respuesta.last_page) || 1;
+    const visibles = [...new Set([1, listado.pagina - 1, listado.pagina, listado.pagina + 1, ultima])]
+      .filter((pagina) => pagina >= 1 && pagina <= ultima)
+      .sort((a, b) => a - b);
+    this.paginasListado = visibles.flatMap((pagina, i) => (i > 0 && pagina - visibles[i - 1] > 1 ? [null, pagina] : [pagina]));
+
+    this.actualizarSeoListado(listado);
+  }
+
+  /** Título, descripción, canonical y datos estructurados del listado. */
+  private actualizarSeoListado(listado: DatosListado) {
+    const { negocio, tipo, ciudad, barrio, pagina } = listado;
+    const total = Number(listado.respuesta.total) || 0;
+
+    this.tituloListado = encabezadoListado(negocio, tipo?.plural, ciudad?.nombre, barrio?.nombre);
+    this.migasListado = [[negocio === 'venta' ? 'Venta' : 'Arriendo', rutaListado(negocio)]];
+    if (tipo) this.migasListado.push([tipo.plural, rutaListado(negocio, tipo.slug)]);
+    if (ciudad) this.migasListado.push([ciudad.nombre, rutaListado(negocio, tipo?.slug, ciudad.slug)]);
+    if (barrio) this.migasListado.push([barrio.nombre, listado.ruta]);
+
+    const zona = ciudad ? '' : ' en Medellín, el Valle de Aburrá y el Oriente antioqueño';
+    const disponibles = total === 1 ? '1 inmueble disponible' : `${total} inmuebles disponibles`;
+
+    this.seo.actualizar({
+      titulo: `${this.tituloListado}${pagina > 1 ? ` - Página ${pagina}` : ''}${SEO_SUFIJO}`,
+      descripcion: `${this.tituloListado}${zona}: ${disponibles} con Renta Raíz. Fotos, precios y asesoría experta.`,
+      ruta: `${listado.ruta}${pagina > 1 ? `?page=${pagina}` : ''}`,
+      // Un listado vacío o un barrio con muy pocos inmuebles no aporta nada en buscadores.
+      noindex: total === 0 || (!!barrio && total < MINIMO_BARRIO),
+      datosEstructurados: [
+        {
+          '@type': 'ItemList',
+          name: this.tituloListado,
+          numberOfItems: total,
+          itemListElement: (listado.respuesta.data || []).map((inmueble: any, i: number) => ({
+            '@type': 'ListItem',
+            position: (pagina - 1) * this.elementsPerPage + i + 1,
+            url: `${SEO_DOMINIO}/ver-propiedad/${inmueble.codpro}/0`,
+          })),
+        },
+        seoMigas([['Inicio', '/'], ...this.migasListado]),
+      ],
+    });
   }
 
   @HostListener('window:resize', ['$event'])
@@ -682,7 +802,7 @@ export class FiltrosComponent implements OnInit {
         this.generarPaginas();
       }
 
-      var queryParams = this.activatedRoute.snapshot.queryParams;
+      var queryParams = this.parametrosUrl();
       const state = this.estadoHistorial();
       console.log(state)
 
@@ -718,7 +838,7 @@ export class FiltrosComponent implements OnInit {
   paginaSiguiente() {
     if (this.paginaActual < this.totalPaginas) {
       const nuevaPagina = this.paginaActual + 1;
-      var queryParams = this.activatedRoute.snapshot.queryParams;
+      var queryParams = this.parametrosUrl();
       const state = this.estadoHistorial();
 
       if (Object.keys(queryParams).length >= 1) {
@@ -970,6 +1090,8 @@ export class FiltrosComponent implements OnInit {
   }
 
   enviarFiltros(pagina: number, prepararFiltros: boolean = true) {
+    // Los resultados dejan de corresponder a la URL del listado.
+    this.listado = null;
     this.filtrosSeleccionados = new Map();
     this.cargando = true;
     this.loadingResultados = true;
@@ -1061,6 +1183,7 @@ export class FiltrosComponent implements OnInit {
           texto
             ?.normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s*,\s*/g, ',')
             .trim()
             .toLowerCase() || ''
         );
@@ -1213,6 +1336,7 @@ export class FiltrosComponent implements OnInit {
   }
 
   enviarFiltrosSelect() {
+    this.listado = null;
     this.prepararFiltros();
 
     const opcion = this.formFiltrosSelect.value.opcion;

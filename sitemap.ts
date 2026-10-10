@@ -1,5 +1,6 @@
 import * as CryptoJS from 'crypto-js';
 import { DataasesoresService } from './src/app/core/dataAsesores/dataasesores.service';
+import { IndiceListados, calcularIndiceListados, enlacesDeIndice } from './src/app/core/listados/listados';
 import { SEO_DOMINIO } from './src/app/core/seo/seo.service';
 import { Login, environment } from './src/environments/environment';
 
@@ -36,6 +37,7 @@ interface EntradaSitemap {
 }
 
 let cache: { xml: string; timestamp: number } | null = null;
+let indiceListados: IndiceListados | null = null;
 let enCurso: Promise<string> | null = null;
 
 function tokenApi(): string {
@@ -55,9 +57,17 @@ async function pedirPagina(pagina: number, token: string): Promise<any> {
   return respuesta.json();
 }
 
+async function pedirCatalogo(nombre: 'ciudades' | 'barrios', token: string): Promise<any[]> {
+  const respuesta = await fetch(`${environment.baseUrl}/properties/${nombre}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(30000),
+  });
+  if (!respuesta.ok) throw new Error(`La API respondió ${respuesta.status} al pedir ${nombre}`);
+  return (await respuesta.json()).data || [];
+}
+
 /** Recorre todas las páginas del inventario. Si una falla se lanza el error: no se publica un sitemap parcial. */
-async function obtenerInmuebles(): Promise<EntradaSitemap[]> {
-  const token = tokenApi();
+async function obtenerInmuebles(token: string): Promise<any[]> {
   const primera = await pedirPagina(1, token);
   const totalPaginas = Math.min(Number(primera.last_page) || 1, MAXIMO_PAGINAS);
   const paginas: any[] = [primera];
@@ -71,17 +81,13 @@ async function obtenerInmuebles(): Promise<EntradaSitemap[]> {
   }
 
   const vistos = new Set<number>();
-  const inmuebles: EntradaSitemap[] = [];
+  const inmuebles: any[] = [];
   for (const pagina of paginas) {
     for (const inmueble of pagina.data || []) {
       const codigo = Number(inmueble.codpro);
       if (!Number.isInteger(codigo) || codigo <= 0 || vistos.has(codigo)) continue;
       vistos.add(codigo);
-      const fecha = String(inmueble.registry_date || '').slice(0, 10);
-      inmuebles.push({
-        ruta: `/ver-propiedad/${codigo}/0`,
-        modificado: /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : undefined,
-      });
+      inmuebles.push(inmueble);
     }
   }
   if (!inmuebles.length) throw new Error('La API no devolvió inmuebles');
@@ -89,14 +95,32 @@ async function obtenerInmuebles(): Promise<EntradaSitemap[]> {
 }
 
 async function generarSitemap(): Promise<string> {
-  const inmuebles = await obtenerInmuebles();
+  const token = tokenApi();
+  const [inventario, ciudades, barrios] = await Promise.all([
+    obtenerInmuebles(token),
+    pedirCatalogo('ciudades', token),
+    pedirCatalogo('barrios', token),
+  ]);
+
+  const inmuebles: EntradaSitemap[] = inventario.map((inmueble) => {
+    const fecha = String(inmueble.registry_date || '').slice(0, 10);
+    return {
+      ruta: `/ver-propiedad/${Number(inmueble.codpro)}/0`,
+      modificado: /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : undefined,
+    };
+  });
+
+  // Listados con URL propia (/arriendo/apartamentos/medellin) que tienen inmuebles ahora mismo.
+  const indice = calcularIndiceListados(inventario, ciudades, barrios);
+  indiceListados = indice;
+  const listados = enlacesDeIndice(indice).map((enlace) => enlace.ruta);
   const portafolios = new DataasesoresService()
     .getAsesores()
     .filter((asesor) => asesor.id)
     .map((asesor) => `/portafolio/${asesor.id}`);
 
   const entradas: EntradaSitemap[] = [
-    ...[...RUTAS_FIJAS, ...ARTICULOS_BLOG.map((id) => `/ver-blog/${id}`), ...portafolios].map((ruta) => ({ ruta })),
+    ...[...RUTAS_FIJAS, ...listados, ...ARTICULOS_BLOG.map((id) => `/ver-blog/${id}`), ...portafolios].map((ruta) => ({ ruta })),
     ...inmuebles,
   ];
 
@@ -130,6 +154,11 @@ function regenerar(): Promise<string | null> {
  * Si ya hay una versión, se responde con ella al instante y se actualiza en segundo plano; así una API lenta
  * o caída nunca deja a los buscadores esperando. Solo devuelve null si todavía no se pudo generar ninguna.
  */
+/** Listados con inmuebles según la última generación del sitemap; null si todavía no se ha generado ninguna. */
+export function obtenerIndiceListados(): IndiceListados | null {
+  return indiceListados;
+}
+
 export async function obtenerSitemap(): Promise<string | null> {
   if (!cache) return regenerar();
   if (Date.now() - cache.timestamp >= SITEMAP_TTL_MS) void regenerar();

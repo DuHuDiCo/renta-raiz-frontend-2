@@ -18,6 +18,7 @@ import { NavbarComponent } from '../../../../shared/navbar/navbar.component';
 import { InmueblesService } from '../../../../core/Inmuebles/inmuebles.service';
 import { Router, RouterLink } from '@angular/router';
 import { FooterComponent } from '../../../../shared/footer/footer.component';
+import { EnlacesListadosComponent } from '../../../../shared/enlaces-listados/enlaces-listados.component';
 import { BotonesFlotantesComponent } from '../../../../shared/botones-flotantes/botones-flotantes.component';
 import { BarraFiltrosComponent } from '../../../../shared/barra-filtros/barra-filtros.component';
 import { BehaviorSubject, of } from 'rxjs';
@@ -37,6 +38,7 @@ declare const Carousel: any;
     FormsModule,
     NavbarComponent,
     FooterComponent,
+    EnlacesListadosComponent,
     BotonesFlotantesComponent,
     BarraFiltrosComponent,
     OffcanvasWishlistComponent,

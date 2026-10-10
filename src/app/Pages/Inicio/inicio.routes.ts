@@ -18,6 +18,8 @@ import { blogsResolver } from '../../core/resolvers/blogs.resolver';
 import { PoliticaAcosoComponent } from './Components/politica-acoso/politica-acoso.component';
 import { PortafolioAsesoresComponent } from './Components/portafolio-asesores/portafolio-asesores.component';
 import { PrioritariosComponent } from '../Prioritarios/Components/prioritarios/prioritarios.component';
+import { listadoMatcher, listadoResolver } from '../../core/resolvers/listado.resolver';
+import { asesorResolver } from '../../core/resolvers/asesor.resolver';
 
 export const routes: Routes = [
 
@@ -50,15 +52,13 @@ export const routes: Routes = [
         },
       },
       {
-        path: 'filtros/:tipo',
+        // Listados con URL propia: /arriendo, /venta/casas, /arriendo/apartamentos/medellin/el-poblado
+        matcher: listadoMatcher,
         component: FiltrosComponent,
-        data: {
-          seo: {
-            titulo: 'Inmuebles en arriendo y venta en Medellín y Envigado | Renta Raíz',
-            descripcion:
-              'Busca inmuebles en arriendo y venta en Medellín, Envigado, Sabaneta, Itagüí y Rionegro: filtra por ciudad, barrio, tipo y precio con Renta Raíz.',
-          },
-        },
+        // El componente arma el SEO con los datos que carga.
+        data: { seoDinamico: true },
+        resolve: { listado: listadoResolver },
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
       },
       {
         path: 'contacto',
@@ -200,6 +200,7 @@ export const routes: Routes = [
         component: PortafolioAsesoresComponent,
         // El componente arma el SEO con los datos que carga.
         data: { seoDinamico: true },
+        resolve: { asesor: asesorResolver },
       }
       ,
       {

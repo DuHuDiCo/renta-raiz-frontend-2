@@ -6,7 +6,8 @@ import { dirname, join, resolve } from 'node:path';
 import bootstrap from './src/main.server';
 import compression from 'compression';
 import { ESTADO_HTTP, EstadoHttp } from './src/app/core/seo/estado-http';
-import { obtenerSitemap } from './sitemap';
+import { INDICE_LISTADOS } from './src/app/core/listados/indice-listados';
+import { obtenerIndiceListados, obtenerSitemap } from './sitemap';
 
 // Configuración básica de caché
 const CACHE_SIZE_LIMIT = 100; // Solo guardar las últimas 100 páginas
@@ -106,6 +107,7 @@ export function app(): express.Express {
         providers: [
           { provide: APP_BASE_HREF, useValue: baseUrl },
           { provide: ESTADO_HTTP, useValue: estadoHttp },
+          { provide: INDICE_LISTADOS, useValue: obtenerIndiceListados() },
         ],
       });
 
