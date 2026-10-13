@@ -16,10 +16,24 @@ export interface DatosSeo {
   /** true para páginas que no deben aparecer en buscadores. */
   noindex?: boolean;
   tipo?: 'website' | 'article';
-  /** Imagen principal de la página (la que se ve al abrir). Se precarga para que aparezca antes. */
-  precarga?: string;
+  /**
+   * Imagen principal de la página (la que se ve al abrir). Se precarga para que aparezca antes.
+   * Una lista cuando la imagen tiene varias versiones según el dispositivo.
+   */
+  precarga?: string | PrecargaImagen[];
   /** Bloques schema.org (JSON-LD) de la página. Si no se envían se elimina el bloque anterior. */
   datosEstructurados?: object[];
+}
+
+/** Una versión de la imagen principal y cuándo aplica. Debe coincidir con el `<img>` o `<source>` que la pinta. */
+export interface PrecargaImagen {
+  href: string;
+  /** Mismo valor que el atributo `srcset` del `<img>`. */
+  srcset?: string;
+  /** Mismo valor que el atributo `sizes` del `<img>`. */
+  sizes?: string;
+  /** Consulta de medios en la que se usa esta versión. */
+  media?: string;
 }
 
 export const SEO_DOMINIO = 'https://rentaraiz.co';
@@ -28,7 +42,7 @@ const IMAGEN_POR_DEFECTO = `${SEO_DOMINIO}/assets/images/vistaInicial-slider-red
 
 const ID_AGENCIA = `${SEO_DOMINIO}/#agencia`;
 const ID_JSON_LD = 'seo-json-ld';
-const ID_PRECARGA = 'seo-precarga';
+const ATRIBUTO_PRECARGA = 'data-seo-precarga';
 
 /** Referencia corta a la agencia para usarla como autor, vendedor o editor en otros bloques. */
 export const SEO_REF_AGENCIA = { '@type': 'RealEstateAgent', '@id': ID_AGENCIA, name: 'Renta Raíz' };
@@ -162,21 +176,22 @@ export class SeoService {
     link.setAttribute('href', url);
   }
 
-  private actualizarPrecarga(imagen?: string) {
-    let link = this.document.getElementById(ID_PRECARGA);
-    if (!imagen) {
-      link?.remove();
-      return;
-    }
-    if (!link) {
-      link = this.document.createElement('link');
-      link.id = ID_PRECARGA;
+  private actualizarPrecarga(precarga?: string | PrecargaImagen[]) {
+    this.document.head.querySelectorAll(`link[${ATRIBUTO_PRECARGA}]`).forEach((link) => link.remove());
+
+    const versiones = typeof precarga === 'string' ? [{ href: precarga }] : precarga || [];
+    for (const version of versiones) {
+      const link = this.document.createElement('link');
+      link.setAttribute(ATRIBUTO_PRECARGA, '');
       link.setAttribute('rel', 'preload');
       link.setAttribute('as', 'image');
       link.setAttribute('fetchpriority', 'high');
+      link.setAttribute('href', version.href);
+      if (version.srcset) link.setAttribute('imagesrcset', version.srcset);
+      if (version.sizes) link.setAttribute('imagesizes', version.sizes);
+      if (version.media) link.setAttribute('media', version.media);
       this.document.head.appendChild(link);
     }
-    link.setAttribute('href', imagen);
   }
 
   private actualizarDatosEstructurados(bloques?: object[]) {

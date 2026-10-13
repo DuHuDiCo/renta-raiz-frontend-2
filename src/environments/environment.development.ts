@@ -6,7 +6,7 @@ export const environment = {
   baseUrl: 'https://portalrenta.duckdns.org/api/v1',
   baserUrlTest: 'https://rentaraizbackend.duckdns.org/api/v1',
   /** Chat del asistente con respuestas de prueba, sin llamar al backend. */
-  asistenteMock: true,
+  asistenteMock: false,
 };
 
 export const conexionVault = {

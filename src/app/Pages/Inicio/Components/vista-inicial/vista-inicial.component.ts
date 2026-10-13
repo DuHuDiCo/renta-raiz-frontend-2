@@ -18,6 +18,7 @@ import { NavbarComponent } from '../../../../shared/navbar/navbar.component';
 import { InmueblesService } from '../../../../core/Inmuebles/inmuebles.service';
 import { Router, RouterLink } from '@angular/router';
 import { FooterComponent } from '../../../../shared/footer/footer.component';
+import { SLIDER_INICIO, SLIDER_MEDIA_MOVIL, SLIDER_SIZES } from './slider-inicio';
 import { EnlacesListadosComponent } from '../../../../shared/enlaces-listados/enlaces-listados.component';
 import { BotonesFlotantesComponent } from '../../../../shared/botones-flotantes/botones-flotantes.component';
 import { BarraFiltrosComponent } from '../../../../shared/barra-filtros/barra-filtros.component';
@@ -82,11 +83,9 @@ export class VistaInicialComponent implements OnInit {
     'assets/images/Unifianza.png',
   ];
 
-  sliderFotos: string[] = [
-    'assets/images/vistaInicial-slider-1.webp',
-    'assets/images/vistaInicial-slider-2.webp',
-    'assets/images/vistaInicial-slider-3.webp',
-  ];
+  sliderFotos = SLIDER_INICIO;
+  readonly sliderMediaMovil = SLIDER_MEDIA_MOVIL;
+  readonly sliderSizes = SLIDER_SIZES;
 
   cargando = false;
   isLoading = true;

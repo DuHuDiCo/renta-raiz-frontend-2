@@ -4,19 +4,24 @@
 <div class="flex flex-col">
   <div class="banner-contacto w-full max-h-[60vh] overflow-hidden" data-carousel="slide" data-carousel-interval="5000">
     <div class="relative w-full h-[40vh] md:h-[60vh]">
-      <div *ngFor="let imagen of sliderFotos; let i = index"
+      <div *ngFor="let foto of sliderFotos; let i = index"
         class="absolute top-0 left-0 w-full h-full transition-opacity duration-700"
         [attr.data-carousel-item]="i === 0 ? 'active' : ''">
-        <img [attr.fetchpriority]="i === 0 ? 'high' : 'low'" [src]="imagen" class="w-full h-full object-cover" alt="Slide {{ i + 1 }}" />
+        <picture>
+          <source [attr.media]="sliderMediaMovil" [attr.srcset]="foto.movil" />
+          <img [attr.fetchpriority]="i === 0 ? 'high' : 'low'" [attr.srcset]="foto.srcset" [attr.sizes]="sliderSizes"
+            [src]="foto.base" class="w-full h-full object-cover" [alt]="foto.alt" />
+        </picture>
       </div>
 
       <div class="absolute inset-0 z-30 bg-black/50 flex items-center justify-center">
-        <img src="assets/images/TextoSlider-vistaInicial.png"
-          class="hidden lg:block w-[100%] md:w-[60%] lg:w-[70%] xl:w-[60%] 2xl:w-[50%] h-auto object-contain -translate-y-6 md:-translate-y-4 xl:-translate-y-2"
-          alt="Texto Escritorio" />
-        <img src="assets/images/HOME-MOVIL.png"
-          class="block lg:hidden w-[100%] h-auto object-contain -translate-y-[-30px] md:w-[85%] sm:w-[70%] xs:w-[70%]"
-          alt="Texto Mobile y Tablet" />
+        <!-- Un solo <img>: cada dispositivo descarga únicamente su versión del texto (antes bajaban las dos). -->
+        <picture class="contents">
+          <source media="(min-width: 1024px)" srcset="assets/images/TextoSlider-vistaInicial.png" />
+          <img src="assets/images/HOME-MOVIL.webp"
+            class="w-full sm:w-[70%] md:w-[85%] lg:w-[70%] xl:w-[60%] 2xl:w-[50%] h-auto object-contain translate-y-[30px] lg:-translate-y-4 xl:-translate-y-2"
+            alt="Lo que sueñas, lo encuentras aquí. En el portal inmobiliario de Renta Raíz, expertos en propiedades de lujo." />
+        </picture>
       </div>
     </div>
   </div>

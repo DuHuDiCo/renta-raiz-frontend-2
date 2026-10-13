@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { VistaInicialComponent } from './Components/vista-inicial/vista-inicial.component';
+import { SLIDER_PRECARGA } from './Components/vista-inicial/slider-inicio';
 
 import { FiltrosComponent } from './Components/filtros/filtros.component';
 import { ContactanosComponent } from './Components/contactanos/contactanos.component';
@@ -32,7 +33,7 @@ export const routes: Routes = [
         component: VistaInicialComponent,
         data: {
           seo: {
-            precarga: '/assets/images/vistaInicial-slider-1.webp',
+            precarga: SLIDER_PRECARGA,
             titulo: 'Renta Raíz | Inmobiliaria en Medellín y el Valle de Aburrá',
             descripcion:
               'Apartamentos, casas, oficinas y locales para arrendar o comprar en Medellín, Envigado, Sabaneta, Itagüí y el Oriente antioqueño. Asesoría experta.',
