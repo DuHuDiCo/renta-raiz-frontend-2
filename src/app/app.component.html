@@ -22,3 +22,8 @@
   <router-outlet></router-outlet>
   
 </main>
+
+<!-- Asistente virtual: solo en el navegador (el servidor no renderiza bloques @defer) y sin frenar la carga inicial -->
+@defer (on idle) {
+  <app-asistente-chat />
+}

@@ -1,0 +1,123 @@
+<!-- Invitación: aparece una vez por sesión del navegador si el usuario no ha abierto el chat -->
+@if (mostrarInvitacion && !abierto) {
+  <div class="fixed right-6 z-50 animar-entrada" [style.bottom.px]="margenInferior + 68">
+    <div class="relative max-w-[250px] rounded-2xl rounded-br-md bg-white px-4 py-3 text-sm text-[#080E36] shadow-xl ring-1 ring-black/5">
+      <button type="button" (click)="descartarInvitacion()" aria-label="Cerrar invitación"
+        class="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-gray-500 shadow ring-1 ring-black/5 hover:text-[#080E36]">
+        <i class="fa-solid fa-xmark text-xs"></i>
+      </button>
+      <button type="button" (click)="abrir()" class="text-left">
+        ¿Tienes alguna pregunta? <span class="font-semibold">Te ayudo 👋</span>
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Botón flotante: va encima de "Volver arriba" para no taparlo -->
+<button #botonAbrir type="button" (click)="abierto ? cerrar() : abrir()" [style.bottom.px]="margenInferior"
+  [ngClass]="{ 'max-md:hidden': abierto }"
+  class="fixed right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#080E36] text-[#CDAD60] shadow-lg ring-2 ring-[#CDAD60]/40 transition-all duration-300 hover:bg-[#CDAD60] hover:text-white"
+  [attr.aria-label]="abierto ? 'Cerrar asistente virtual' : 'Abrir asistente virtual'" [attr.aria-expanded]="abierto"
+  aria-controls="asistente-panel">
+  <i class="fa-solid text-2xl" [ngClass]="abierto ? 'fa-xmark' : 'fa-comment-dots'"></i>
+  @if (noLeidos > 0 && !abierto) {
+    <span class="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-bold text-white ring-2 ring-white">
+      {{ noLeidos }}
+    </span>
+  }
+</button>
+
+@if (abierto) {
+  <section id="asistente-panel" role="dialog" aria-modal="false" aria-labelledby="asistente-titulo"
+    [style.--asistente-bottom]="margenInferior + 68 + 'px'"
+    class="animar-panel fixed inset-0 z-[60] flex flex-col overflow-hidden bg-white shadow-2xl md:inset-auto md:bottom-[var(--asistente-bottom)] md:right-6 md:h-[min(620px,calc(100vh-180px))] md:w-[380px] md:rounded-2xl md:ring-1 md:ring-black/5">
+
+    <!-- Encabezado -->
+    <header class="flex items-center gap-3 bg-[#080E36] px-4 py-3 text-white">
+      <img src="assets/images/rentaraiz.png" alt="" class="h-10 w-10 rounded-full object-cover ring-2 ring-[#CDAD60]/60" />
+      <div class="min-w-0 flex-1">
+        <h2 id="asistente-titulo" class="truncate text-base font-semibold leading-tight">{{ nombreAsistente }}</h2>
+        <p class="flex items-center gap-1.5 text-xs text-gray-300">
+          <span class="h-2 w-2 rounded-full bg-green-400"></span> Responde al instante
+        </p>
+      </div>
+      <button type="button" (click)="nuevaConversacion()" title="Nueva conversación" aria-label="Empezar una nueva conversación"
+        class="flex h-9 w-9 items-center justify-center rounded-full text-gray-300 transition hover:bg-white/10 hover:text-white">
+        <i class="fa-solid fa-rotate-right"></i>
+      </button>
+      <button type="button" (click)="cerrar()" aria-label="Cerrar asistente virtual"
+        class="flex h-9 w-9 items-center justify-center rounded-full text-gray-300 transition hover:bg-white/10 hover:text-white">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </header>
+
+    <!-- Conversación -->
+    <div #listaMensajes role="log" aria-live="polite" aria-relevant="additions"
+      class="flex-1 space-y-3 overflow-y-auto bg-[#F5F6FA] px-4 py-4">
+      @for (mensaje of mensajes; track mensaje.id) {
+        @if (mensaje.autor === 'usuario') {
+          <div class="flex justify-end">
+            <p class="max-w-[80%] whitespace-pre-line break-words rounded-2xl rounded-br-md bg-[#080E36] px-4 py-2 text-sm text-white">{{ mensaje.texto }}</p>
+          </div>
+        } @else if (mensaje.autor === 'sistema') {
+          <div class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800" role="alert">
+            <p>{{ mensaje.texto }}</p>
+            @if (mensaje.error) {
+              <div class="mt-2 flex flex-wrap gap-2">
+                <button type="button" (click)="reintentar()"
+                  class="inline-flex items-center gap-1.5 rounded-full border border-red-300 bg-white px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-100">
+                  <i class="fa-solid fa-rotate-right"></i> Reintentar
+                </button>
+                <a [href]="whatsappRespaldo" target="_blank" rel="noopener" (click)="alContactarWhatsapp()"
+                  class="inline-flex items-center gap-1.5 rounded-full bg-[#25D366] px-3 py-1 text-xs font-semibold text-white hover:bg-[#128C7E]">
+                  <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                </a>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="flex items-end gap-2">
+            <img src="assets/images/rentaraiz.png" alt="" class="h-7 w-7 shrink-0 rounded-full object-cover" />
+            <p class="min-w-0 max-w-[85%] whitespace-pre-line break-words rounded-2xl rounded-bl-md bg-white px-4 py-2 text-sm text-gray-800 shadow-sm">{{ mensaje.texto }}</p>
+          </div>
+        }
+      }
+
+      @if (esperando) {
+        <div class="flex items-end gap-2" aria-label="El asistente está escribiendo">
+          <img src="assets/images/rentaraiz.png" alt="" class="h-7 w-7 shrink-0 rounded-full object-cover" />
+          <div class="escribiendo flex gap-1 rounded-2xl rounded-bl-md bg-white px-4 py-3 shadow-sm">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Respuestas rápidas -->
+    @if (sugerencias.length && !esperando) {
+      <div class="flex flex-wrap gap-2 border-t border-gray-100 bg-[#F5F6FA] px-4 py-2">
+        @for (sugerencia of sugerencias; track sugerencia) {
+          <button type="button" (click)="elegirSugerencia(sugerencia)"
+            class="rounded-full border border-[#080E36]/20 bg-white px-3 py-1.5 text-xs font-medium text-[#080E36] transition hover:border-[#CDAD60] hover:bg-[#CDAD60] hover:text-white">
+            {{ sugerencia }}
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Caja de texto -->
+    <div class="flex items-end gap-2 border-t border-gray-200 bg-white px-3 pb-2 pt-3">
+      <label for="asistente-texto" class="sr-only">Escribe tu mensaje</label>
+      <textarea #campoTexto id="asistente-texto" [formControl]="texto" rows="1" (keydown)="alTeclear($event)"
+        (input)="ajustarAltura()" [attr.maxlength]="longitudMaxima" placeholder="Escribe tu pregunta…"
+        class="max-h-[120px] flex-1 resize-none rounded-2xl border border-gray-300 px-4 py-2 text-sm focus:border-[#080E36] focus:ring-[#080E36]"></textarea>
+      <button type="button" (click)="enviarTexto()" [disabled]="esperando || !texto.value.trim()" aria-label="Enviar mensaje"
+        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#080E36] text-white transition hover:bg-[#CDAD60] disabled:opacity-40 disabled:hover:bg-[#080E36]">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </div>
+    <p class="bg-white px-4 pb-3 text-center text-[11px] text-gray-400">
+      Respuestas generadas con IA; pueden tener errores. Confirma los detalles con un asesor.
+    </p>
+  </section>
+}

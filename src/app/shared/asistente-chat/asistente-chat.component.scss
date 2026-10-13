@@ -1,0 +1,58 @@
+// Tres puntos de "escribiendo…"
+.escribiendo span {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: #9ca3af;
+  animation: rebote 1.2s infinite ease-in-out;
+
+  &:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+
+  &:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+}
+
+@keyframes rebote {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.animar-panel {
+  animation: aparecer-panel 0.2s ease-out;
+}
+
+.animar-entrada {
+  animation: aparecer-panel 0.3s ease-out;
+}
+
+@keyframes aparecer-panel {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .escribiendo span,
+  .animar-panel,
+  .animar-entrada {
+    animation: none;
+  }
+}

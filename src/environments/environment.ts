@@ -5,6 +5,8 @@ export const environment = {
   production: false,
   baseUrl: 'https://rentaraiz.co/api/v1',
   baserUrlTest: 'https://rentaraizbackend.duckdns.org/api/v1',
+  /** Chat del asistente con respuestas de prueba, sin llamar al backend. */
+  asistenteMock: false,
 };
 
 export const conexionVault = {

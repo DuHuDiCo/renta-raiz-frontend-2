@@ -6,13 +6,14 @@
 
   import { filter } from 'rxjs/operators';
   import { SEO_AGENCIA, SEO_POR_DEFECTO, SEO_SITIO_WEB, SeoService } from './core/seo/seo.service';
+  import { AsistenteChatComponent } from './shared/asistente-chat/asistente-chat.component';
 
   declare let fbq: Function; // Importante para que TypeScript no dé error
 
   @Component({
     selector: 'app-root',
     standalone: true,
-    imports: [RouterOutlet, NgxUiLoaderModule],
+    imports: [RouterOutlet, NgxUiLoaderModule, AsistenteChatComponent],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss',
   })
