@@ -75,6 +75,8 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
   noLeidos = 0;
   mensajes: MensajeChat[] = [];
   sugerencias: string[] = [];
+  /** El visitante puede plegar las preguntas sugeridas; se queda así hasta que las vuelva a abrir. */
+  sugerenciasAbiertas = true;
   /** Separación del botón respecto al borde inferior, para no tapar los botones flotantes. */
   margenInferior = 92;
 
@@ -178,6 +180,10 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
     this.texto.setValue('');
     this.programar(() => this.ajustarAltura(), 0);
     this.enviar(texto, 'texto');
+  }
+
+  alternarSugerencias(): void {
+    this.sugerenciasAbiertas = !this.sugerenciasAbiertas;
   }
 
   elegirSugerencia(sugerencia: string): void {

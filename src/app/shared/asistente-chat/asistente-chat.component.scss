@@ -29,6 +29,15 @@
   }
 }
 
+// La caja de texto crece sola hasta su alto máximo: se puede desplazar, pero sin barra ni flechas.
+.sin-barra {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 .animar-panel {
   animation: aparecer-panel 0.2s ease-out;
 }

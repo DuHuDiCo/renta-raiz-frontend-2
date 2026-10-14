@@ -121,12 +121,22 @@
 
     <!-- Respuestas rápidas -->
     @if (sugerencias.length && !esperando) {
-      <div class="flex flex-wrap gap-2 border-t border-gray-100 bg-[#F5F6FA] px-4 py-2">
-        @for (sugerencia of sugerencias; track sugerencia) {
-          <button type="button" (click)="elegirSugerencia(sugerencia)"
-            class="rounded-full border border-[#080E36]/20 bg-white px-3 py-1.5 text-xs font-medium text-[#080E36] transition hover:border-[#CDAD60] hover:bg-[#CDAD60] hover:text-white">
-            {{ sugerencia }}
-          </button>
+      <div class="border-t border-gray-100 bg-[#F5F6FA] px-4 py-2">
+        <button type="button" (click)="alternarSugerencias()" [attr.aria-expanded]="sugerenciasAbiertas"
+          aria-controls="asistente-sugerencias"
+          class="flex w-full items-center justify-between text-xs font-medium text-gray-500 hover:text-[#080E36]">
+          Preguntas sugeridas
+          <i class="fa-solid text-[10px]" [ngClass]="sugerenciasAbiertas ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+        </button>
+        @if (sugerenciasAbiertas) {
+          <div id="asistente-sugerencias" class="mt-2 flex flex-wrap gap-2">
+            @for (sugerencia of sugerencias; track sugerencia) {
+              <button type="button" (click)="elegirSugerencia(sugerencia)"
+                class="rounded-full border border-[#080E36]/20 bg-white px-3 py-1.5 text-xs font-medium text-[#080E36] transition hover:border-[#CDAD60] hover:bg-[#CDAD60] hover:text-white">
+                {{ sugerencia }}
+              </button>
+            }
+          </div>
         }
       </div>
     }
@@ -136,7 +146,7 @@
       <label for="asistente-texto" class="sr-only">Escribe tu mensaje</label>
       <textarea #campoTexto id="asistente-texto" [formControl]="texto" rows="1" (keydown)="alTeclear($event)"
         (input)="ajustarAltura()" [attr.maxlength]="longitudMaxima" placeholder="Escribe tu pregunta…"
-        class="max-h-[120px] flex-1 resize-none rounded-2xl border border-gray-300 px-4 py-2 text-sm focus:border-[#080E36] focus:ring-[#080E36]"></textarea>
+        class="sin-barra max-h-[120px] flex-1 resize-none rounded-2xl border border-gray-300 px-4 py-2 text-sm focus:border-[#080E36] focus:ring-[#080E36]"></textarea>
       <button type="button" (click)="enviarTexto()" [disabled]="esperando || !texto.value.trim()" aria-label="Enviar mensaje"
         class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#080E36] text-white transition hover:bg-[#CDAD60] disabled:opacity-40 disabled:hover:bg-[#080E36]">
         <i class="fa-solid fa-paper-plane"></i>
