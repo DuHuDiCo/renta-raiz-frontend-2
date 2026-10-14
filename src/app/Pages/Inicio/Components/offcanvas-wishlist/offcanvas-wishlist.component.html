@@ -2,9 +2,12 @@
   class="fixed z-50 bg-white shadow-2xl border-gray-200 transform transition-transform duration-300
          flex flex-col  /* MOBILE: Pantalla completa desde la izquierda */
          top-0 left-0 h-full w-full sm:w-96 rounded-r-2xl border-r
-         
+
          /* DESKTOP: Popup abajo derecha */
-         lg:top-auto lg:left-auto lg:bottom-0 lg:right-24 lg:h-auto lg:w-96 lg:rounded-r-none lg:rounded-t-2xl lg:border"
+         lg:top-auto lg:left-auto lg:bottom-0 lg:right-24 lg:h-auto lg:w-96 lg:rounded-r-none lg:rounded-t-2xl lg:border
+
+         /* DESKTOP con el chat del asistente abierto: se corre a su izquierda (92px + 380px del chat + 12px) */
+         lg:transition-[transform,right] lg:[.asistente-abierto_&]:right-[484px]"
 
   [ngClass]="{
     'translate-x-0': visible, 

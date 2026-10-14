@@ -614,7 +614,7 @@
         Inmuebles similares
       </h2>
       <h2 class="text-2xl font-normal text-[#9a9b9c] text-center w-full max-w-6xl mt-4">
-        Busca inmuebles similares a tus propios
+        Otras opciones parecidas a este inmueble
       </h2>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full max-w-6xl mt-6">
@@ -622,7 +622,7 @@
           class="relative bg-white border border-[#CDAD60] rounded-lg shadow-md border-b-4 pb-6">
           <div class="relative group">
             <div class="bg-black w-full h-[280px] flex items-center justify-center overflow-hidden rounded-t-lg">
-              <a href="#">
+              <a [routerLink]="inmueble | rutaFicha">
                 <img loading="lazy" decoding="async" class="max-w-full max-h-full object-contain" [src]="inmueble.image1 || 'assets/images/renta-1.jpg'"
                   [alt]="inmueble.address" />
               </a>

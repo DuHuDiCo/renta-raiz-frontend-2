@@ -5,6 +5,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
+import { catchError, Observable, of, Subscription, switchMap } from 'rxjs';
 import { NavbarComponent } from '../../../../shared/navbar/navbar.component';
 import { NavbarComponent2 } from '../../../../shared/navbar-2/navbar-2.component';
 import { InmueblesService } from '../../../../core/Inmuebles/inmuebles.service';
@@ -25,6 +26,7 @@ import { encabezadoListado, negocioDeBiz, rutaFicha, rutaListado, slugListado, t
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
 import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wishlist.component';
 import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
+import { busquedasSimilares, CANDIDATOS_SIMILARES, CANTIDAD_SIMILARES, mejoresSimilares } from '../../../../core/similares/similares';
 
 
 @Component({
@@ -57,8 +59,6 @@ export class VerPropiedadComponent implements OnInit {
   codPro?: number;
   selectedIndex = 0;
   propiedad: any = {};
-  elementsPerPage = 12;
-  totalInmuebles = 3;
   thumbnailsPerPage = 3;
   resultadosFiltros: any[] = [];
   selectedImageUrl: string | null = null;
@@ -67,7 +67,7 @@ export class VerPropiedadComponent implements OnInit {
   datosCargados = false;
   mostrarContenido = false;
 
-  filtrosSeleccionados: Map<string, any> = new Map();
+  private similaresSub?: Subscription;
 
   private currentScale = 1;
   private zoomInstance: any;
@@ -112,7 +112,6 @@ export class VerPropiedadComponent implements OnInit {
     const ocultar = Number(this.route.snapshot.paramMap.get('ocultarContenido')) === 1;
     this.mostrarContenido = !ocultar;
 
-    this.getDatos();
     this.updateParams();
 
     this.getAsesor();
@@ -165,11 +164,6 @@ export class VerPropiedadComponent implements OnInit {
     });
   }
 
-
-  getDatos() {
-    // this.getDatosPropiedad();
-    this.prepararFiltros();
-  }
 
   openModal(index: number): void {
     this.selectedIndex = index;
@@ -291,6 +285,7 @@ export class VerPropiedadComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
+    this.similaresSub?.unsubscribe();
     this.destroyZoom();
   }
 
@@ -412,8 +407,7 @@ export class VerPropiedadComponent implements OnInit {
     this.datosCargados = true;
     this.actualizarSeo();
 
-    this.prepararFiltros();
-    this.enviarFiltros();
+    this.buscarSimilares();
     this.getAsesor();
 
     console.log(this.propiedad);
@@ -542,55 +536,35 @@ export class VerPropiedadComponent implements OnInit {
 
 
 
-  prepararFiltros() {
-    this.filtrosSeleccionados.clear();
-    this.filtrosSeleccionados.set('city', this.propiedad.city_code);
-    if (this.propiedad.biz_code == 1) {
-      this.filtrosSeleccionados.set('pcmin', this.propiedad.rent);
-    }
+  /** Carga los "Inmuebles similares" de la ficha actual; la definición de similar está en core/similares. */
+  private buscarSimilares() {
+    // Al pasar de una ficha a otra se descarta la búsqueda anterior para no pintar sus resultados.
+    this.similaresSub?.unsubscribe();
+    this.resultadosFiltros = [];
 
-    if (this.propiedad.biz_code == 2) {
-      this.filtrosSeleccionados.set('pvmin', this.propiedad.saleprice);
-    }
-
-    if (this.propiedad.biz_code == 3) {
-      this.filtrosSeleccionados.set('pcmin', this.propiedad.rent);
-      this.filtrosSeleccionados.set('pvmin', this.propiedad.saleprice);
-    }
+    const inmueble = this.propiedad;
+    this.similaresSub = this.buscarSimilaresDesde(inmueble, busquedasSimilares(inmueble), []).subscribe(
+      (similares) => (this.resultadosFiltros = similares)
+    );
   }
 
-  enviarFiltros() {
-    const filtrosObj = Object.fromEntries(this.filtrosSeleccionados);
+  /** Recorre las búsquedas de la más estricta a la más amplia hasta reunir suficientes similares. */
+  private buscarSimilaresDesde(inmueble: any, busquedas: Record<string, string | number>[], candidatos: any[]): Observable<any[]> {
+    const [busqueda, ...siguientes] = busquedas;
+    if (!busqueda) return of(mejoresSimilares(inmueble, candidatos));
 
-    console.log(filtrosObj);
-
-    const obj = { ...filtrosObj, page: 1 };
-
-    this.inmueblesService.getFiltrosEnviar(obj, this.totalInmuebles).subscribe(
-      (response: any) => {
-        const idActual = this.propiedad.idpro;
-        let filtrados = response.data.filter(
-          (inmueble: any) => inmueble.idpro !== idActual
-        );
-
-        const faltantes = 3 - filtrados.length;
-        if (faltantes > 0) {
-          this.inmueblesService
-            .getFiltrosEnviar(
-              { ...filtrosObj, page: obj.page + 1 },
-              this.elementsPerPage
-            )
-            .subscribe((respuestaSiguiente: any) => {
-              filtrados.push(...respuestaSiguiente.data.slice(0, faltantes));
-              this.resultadosFiltros = filtrados;
-            });
-        } else {
-          this.resultadosFiltros = filtrados;
-        }
-      },
-      (error: any) => {
-        console.error('Error al enviar los filtros:', error);
-      }
+    return this.inmueblesService.getFiltrosEnviar({ ...busqueda, page: 1 }, CANDIDATOS_SIMILARES).pipe(
+      catchError((error: any) => {
+        console.error('Error al buscar inmuebles similares:', error);
+        return of({ data: [] });
+      }),
+      switchMap((respuesta: any) => {
+        const acumulados = [...candidatos, ...(respuesta?.data ?? [])];
+        const similares = mejoresSimilares(inmueble, acumulados);
+        return similares.length >= CANTIDAD_SIMILARES
+          ? of(similares)
+          : this.buscarSimilaresDesde(inmueble, siguientes, acumulados);
+      })
     );
   }
 

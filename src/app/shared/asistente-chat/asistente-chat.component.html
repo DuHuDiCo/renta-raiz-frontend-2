@@ -28,9 +28,9 @@
 </button>
 
 @if (abierto) {
+  <!-- En escritorio se abre a la izquierda de la columna de botones flotantes (24px de margen + 56px de botón + 12px de separación) -->
   <section id="asistente-panel" role="dialog" aria-modal="false" aria-labelledby="asistente-titulo"
-    [style.--asistente-bottom]="margenInferior + 68 + 'px'"
-    class="animar-panel fixed inset-0 z-[60] flex flex-col overflow-hidden bg-white shadow-2xl md:inset-auto md:bottom-[var(--asistente-bottom)] md:right-6 md:h-[min(620px,calc(100vh-180px))] md:w-[380px] md:rounded-2xl md:ring-1 md:ring-black/5">
+    class="animar-panel fixed inset-0 z-[60] flex flex-col overflow-hidden bg-white shadow-2xl md:inset-auto md:bottom-6 md:right-[92px] md:h-[min(620px,calc(100vh-48px))] md:w-[380px] md:rounded-2xl md:ring-1 md:ring-black/5">
 
     <!-- Encabezado -->
     <header class="flex items-center gap-3 bg-[#080E36] px-4 py-3 text-white">

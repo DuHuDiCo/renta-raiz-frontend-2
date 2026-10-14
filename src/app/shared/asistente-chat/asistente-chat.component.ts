@@ -1,4 +1,4 @@
-import { isPlatformBrowser, NgClass } from '@angular/common';
+import { DOCUMENT, isPlatformBrowser, NgClass } from '@angular/common';
 import {
   Component,
   ElementRef,
@@ -29,6 +29,8 @@ const ESPERA_INVITACION_MS = 12000;
 const CLAVE_INVITACION_VISTA = 'asistente_invitacion_vista';
 /** Rutas donde el botón flotante de WhatsApp ocupa el sitio encima de "Volver arriba". */
 const RUTAS_CON_WHATSAPP_FLOTANTE = ['/prioritarios'];
+/** Clase en <body> mientras el panel está abierto; el popup de Recorrido la usa para correrse a la izquierda. */
+const CLASE_ASISTENTE_ABIERTO = 'asistente-abierto';
 
 const SUGERENCIAS_INICIO = [
   'Requisitos para arrendar',
@@ -53,6 +55,7 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
   private asistente = inject(AsistenteChatService);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private documento = inject(DOCUMENT);
 
   @ViewChild('listaMensajes') listaMensajes?: ElementRef<HTMLElement>;
   @ViewChild('campoTexto') campoTexto?: ElementRef<HTMLTextAreaElement>;
@@ -102,6 +105,7 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.documento.body.classList.remove(CLASE_ASISTENTE_ABIERTO);
     this.temporizadores.forEach(clearTimeout);
     this.suscripciones.unsubscribe();
   }
@@ -113,6 +117,7 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
 
   abrir(): void {
     this.abierto = true;
+    this.documento.body.classList.add(CLASE_ASISTENTE_ABIERTO);
     this.noLeidos = 0;
     this.descartarInvitacion();
     if (this.mensajes.length === 0) this.saludar();
@@ -125,6 +130,7 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
 
   cerrar(): void {
     this.abierto = false;
+    this.documento.body.classList.remove(CLASE_ASISTENTE_ABIERTO);
     this.programar(() => this.botonAbrir?.nativeElement.focus(), 50);
   }
 
