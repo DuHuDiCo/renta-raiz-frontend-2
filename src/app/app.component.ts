@@ -1,7 +1,10 @@
   import { isPlatformBrowser } from '@angular/common';
   import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
   import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, ResolveEnd, Router, RouterOutlet } from '@angular/router';
-  import { initFlowbite } from 'flowbite';
+  // Solo los dos componentes de Flowbite que usa el sitio (data-carousel y data-drawer):
+  // importar 'flowbite' entero trae también datepicker, popper y el resto.
+  import { initCarousels } from 'flowbite/lib/esm/components/carousel';
+  import { initDrawers } from 'flowbite/lib/esm/components/drawer';
   import { NgxUiLoaderModule, NgxUiLoaderService } from 'ngx-ui-loader';
 
   import { filter } from 'rxjs/operators';
@@ -70,13 +73,15 @@
       // Todo lo de aquí usa APIs del navegador (window, localStorage, fbq) que no existen en SSR.
       if (!isPlatformBrowser(this.platformId)) return;
 
-      initFlowbite();
+      const iniciarFlowbite = () => {
+        initCarousels();
+        initDrawers();
+      };
+      iniciarFlowbite();
 
       this.router.events.subscribe((event) => {
         if (event instanceof NavigationEnd) {
-          setTimeout(() => {
-            initFlowbite();
-          }, 100);
+          setTimeout(iniciarFlowbite, 100);
         }
       });
 

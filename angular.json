@@ -42,6 +42,10 @@
           },
           "configurations": {
             "production": {
+              "styles": [
+                "src/styles/fontawesome.css",
+                "src/styles.scss"
+              ],
               "budgets": [
                 {
                   "type": "initial",

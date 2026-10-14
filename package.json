@@ -4,10 +4,13 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "iconos": "node scripts/generar-iconos.js",
+    "prebuild": "npm run iconos",
     "build": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "dev:ssr": "ng serve --ssr",
+    "prebuild:ssr": "npm run iconos",
     "build:ssr": "ng build && ng run renta-raiz-frontend-2:server",
     "serve:ssr": "node dist/renta-raiz-frontend-2/server/server.mjs"
   },

@@ -1,24 +1,8 @@
 import { Routes } from '@angular/router';
-import { VistaInicialComponent } from './Components/vista-inicial/vista-inicial.component';
 import { SLIDER_PRECARGA } from './Components/vista-inicial/slider-inicio';
 
-import { FiltrosComponent } from './Components/filtros/filtros.component';
-import { ContactanosComponent } from './Components/contactanos/contactanos.component';
-import { VerPropiedadComponent } from './Components/ver-propiedad/ver-propiedad.component';
-import { NuestroEquipoComponent } from './Components/nuestro-equipo/nuestro-equipo.component';
-import { QuienesSomosComponent } from './Components/quienes-somos/quienes-somos.component';
-import { MapaComponent } from './Components/mapa/mapa.component';
-import { BlogsComponent } from './Components/blogs/blogs.component';
-import { VerBlogComponent } from './Components/ver-blog/ver-blog.component';
-import { PublicarInmuebleComponent } from './Components/publicar-inmueble/publicar-inmueble.component';
-import { PoliticarPrivacidadComponent } from './Components/politicar-privacidad/politicar-privacidad.component';
-import { AvaluosComercialesComponent } from './Components/avaluos-comerciales/avaluos-comerciales.component';
-import { EnvioExitosoComponent } from '../../shared/envio-exitoso/envio-exitoso.component';
 import { propiedadResolver } from '../../core/resolvers/propiedad.resolver';
 import { blogsResolver } from '../../core/resolvers/blogs.resolver';
-import { PoliticaAcosoComponent } from './Components/politica-acoso/politica-acoso.component';
-import { PortafolioAsesoresComponent } from './Components/portafolio-asesores/portafolio-asesores.component';
-import { PrioritariosComponent } from '../Prioritarios/Components/prioritarios/prioritarios.component';
 import { listadoMatcher, listadoResolver } from '../../core/resolvers/listado.resolver';
 import { asesorResolver } from '../../core/resolvers/asesor.resolver';
 
@@ -30,7 +14,8 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: VistaInicialComponent,
+        loadComponent: () =>
+          import('./Components/vista-inicial/vista-inicial.component').then((m) => m.VistaInicialComponent),
         data: {
           seo: {
             precarga: SLIDER_PRECARGA,
@@ -43,7 +28,8 @@ export const routes: Routes = [
 
       {
         path: 'filtros',
-        component: FiltrosComponent,
+        loadComponent: () =>
+          import('./Components/filtros/filtros.component').then((m) => m.FiltrosComponent),
         data: {
           seo: {
             titulo: 'Inmuebles en arriendo y venta en Medellín y Envigado | Renta Raíz',
@@ -55,7 +41,8 @@ export const routes: Routes = [
       {
         // Listados con URL propia: /arriendo, /venta/casas, /arriendo/apartamentos/medellin/el-poblado
         matcher: listadoMatcher,
-        component: FiltrosComponent,
+        loadComponent: () =>
+          import('./Components/filtros/filtros.component').then((m) => m.FiltrosComponent),
         // El componente arma el SEO con los datos que carga.
         data: { seoDinamico: true },
         resolve: { listado: listadoResolver },
@@ -63,7 +50,8 @@ export const routes: Routes = [
       },
       {
         path: 'contacto',
-        component: ContactanosComponent,
+        loadComponent: () =>
+          import('./Components/contactanos/contactanos.component').then((m) => m.ContactanosComponent),
         data: {
           seo: {
             precarga: '/assets/images/SLIDERCONTACTANOS.webp',
@@ -76,7 +64,8 @@ export const routes: Routes = [
       {
         // Ficha del inmueble: /inmueble/apartamento-arriendo-el-poblado-medellin-7434
         path: 'inmueble/:slug',
-        component: VerPropiedadComponent,
+        loadComponent: () =>
+          import('./Components/ver-propiedad/ver-propiedad.component').then((m) => m.VerPropiedadComponent),
         // El componente arma el SEO con los datos que carga.
         data: { seoDinamico: true },
         resolve: { propiedad: propiedadResolver }
@@ -84,7 +73,8 @@ export const routes: Routes = [
       {
         // Dirección antigua: /0 redirige a la ficha; /1 es la vista reducida que usa Prioritarios.
         path: 'ver-propiedad/:codpro/:ocultarContenido',
-        component: VerPropiedadComponent,
+        loadComponent: () =>
+          import('./Components/ver-propiedad/ver-propiedad.component').then((m) => m.VerPropiedadComponent),
         // El componente arma el SEO con los datos que carga.
         data: { seoDinamico: true },
         resolve: { propiedad: propiedadResolver }
@@ -92,7 +82,8 @@ export const routes: Routes = [
 
       {
         path: 'nuestro-equipo',
-        component: NuestroEquipoComponent,
+        loadComponent: () =>
+          import('./Components/nuestro-equipo/nuestro-equipo.component').then((m) => m.NuestroEquipoComponent),
         data: {
           seo: {
             precarga: '/assets/images/equipo-expertos.jpg',
@@ -104,7 +95,8 @@ export const routes: Routes = [
       },
       {
         path: 'quienes-somos',
-        component: QuienesSomosComponent,
+        loadComponent: () =>
+          import('./Components/quienes-somos/quienes-somos.component').then((m) => m.QuienesSomosComponent),
         data: {
           seo: {
             precarga: '/assets/images/SliderQUIENESOMOS.webp',
@@ -116,7 +108,8 @@ export const routes: Routes = [
       },
       {
         path: 'mapa',
-        component: MapaComponent,
+        loadComponent: () =>
+          import('./Components/mapa/mapa.component').then((m) => m.MapaComponent),
         data: {
           seo: {
             titulo: 'Mapa de inmuebles | Renta Raíz',
@@ -128,7 +121,8 @@ export const routes: Routes = [
       },
       {
         path: 'blogs',
-        component: BlogsComponent,
+        loadComponent: () =>
+          import('./Components/blogs/blogs.component').then((m) => m.BlogsComponent),
         data: {
           seo: {
             precarga: '/assets/images/noticias.png',
@@ -140,14 +134,16 @@ export const routes: Routes = [
       },
       {
         path: 'ver-blog/:id',
-        component: VerBlogComponent,
+        loadComponent: () =>
+          import('./Components/ver-blog/ver-blog.component').then((m) => m.VerBlogComponent),
         // El componente arma el SEO con los datos que carga.
         data: { seoDinamico: true },
         resolve: { blogs: blogsResolver }
       },
       {
         path: 'publicar-inmueble',
-        component: PublicarInmuebleComponent,
+        loadComponent: () =>
+          import('./Components/publicar-inmueble/publicar-inmueble.component').then((m) => m.PublicarInmuebleComponent),
         data: {
           seo: {
             precarga: '/assets/images/SLIDERPUBLICATUPROPIEDAD.webp',
@@ -159,7 +155,8 @@ export const routes: Routes = [
       },
       {
         path: 'politicas-de-privacidad',
-        component: PoliticarPrivacidadComponent,
+        loadComponent: () =>
+          import('./Components/politicar-privacidad/politicar-privacidad.component').then((m) => m.PoliticarPrivacidadComponent),
         data: {
           seo: {
             precarga: '/assets/images/SLIDERPOLITICAS.webp',
@@ -171,7 +168,8 @@ export const routes: Routes = [
       },
       {
         path: 'politicas-de-acoso-sexual',
-        component: PoliticaAcosoComponent,
+        loadComponent: () =>
+          import('./Components/politica-acoso/politica-acoso.component').then((m) => m.PoliticaAcosoComponent),
         data: {
           seo: {
             titulo: 'Política de prevención del acoso sexual | Renta Raíz',
@@ -182,7 +180,8 @@ export const routes: Routes = [
       },
       {
         path: 'avaluos-comerciales',
-        component: AvaluosComercialesComponent,
+        loadComponent: () =>
+          import('./Components/avaluos-comerciales/avaluos-comerciales.component').then((m) => m.AvaluosComercialesComponent),
         data: {
           seo: {
             precarga: '/assets/images/SliderAVALUOS.webp',
@@ -194,7 +193,8 @@ export const routes: Routes = [
       },
       {
         path: 'formulario-enviado-con-exito',
-        component: EnvioExitosoComponent,
+        loadComponent: () =>
+          import('../../shared/envio-exitoso/envio-exitoso.component').then((m) => m.EnvioExitosoComponent),
         data: {
           seo: {
             titulo: 'Formulario enviado | Renta Raíz',
@@ -207,7 +207,8 @@ export const routes: Routes = [
       ,
       {
         path: 'portafolio/:asesor',
-        component: PortafolioAsesoresComponent,
+        loadComponent: () =>
+          import('./Components/portafolio-asesores/portafolio-asesores.component').then((m) => m.PortafolioAsesoresComponent),
         // El componente arma el SEO con los datos que carga.
         data: { seoDinamico: true },
         resolve: { asesor: asesorResolver },
@@ -215,7 +216,8 @@ export const routes: Routes = [
       ,
       {
         path: 'prioritarios',
-        component: PrioritariosComponent,
+        loadComponent: () =>
+          import('../Prioritarios/Components/prioritarios/prioritarios.component').then((m) => m.PrioritariosComponent),
         data: {
           seo: {
             titulo: 'Inmuebles prioritarios | Renta Raíz',

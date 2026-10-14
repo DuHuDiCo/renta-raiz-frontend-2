@@ -1,5 +1,7 @@
 import { HTTP_INTERCEPTORS, HttpInterceptorFn } from '@angular/common/http';
-import * as CryptoJS from 'crypto-js';
+// Solo el núcleo y AES (CBC y Pkcs7 vienen con AES): importar 'crypto-js' entero trae todos los algoritmos.
+import CryptoJS from 'crypto-js/core';
+import 'crypto-js/aes';
 import { Login, token } from '../../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
