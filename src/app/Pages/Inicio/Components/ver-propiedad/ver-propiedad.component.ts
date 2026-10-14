@@ -26,6 +26,7 @@ import { encabezadoListado, negocioDeBiz, rutaFicha, rutaListado, slugListado, t
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
 import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wishlist.component';
 import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
+import { CompartirInmuebleComponent } from '../../../../shared/compartir-inmueble/compartir-inmueble.component';
 import { busquedasSimilares, CANDIDATOS_SIMILARES, CANTIDAD_SIMILARES, mejoresSimilares } from '../../../../core/similares/similares';
 
 
@@ -34,6 +35,7 @@ import { busquedasSimilares, CANDIDATOS_SIMILARES, CANTIDAD_SIMILARES, mejoresSi
   standalone: true,
   imports: [
     RutaFichaPipe,
+    CompartirInmuebleComponent,
     RouterLink,
     NavbarComponent,
     FormsModule,
@@ -87,6 +89,8 @@ export class VerPropiedadComponent implements OnInit {
   seo = inject(SeoService);
   /** Encabezado principal (h1) de la ficha; es el mismo texto del título SEO. */
   tituloPagina = '';
+  /** Dirección pública de la ficha para compartir: sin parámetros de campaña ni de seguimiento. */
+  urlCompartir = '';
   /** Listados a los que enlazan las migas de la ficha: negocio, tipo y ciudad. */
   migasListado: { negocio: string; tipo: string; ciudad: string } | null = null;
   mostrarOffcanvas: boolean = false;
@@ -445,6 +449,7 @@ export class VerPropiedadComponent implements OnInit {
     const lugar = [capitalizar(p.neighborhood), capitalizar(p.city)].filter(Boolean).join(', ');
     const encabezado = `${tipo} en ${negocio}${lugar ? ` en ${lugar}` : ''}`;
     this.tituloPagina = encabezado;
+    this.urlCompartir = `${SEO_DOMINIO}${rutaFicha(p)}`;
 
     const detalles = [
       p.area_cons > 0 ? `${p.area_cons} m²` : '',
