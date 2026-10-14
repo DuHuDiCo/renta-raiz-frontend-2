@@ -10,15 +10,17 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { AsistenteChatService } from '../../core/asistente/asistente-chat.service';
 import {
   AsistenteMensajeRequest,
   AsistenteMensajeResponse,
+  InmuebleChat,
   LONGITUD_MAXIMA_MENSAJE,
   MensajeChat,
 } from '../../core/asistente/asistente.models';
+import { RutaFichaPipe } from '../pipes/ruta-ficha.pipe';
 
 const NOMBRE_ASISTENTE = 'Asistente Renta Raíz';
 /** Línea general de WhatsApp (la misma del botón flotante); respaldo cuando el asistente falla. */
@@ -47,7 +49,7 @@ const SUGERENCIAS_PROPIEDAD = ['¿Qué requisitos piden?', '¿Qué incluye el ca
 @Component({
   selector: 'app-asistente-chat',
   standalone: true,
-  imports: [NgClass, ReactiveFormsModule],
+  imports: [NgClass, ReactiveFormsModule, RouterLink, RutaFichaPipe],
   templateUrl: './asistente-chat.component.html',
   styleUrl: './asistente-chat.component.scss',
 })
@@ -193,6 +195,18 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
     this.asistente.registrarEvento('asistente_whatsapp_click');
   }
 
+  /** Precio de la tarjeta: el canon si está en arriendo y, si no, el precio de venta. */
+  precioDe(inmueble: InmuebleChat): string {
+    const [etiqueta, valor] = inmueble.rent > 0 ? ['Arriendo', inmueble.rent] : ['Venta', inmueble.saleprice];
+    return valor > 0 ? `${etiqueta} $${Math.round(valor).toLocaleString('es-CO')}` : '';
+  }
+
+  alAbrirInmueble(inmueble: InmuebleChat): void {
+    this.asistente.registrarEvento('asistente_inmueble_click', { codpro: inmueble.codpro });
+    // En móvil el chat ocupa toda la pantalla: se cierra para que se vea la ficha.
+    if (window.matchMedia('(max-width: 767px)').matches) this.cerrar();
+  }
+
   private enviar(texto: string, origen: AsistenteMensajeRequest['origen']): void {
     this.sugerencias = [];
     this.agregar({ autor: 'usuario', texto });
@@ -234,10 +248,14 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
     const globos = (respuesta.mensajes ?? []).filter((m) => m?.trim());
     if (globos.length === 0) globos.push('¿Me lo explicas de otra forma?');
 
+    const inmuebles = respuesta.inmuebles?.length ? respuesta.inmuebles : undefined;
+
     globos.forEach((texto, i) => {
       this.programar(() => {
-        this.agregar({ autor: 'asistente', texto });
-        if (i < globos.length - 1) return;
+        const ultimo = i === globos.length - 1;
+        // Las tarjetas van con el último globo, después del texto que las presenta.
+        this.agregar({ autor: 'asistente', texto, ...(ultimo && inmuebles ? { inmuebles } : {}) });
+        if (!ultimo) return;
 
         this.esperando = false;
         this.sugerencias = respuesta.sugerencias ?? [];

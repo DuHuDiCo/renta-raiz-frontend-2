@@ -4,6 +4,8 @@
  *
  * Chat de servicio al cliente, solo preguntas y respuestas: no capta datos personales ni
  * escala a un asesor. El backend arma el prompt, llama a la IA y devuelve la respuesta validada.
+ * Cuando el visitante pide inmuebles (parecidos al que ve o según lo que busca), el backend los
+ * consulta en Domus y los devuelve como tarjetas en `inmuebles`.
  */
 
 /** Qué página estaba viendo el usuario al escribir. Le permite a la IA responder sobre ella. */
@@ -42,12 +44,32 @@ export interface AsistenteMensajeRequest {
   contexto: ContextoAsistente;
 }
 
+/** Tarjeta de un inmueble en el chat. Los nombres son los de Domus, así sirve `rutaFicha` tal cual. */
+export interface InmuebleChat {
+  codpro: number;
+  type: string;
+  biz: string;
+  biz_code: number;
+  neighborhood: string;
+  city: string;
+  /** Canon de arriendo; 0 si no aplica. */
+  rent: number;
+  /** Precio de venta; 0 si no aplica. */
+  saleprice: number;
+  bedrooms: number;
+  bathrooms: number;
+  area_cons: number;
+  image1: string;
+}
+
 export interface AsistenteMensajeResponse {
   sesionId: string;
   /** Uno o varios globos, en orden. */
   mensajes: string[];
   /** Respuestas rápidas para el siguiente turno. */
   sugerencias?: string[];
+  /** Tarjetas que van debajo del último globo; ausente o null si no se buscaron inmuebles. */
+  inmuebles?: InmuebleChat[] | null;
 }
 
 /** Mensaje tal como lo pinta el chat (y como queda guardado en el navegador). */
@@ -58,6 +80,8 @@ export interface MensajeChat {
   fecha: number;
   /** Mensaje de sistema por un fallo: muestra "Reintentar". */
   error?: boolean;
+  /** Tarjetas de inmuebles que acompañan a este globo del asistente. */
+  inmuebles?: InmuebleChat[];
 }
 
 export const LONGITUD_MAXIMA_MENSAJE = 1000;
