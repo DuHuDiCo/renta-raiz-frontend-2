@@ -5,6 +5,7 @@ import { propiedadResolver } from '../../core/resolvers/propiedad.resolver';
 import { blogsResolver } from '../../core/resolvers/blogs.resolver';
 import { listadoMatcher, listadoResolver } from '../../core/resolvers/listado.resolver';
 import { asesorResolver } from '../../core/resolvers/asesor.resolver';
+import { asesorPerfilResolver } from '../../core/resolvers/asesor-perfil.resolver';
 
 export const routes: Routes = [
 
@@ -212,6 +213,16 @@ export const routes: Routes = [
         // El componente arma el SEO con los datos que carga.
         data: { seoDinamico: true },
         resolve: { asesor: asesorResolver },
+      }
+      ,
+      {
+        // Tarjeta digital del asesor para compartir: /asesor/sebastian-ospina
+        path: 'asesor/:slug',
+        loadComponent: () =>
+          import('./Components/perfil-asesor/perfil-asesor.component').then((m) => m.PerfilAsesorComponent),
+        // El componente arma el SEO con los datos del asesor.
+        data: { seoDinamico: true },
+        resolve: { asesor: asesorPerfilResolver },
       }
       ,
       {

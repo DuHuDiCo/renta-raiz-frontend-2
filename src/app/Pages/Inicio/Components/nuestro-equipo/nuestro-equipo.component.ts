@@ -8,25 +8,21 @@ import { Router, RouterLink } from '@angular/router';
 import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wishlist.component';
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
 import { WishlistServiceService } from '../../../../core/wishlist/wishlist-service.service';
+import { DataasesoresService } from '../../../../core/dataAsesores/dataasesores.service';
+import { SEO_DOMINIO } from '../../../../core/seo/seo.service';
+import { CompartirInmuebleComponent } from '../../../../shared/compartir-inmueble/compartir-inmueble.component';
 
 
 @Component({
   selector: 'app-nuestro-equipo',
   standalone: true,
-  imports: [RouterLink, NavbarComponent, FooterComponent, BotonesFlotantesComponent, VolverComponent, BarraFiltrosComponent, OffcanvasWishlistComponent, ModalWishlistComponent],
+  imports: [RouterLink, NavbarComponent, FooterComponent, BotonesFlotantesComponent, VolverComponent, BarraFiltrosComponent, OffcanvasWishlistComponent, ModalWishlistComponent, CompartirInmuebleComponent],
   templateUrl: './nuestro-equipo.component.html',
   styleUrl: './nuestro-equipo.component.scss'
 })
 export class NuestroEquipoComponent implements OnInit {
 
-  asesoresCode = {
-    "Juan Pablo Hoyos": "11370",
-    "Sebastián Ospina": "41112",
-    "Lenys Cuberos": "59504",
-    "Andres Mejia": "67953",
-    "David Peláez": "69627",
-    "Juan Pablo Ospina": "45849"
-  }
+  equipo = inject(DataasesoresService).getEquipo();
 
   mostrarModalRecorrido = false
 
@@ -37,6 +33,10 @@ export class NuestroEquipoComponent implements OnInit {
 
   router = inject(Router);
 
+
+  urlPerfil(asesor: any): string {
+    return `${SEO_DOMINIO}/asesor/${asesor.slug}`;
+  }
 
   ngOnInit(): void {
     if (typeof window !== 'undefined') window.scrollTo(0, 0);

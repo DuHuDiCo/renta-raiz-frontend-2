@@ -1,8 +1,15 @@
-<h1 class="sr-only">{{ tituloPagina }}</h1>
+<header class="px-4 pt-6 md:pt-8 text-center">
+  <p class="text-xs tracking-[0.25em] uppercase text-[#CDAD60]">Renta Raíz</p>
+  <h1 class="mt-1 text-3xl sm:text-4xl font-bold text-[#080E36]">{{ tituloPagina }}</h1>
+</header>
 <!-- navbar  -->
 <!-- <app-navbar-2 [alwaysScrolled]="true" *ngIf=" !mostrarContenido"></app-navbar-2> -->
 
-<div class="w-full  mb-12 transition-all duration-300 ease-in-out px-4 md:px-6 lg:px-10 xl:px-16 md:mt-16" [ngClass]="{
+<div *ngIf="asesor?.slug" class="px-4 md:px-6 pt-8 max-w-xl mx-auto" [ngClass]="{ 'lg:hidden': resultadosVenta.length > 0 }">
+  <ng-container *ngTemplateOutlet="fichaAsesor"></ng-container>
+</div>
+
+<div class="w-full  mb-12 transition-all duration-300 ease-in-out px-4 md:px-6 lg:px-10 xl:px-16 md:mt-5" [ngClass]="{
       'md:ml-[24rem] lg:ml-[26rem] xl:ml-[28rem]': isDrawerOpen,
       'md:ml-0': !isDrawerOpen
     }">
@@ -21,19 +28,23 @@
 
 
       <div class="w-full flex flex-col items-center  ">
-        <h2 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center mb-1">
-          Nuestros inmuebles en venta
+        <h2 class="text-2xl sm:text-3xl font-bold text-[#080E36] text-center">
+          En venta <span class="text-[#CDAD60]">· {{ totalDatosVenta }}</span>
         </h2>
-        <h2 class="text-xl md:text-2xl font-normal text-[#9a9b9c] text-center ">
+        <p class="text-base md:text-lg font-normal text-[#9a9b9c] text-center">
           No sueñes, ¡hagamos que suceda!
-        </h2>
+        </p>
       </div>
 
       <!-- Contenido de resultados -->
       <!-- desktop -->
       <div class="hidden md:block sticky bg-white pt-2 mt-4 z-10  md:pb-4 pb-16">
         <div *ngIf="resultadosVenta.length > 0 "
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-10 relative z-0 items-center ">
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 grid-flow-row-dense gap-6 mt-6 relative z-0 items-center ">
+
+          <div *ngIf="asesor?.slug" class="hidden lg:block lg:col-start-2 xl:col-start-3 lg:col-span-2 lg:row-start-1 lg:row-span-2 self-stretch">
+            <ng-container *ngTemplateOutlet="fichaAsesor; context: { $implicit: true }"></ng-container>
+          </div>
 
           <div *ngFor="let inmueble of inmueblesVisiblesVenta"
             class="z-10 relative bg-white border border-[#CDAD60] rounded-lg shadow-md border-b-4 pb-4 text-sm w-full mx-auto">
@@ -378,10 +389,11 @@
   </div> -->
 </div>
 
+
 <div class="bg-gray-200">
 
   <div style="padding-top: 20px;" *ngIf="resultadosArriendo.length > 0 "
-    class="w-full   transition-all duration-300 ease-in-out px-4 md:px-6 lg:px-10 xl:px-16 md:mt-16" [ngClass]="{
+    class="w-full   transition-all duration-300 ease-in-out px-4 md:px-6 lg:px-10 xl:px-16 md:mt-5" [ngClass]="{
       'md:ml-[24rem] lg:ml-[26rem] xl:ml-[28rem]': isDrawerOpen,
       'md:ml-0': !isDrawerOpen
     }">
@@ -399,12 +411,12 @@
 
 
         <div class="w-full flex flex-col items-center  px-4">
-          <h2 class="text-4xl sm:text-5xl font-bold text-[#080E36] text-center mb-1">
-            Nuestros inmuebles en arriendo
+          <h2 class="text-2xl sm:text-3xl font-bold text-[#080E36] text-center">
+            En arriendo <span class="text-[#CDAD60]">· {{ totalDatosArriendo }}</span>
           </h2>
-          <h2 class="text-xl md:text-2xl font-normal text-[#9a9b9c] text-center ">
+          <p class="text-base md:text-lg font-normal text-[#9a9b9c] text-center">
             Somos la llave al hogar que buscas
-          </h2>
+          </p>
         </div>
 
 
@@ -726,18 +738,73 @@
 
 
     </div>
-    <div class="fixed bottom-6 right-2 flex flex-col gap-3 z-50">
-      <button (click)="scrollToTop()"
-        class="cursor-pointer w-14 h-14 rounded-full shadow-lg hover:bg-[#CDAD60] transition-all duration-300 bg-[#080E36] flex items-center justify-center"
-        aria-label="Volver arriba">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-        </svg>
-      </button>
-    </div>
   </div>
 </div>
+
+<!-- Ficha del asesor. En computador ocupa 2 × 2 casillas a la derecha de los inmuebles en venta;
+     en celular y tableta (o si no tiene inmuebles en venta) va arriba de todo. -->
+<!-- ancha: dentro de la cuadrícula ocupa 2 × 2 tarjetas, con la foto arriba y los datos debajo en dos columnas. -->
+<ng-template #fichaAsesor let-ancha>
+  <div class="bg-[#060F29] text-white rounded-2xl overflow-hidden shadow-lg" [ngClass]="{ 'h-full flex flex-col': ancha }">
+    <img [src]="asesor.retrato || asesor.avatar" [alt]="asesor.nombre" width="800" height="552" fetchpriority="high"
+      class="w-full object-cover object-[50%_25%]" [ngClass]="ancha ? 'h-[45%] flex-none' : 'h-56'">
+    <div class="p-5" [ngClass]="{ 'flex-1 grid grid-cols-2 gap-6 items-center xl:p-7': ancha }">
+      <div>
+      <p *ngIf="asesor.lema" class="text-[11px] tracking-[0.2em] uppercase text-[#CDAD60]">{{ asesor.lema }}</p>
+      <p class="mt-1 font-serif text-2xl xl:text-3xl text-[#CDAD60]">{{ asesor.nombre }}</p>
+      <p class="text-sm text-[#aab0c6]">{{ asesor.cargo }}</p>
+      <p *ngIf="asesor.especialidad" class="mt-3 font-serif text-lg xl:text-xl leading-snug">{{ asesor.especialidad }}</p>
+      <p *ngIf="asesor.descripcion" class="mt-1 text-sm text-[#aab0c6]">{{ asesor.descripcion }}</p>
+      </div>
+
+      <div [ngClass]="{ 'mt-4': !ancha }">
+      <div class="flex divide-x divide-[#1f2a4d] border-y border-[#1f2a4d] py-2.5 text-center">
+        <div class="flex-1">
+          <p class="text-xl font-semibold text-[#CDAD60]">{{ totalDatosVenta }}</p>
+          <p class="text-xs text-[#aab0c6]">en venta</p>
+        </div>
+        <div class="flex-1">
+          <p class="text-xl font-semibold text-[#CDAD60]">{{ totalDatosArriendo }}</p>
+          <p class="text-xs text-[#aab0c6]">en arriendo</p>
+        </div>
+      </div>
+
+      <div class="mt-4 grid grid-cols-2 gap-2">
+        <a [href]="enlaceWhatsappAsesor" target="_blank" rel="noopener"
+          class="col-span-2 flex items-center justify-center gap-2 rounded-full bg-[#CDAD60] text-[#060F29] font-semibold py-3 hover:bg-[#d9bd78] transition-colors">
+          <i class="fab fa-whatsapp text-lg"></i> Escríbeme
+        </a>
+        <a [routerLink]="['/asesor', asesor.slug]"
+          class="self-start flex items-center justify-center gap-2 rounded-full border border-[#CDAD60] text-[#CDAD60] font-medium py-3.5 hover:bg-[#CDAD60]/10 transition-colors">
+          <i class="fas fa-id-card"></i> Tarjeta
+        </a>
+        <app-compartir-inmueble [url]="urlPerfilAsesor" [titulo]="asesor.nombre" etiqueta="Compartir"
+          [mensaje]="'Te comparto el contacto de ' + asesor.nombre + ', ' + asesor.cargo + ' de Renta Raíz:'"
+          evento="compartir_asesor" variante="oscuro"></app-compartir-inmueble>
+      </div>
+
+      <div class="mt-4 flex items-center justify-center gap-6 text-xl text-[#CDAD60]">
+        <a [href]="'tel:+' + telefonoAsesor" aria-label="Llamar" class="hover:text-white transition-colors">
+          <i class="fas fa-phone"></i>
+        </a>
+        <a [href]="'mailto:' + asesor.email" aria-label="Enviar correo" class="hover:text-white transition-colors">
+          <i class="fas fa-envelope"></i>
+        </a>
+        <a *ngIf="asesor.facebook" [href]="asesor.facebook" target="_blank" rel="noopener" aria-label="Facebook" class="hover:text-white transition-colors">
+          <i class="fab fa-facebook"></i>
+        </a>
+        <a *ngIf="asesor.instagram" [href]="asesor.instagram" target="_blank" rel="noopener" aria-label="Instagram" class="hover:text-white transition-colors">
+          <i class="fab fa-instagram"></i>
+        </a>
+        <a *ngIf="asesor.tiktok" [href]="asesor.tiktok" target="_blank" rel="noopener" aria-label="TikTok" class="hover:text-white transition-colors">
+          <i class="fab fa-tiktok"></i>
+        </a>
+      </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
 <app-footer-portafolio *ngIf="resultadosVenta.length > 0"></app-footer-portafolio>
 
 <app-botones-flotantes    (abrir)="toggleOffcanvas()"></app-botones-flotantes>

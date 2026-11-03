@@ -1,10 +1,13 @@
 <button type="button" (click)="compartir()" [attr.aria-expanded]="opcionesAbiertas"
-  class="w-full flex items-center justify-center gap-2 text-[#080E36] hover:text-white border border-[#080E36] hover:bg-[#080E36] focus:ring-4 focus:outline-none focus:ring-[#080E36]/30 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-all duration-300">
-  <i class="fas fa-share-nodes fa-sm"></i> Compartir inmueble
+  class="w-full flex items-center justify-center gap-2 border focus:ring-4 focus:outline-none font-medium px-5 text-center transition-all duration-300"
+  [class]="variante === 'oscuro'
+    ? 'rounded-full py-3.5 text-base text-[#CDAD60] border-[#CDAD60] hover:bg-[#CDAD60] hover:text-[#060F29] focus:ring-[#CDAD60]/30'
+    : 'rounded-lg py-2.5 text-sm text-[#080E36] hover:text-white border-[#080E36] hover:bg-[#080E36] focus:ring-[#080E36]/30'">
+  <i class="fas fa-share-nodes fa-sm"></i> {{ etiqueta }}
 </button>
 
 @if (opcionesAbiertas) {
-  <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
+  <div class="mt-2 grid grid-cols-3 gap-2 text-xs" [class.bg-white]="variante === 'oscuro'" [class.rounded-xl]="variante === 'oscuro'" [class.p-2]="variante === 'oscuro'">
     <a [href]="enlaceWhatsapp" target="_blank" rel="noopener" (click)="registrar('whatsapp')"
       class="flex flex-col items-center gap-1 rounded-lg border border-gray-200 py-2 text-gray-700 hover:border-green-600 hover:text-green-700">
       <i class="fab fa-whatsapp text-lg"></i> WhatsApp

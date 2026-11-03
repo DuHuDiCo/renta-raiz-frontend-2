@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 /**
- * Botón para compartir la ficha de un inmueble. En celulares y tabletas abre el menú nativo del sistema
+ * Botón para compartir la ficha de un inmueble o el perfil de un asesor. En celulares y tabletas abre el menú nativo del sistema
  * (WhatsApp, Instagram, correo…); donde no existe, muestra WhatsApp, Facebook y "Copiar enlace".
  */
 @Component({
@@ -14,12 +14,20 @@ export class CompartirInmuebleComponent {
   @Input({ required: true }) url = '';
   /** Encabezado de la ficha: "Apartamento en arriendo en El Poblado, Medellín". */
   @Input() titulo = '';
+  /** Texto del botón. */
+  @Input() etiqueta = 'Compartir inmueble';
+  /** Mensaje que acompaña el enlace. Por defecto, el de la ficha de un inmueble. */
+  @Input() mensaje = '';
+  /** Nombre del evento en Google Tag Manager. */
+  @Input() evento = 'compartir_inmueble';
+  /** 'oscuro' para fondos azul marino (perfil del asesor). */
+  @Input() variante: 'claro' | 'oscuro' = 'claro';
 
   opcionesAbiertas = false;
   copiado = false;
 
   get textoMensaje(): string {
-    return `Mira este inmueble de Renta Raíz: ${this.titulo}`.trim();
+    return this.mensaje || `Mira este inmueble de Renta Raíz: ${this.titulo}`.trim();
   }
 
   get enlaceWhatsapp(): string {
@@ -66,6 +74,6 @@ export class CompartirInmuebleComponent {
   /** Evento para Google Tag Manager. */
   registrar(medio: string): void {
     const capa = ((window as any).dataLayer = (window as any).dataLayer || []);
-    capa.push({ event: 'compartir_inmueble', medio, url: this.url });
+    capa.push({ event: this.evento, medio, url: this.url });
   }
 }

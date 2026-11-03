@@ -12,8 +12,9 @@ import { WishlistServiceService } from '../../../../core/wishlist/wishlist-servi
 import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wishlist.component';
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
 import { DataasesoresService } from '../../../../core/dataAsesores/dataasesores.service';
-import { SEO_SUFIJO, seoMigas, SeoService } from '../../../../core/seo/seo.service';
+import { SEO_DOMINIO, SEO_SUFIJO, seoMigas, SeoService } from '../../../../core/seo/seo.service';
 import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
+import { CompartirInmuebleComponent } from '../../../../shared/compartir-inmueble/compartir-inmueble.component';
 
 
 @Component({
@@ -21,7 +22,7 @@ import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
   standalone: true,
   imports: [
     RutaFichaPipe,RouterLink, CommonModule, NavbarComponent2, FooterPortafolioComponent,
-    BotonesFlotantesComponent, OffcanvasWishlistComponent, ModalWishlistComponent],
+    BotonesFlotantesComponent, OffcanvasWishlistComponent, ModalWishlistComponent, CompartirInmuebleComponent],
   templateUrl: './portafolio-asesores.component.html',
   styleUrl: './portafolio-asesores.component.scss'
 })
@@ -47,6 +48,8 @@ export class PortafolioAsesoresComponent implements OnInit {
   paginaActualVenta: number = 1;
   paginaActualArriendo: number = 1;
   elementsPerPage = 8;
+  /** Con la ficha del asesor en la cuadrícula de venta (ocupa 2 × 2 casillas), 12 inmuebles completan las filas. */
+  elementsPerPageVenta = 8;
   bloqueActualVenta: number = 0;
   bloqueActualArriendo: number = 0;
   inmueblesVisiblesArriendo: any[] = [];
@@ -68,6 +71,22 @@ export class PortafolioAsesoresComponent implements OnInit {
   dataasesoresService = inject(DataasesoresService);
   seo = inject(SeoService);
   tituloPagina = '';
+  /** Asesor del equipo dueño del portafolio; undefined si el código no está en la lista. */
+  asesor: any;
+
+  get urlPerfilAsesor(): string {
+    return `${SEO_DOMINIO}/asesor/${this.asesor.slug}`;
+  }
+
+  /** Teléfono con indicativo de Colombia y sin espacios: 573012050207. */
+  get telefonoAsesor(): string {
+    return `57${this.asesor.telefono.replace(/\D/g, '')}`;
+  }
+
+  get enlaceWhatsappAsesor(): string {
+    const saludo = `Hola ${this.asesor.nombre.split(' ')[0]}, vi tu portafolio en Renta Raíz y quiero más información.`;
+    return `https://wa.me/${this.telefonoAsesor}?text=${encodeURIComponent(saludo)}`;
+  }
 
 
 
@@ -76,9 +95,10 @@ export class PortafolioAsesoresComponent implements OnInit {
 
     this.asesorId = this.activatedRoute.snapshot.paramMap.get('asesor')!;
 
-    const asesor = this.dataasesoresService.getAsesorById(this.asesorId);
+    const asesor = (this.asesor = this.dataasesoresService.getAsesorById(this.asesorId));
+    if (asesor?.slug) this.elementsPerPageVenta = 12;
     const nombre = asesor?.nombre || 'Renta Raíz';
-    this.tituloPagina = `Portafolio de inmuebles de ${nombre}`;
+    this.tituloPagina = `Portafolio de ${nombre}`;
     this.seo.actualizar({
       titulo: `Portafolio de inmuebles de ${nombre}${SEO_SUFIJO}`,
       descripcion: `Inmuebles en arriendo y venta en Medellín y el Valle de Aburrá del portafolio de ${nombre}${asesor?.cargo ? `, ${asesor.cargo} de Renta Raíz` : ''}.`,
@@ -94,7 +114,7 @@ export class PortafolioAsesoresComponent implements OnInit {
     // var tamano = window.innerWidth <= 1024 && window.innerWidth >= 1000;
     // var elementsPerPage = tamano ? 4 : 3;
 
-    this.obtenerPropiedadesVenta(Number(this.asesorId), 1, this.elementsPerPage);
+    this.obtenerPropiedadesVenta(Number(this.asesorId), 1, this.elementsPerPageVenta);
     this.obtenerPropiedadesArriendo(Number(this.asesorId), 1, this.elementsPerPage);
 
     this.toggleOffcanvas()
@@ -202,10 +222,10 @@ export class PortafolioAsesoresComponent implements OnInit {
     if (this.isSmallScreen) {
       this.inmueblesVisiblesVenta =
         this.anchoVentana <= 1000
-          ? this.resultadosVenta.slice(0, this.elementsPerPage - 4)
-          : this.resultadosVenta.slice(0, this.elementsPerPage - 2);
+          ? this.resultadosVenta.slice(0, this.elementsPerPageVenta - 4)
+          : this.resultadosVenta.slice(0, this.elementsPerPageVenta - 2);
     } else {
-      this.inmueblesVisiblesVenta = this.resultadosVenta.slice(0, this.elementsPerPage);
+      this.inmueblesVisiblesVenta = this.resultadosVenta.slice(0, this.elementsPerPageVenta);
     }
   }
 
@@ -458,7 +478,7 @@ export class PortafolioAsesoresComponent implements OnInit {
         console.log(typeof pagina);
 
 
-        this.obtenerPropiedadesVenta(Number(this.asesorId), pagina, this.elementsPerPage);
+        this.obtenerPropiedadesVenta(Number(this.asesorId), pagina, this.elementsPerPageVenta);
         this.actualizarInmueblesVisiblesVenta();
         setTimeout(() => {
           this.loadingResultadosVenta = false
@@ -528,7 +548,7 @@ export class PortafolioAsesoresComponent implements OnInit {
         const paginasPorBloque = 3;
         const nuevoBloque = Math.floor((nuevaPagina - 1) / paginasPorBloque);
 
-        this.obtenerPropiedadesVenta(Number(this.asesorId), nuevaPagina, this.elementsPerPage);
+        this.obtenerPropiedadesVenta(Number(this.asesorId), nuevaPagina, this.elementsPerPageVenta);
         this.actualizarInmueblesVisiblesVenta();
         setTimeout(() => {
           this.loadingResultadosVenta = false
@@ -574,7 +594,7 @@ export class PortafolioAsesoresComponent implements OnInit {
         const nuevaPagina = this.paginaActualVenta + 1;
 
 
-        this.obtenerPropiedadesVenta(Number(this.asesorId), nuevaPagina, this.elementsPerPage);
+        this.obtenerPropiedadesVenta(Number(this.asesorId), nuevaPagina, this.elementsPerPageVenta);
         this.actualizarInmueblesVisiblesVenta();
         setTimeout(() => {
           this.loadingResultadosVenta = false

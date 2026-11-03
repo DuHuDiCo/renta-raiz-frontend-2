@@ -118,9 +118,10 @@ async function generarSitemap(): Promise<string> {
     .getAsesores()
     .filter((asesor) => asesor.id)
     .map((asesor) => `/portafolio/${asesor.id}`);
+  const perfiles = new DataasesoresService().getEquipo().map((asesor) => `/asesor/${asesor.slug}`);
 
   const entradas: EntradaSitemap[] = [
-    ...[...RUTAS_FIJAS, ...listados, ...ARTICULOS_BLOG.map((id) => `/ver-blog/${id}`), ...portafolios].map((ruta) => ({ ruta })),
+    ...[...RUTAS_FIJAS, ...listados, ...ARTICULOS_BLOG.map((id) => `/ver-blog/${id}`), ...portafolios, ...perfiles].map((ruta) => ({ ruta })),
     ...inmuebles,
   ];
 

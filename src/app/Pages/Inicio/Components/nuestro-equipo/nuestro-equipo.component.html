@@ -37,132 +37,38 @@
       Que nadie venga a nosotros sin irse mejor y más feliz
     </h2>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 w-full max-w-6xl">
-      <!-- Tarjeta -->
-      <a [routerLink]="['/portafolio', asesoresCode['Juan Pablo Hoyos']]"
-        class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img loading="lazy" decoding="async" src="assets/images/JuanHoyos-rr24-210x210.jpg" alt="Juan Pablo Hoyos"
-          class="w-32 h-32 rounded-full object-cover" />
-        <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
-          Juan Pablo Hoyos
-        </h3>
-        
-        <p class="text-sm font-medium text-gray-900 text-center">
-          Ejecutivo Comercial de Alto Valor
-        </p>
-        <div class="flex items-center text-gray-600 mt-2">
-          <i class="fa-solid fa-phone text-lg"></i>
-          <span class="ml-2 text-sm">350 223 9363</span>
+    <div class="flex flex-wrap justify-center gap-8 w-full max-w-6xl">
+      @for (asesor of equipo; track asesor.id) {
+        <div class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center w-full sm:w-[16.5rem] transition hover:scale-105 duration-300">
+          <a [routerLink]="['/portafolio', asesor.id]" class="flex flex-col items-center">
+            <img loading="lazy" decoding="async" [src]="asesor.avatar" [alt]="asesor.nombre"
+              class="w-32 h-32 rounded-full object-cover" />
+            <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
+              {{ asesor.nombre }}
+            </h3>
+            <p class="text-sm font-medium text-gray-900 text-center">
+              {{ asesor.cargo }}
+            </p>
+            <div class="flex items-center text-gray-600 mt-2">
+              <i class="fa-solid fa-phone text-lg"></i>
+              <span class="ml-2 text-sm">{{ asesor.telefono }}</span>
+            </div>
+            <div class="flex items-center text-gray-600 mt-1">
+              <i class="fa-solid fa-envelope text-lg"></i>
+              <span class="ml-2 text-sm break-all">{{ asesor.email }}</span>
+            </div>
+          </a>
+          <div class="mt-5 w-full flex flex-col gap-2">
+            <a [routerLink]="['/asesor', asesor.slug]"
+              class="text-center text-sm font-medium text-[#080E36] underline underline-offset-4 decoration-[#CDAD60] hover:text-[#CDAD60]">
+              Ver tarjeta digital
+            </a>
+            <app-compartir-inmueble [url]="urlPerfil(asesor)" [titulo]="asesor.nombre" etiqueta="Compartir asesor"
+              [mensaje]="'Te comparto el contacto de ' + asesor.nombre + ', ' + asesor.cargo + ' de Renta Raíz:'"
+              evento="compartir_asesor"></app-compartir-inmueble>
+          </div>
         </div>
-        <div class="flex items-center text-gray-600 mt-1">
-          <i class="fa-solid fa-envelope text-lg"></i>
-          <span class="ml-2 text-sm">juanpabloh.rentaraiz&#64;gmail.com</span>
-        </div>
-      </a>
-
-      <a [routerLink]="['/portafolio', asesoresCode['Sebastián Ospina']]"
-        class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img loading="lazy" decoding="async" src="assets/images/SebastianOspina-rr24-210x210.jpg" alt="Sebastián Ospina"
-          class="w-32 h-32 rounded-full object-cover" />
-        <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
-          Sebastián Ospina
-        </h3>
-        <p class="text-sm font-medium text-gray-900 text-center">
-          Ejecutivo Comercial de Alto Valor
-        </p>
-        <div class="flex items-center text-gray-600 mt-2">
-          <i class="fa-solid fa-phone text-lg"></i>
-          <span class="ml-2 text-sm">301 205 0207</span>
-        </div>
-        <div class="flex items-center text-gray-600 mt-1">
-          <i class="fa-solid fa-envelope text-lg"></i>
-          <span class="ml-2 text-sm">sebas.rentaraiz&#64;gmail.com</span>
-        </div>
-      </a>
-
-      <a [routerLink]="['/portafolio', asesoresCode['Lenys Cuberos']]"
-        class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img loading="lazy" decoding="async" src="assets/images/Lenys-rr24-210x210.jpg" alt="Lenys Cuberos"
-          class="w-32 h-32 rounded-full object-cover" />
-        <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
-          Lenys Cuberos
-        </h3>
-        <p class="text-sm font-medium text-gray-900 text-center">
-          Coordinadora Comercial
-        </p>
-        <div class="flex items-center text-gray-600 mt-2">
-          <i class="fa-solid fa-phone text-lg"></i>
-          <span class="ml-2 text-sm">314 543 8665</span>
-        </div>
-        <div class="flex items-center text-gray-600 mt-1">
-          <i class="fa-solid fa-envelope text-lg"></i>
-          <span class="ml-2 text-sm">direccioncomercial.com&#64;gmail.com</span>
-        </div>
-      </a>
-
-      <a [routerLink]="['/portafolio', asesoresCode['Andres Mejia']]"
-        class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img loading="lazy" decoding="async" src="assets/images/AndresMejia-rr24-210x210.jpg" alt="Juan Pablo Hoyos"
-          class="w-32 h-32 rounded-full object-cover" />
-        <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
-          Andres Mejia
-        </h3>
-        <p class="text-sm font-medium text-gray-900 text-center">
-          Ejecutivo Comercial de Alto Valor
-        </p>
-        <div class="flex items-center text-gray-600 mt-2">
-          <i class="fa-solid fa-phone text-lg"></i>
-          <span class="ml-2 text-sm">311 785 8793</span>
-        </div>
-        <div class="flex items-center text-gray-600 mt-1">
-          <i class="fa-solid fa-envelope text-lg"></i>
-          <span class="ml-2 text-sm">andresmejia.rentaraiz&#64;gmail.com</span>
-        </div>
-      </a>
-    </div>
-
-    <div class="flex flex-wrap justify-center gap-8 w-full max-w-6xl mt-12">
-      <!-- Tarjeta -->
-
-      <a [routerLink]="['/portafolio', asesoresCode['David Peláez']]"
-        class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img loading="lazy" decoding="async" src="assets/images/DavidPelaez-rr24-210x210.jpg" alt="Sebastián Ospina"
-          class="w-32 h-32 rounded-full object-cover" />
-        <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
-          David Peláez
-        </h3>
-        <p class="text-sm font-medium text-gray-900 text-center">
-          Ejecutivo Comercial de Alto Valor
-        </p>
-        <div class="flex items-center text-gray-600 mt-2">
-          <i class="fa-solid fa-phone text-lg"></i>
-          <span class="ml-2 text-sm">300 202 5783</span>
-        </div>
-        <div class="flex items-center text-gray-600 mt-1">
-          <i class="fa-solid fa-envelope text-lg"></i>
-          <span class="ml-2 text-sm"> david.rentaraiz&#64;gmail.com</span>
-        </div>
-      </a>
-
-      <a [routerLink]="['/portafolio', asesoresCode['Juan Pablo Ospina']]"
-        class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center transition hover:scale-105 duration-300">
-        <img loading="lazy" decoding="async" src="assets/images/JuanOspina-rr24-210x210.jpg" alt="Andrés Felipe Aldana"
-          class="w-32 h-32 rounded-full object-cover" />
-        <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
-          Juan Pablo Ospina
-        </h3>
-        <p class="text-sm font-medium text-gray-900 text-center">
-          Ejecutivo Comercial de Alto Valor
-        </p>
-        <div class="flex items-center text-gray-600 mt-2">
-          <i class="fa-solid fa-phone text-lg"></i>
-          <span class="ml-2 text-sm"> 350 223 9393</span>
-        </div>
-        <div class="flex items-center text-gray-600 mt-1">
-          <i class="fa-solid fa-envelope text-lg"></i>
-          <span class="ml-2 text-sm">Juanpablo.rentaraiz&#64;gmail.com</span>
-        </div>
-      </a>
+      }
     </div>
   </section>
 </div>
