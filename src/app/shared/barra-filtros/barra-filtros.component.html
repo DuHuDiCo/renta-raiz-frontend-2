@@ -1,5 +1,6 @@
 <div class="relative w-full flex justify-center mt-4 md:-mt-14 px-4 z-30">
   <div class="bg-white rounded-lg p-6 w-full max-w-8xl shadow-2xl shadow-gray-600/40">
+    @if (tipoFiltro !== 'ia') {
     <div class="flex items-center space-x-4">
       <!-- Radio Button 1: Ubicación (seleccionado por defecto) -->
       <div class="flex items-center">
@@ -19,7 +20,15 @@
           Código
         </label>
       </div>
+
+      @if (busquedaIaHabilitada) {
+      <button type="button" (click)="tipoFiltro = 'ia'"
+        class="!ml-auto text-sm font-medium text-[#080E36] hover:text-[#CDAD60] transition-colors">
+        <i class="fas fa-wand-magic-sparkles text-[#CDAD60] mr-1"></i>Volver a la búsqueda con IA
+      </button>
+      }
     </div>
+    }
     @if (tipoFiltro === 'ubicacion') {
     <div [formGroup]="formRangos" class="flex flex-col md:flex-row gap-4 items-end">
       <div class="relative w-full md:w-1/3">
@@ -301,6 +310,60 @@
         </ng-template>
       </button>
     </div>
+    } @else if (tipoFiltro === 'ia') {
+    <form class="w-full" (ngSubmit)="buscarConIa()">
+      <h2 class="text-xl font-semibold text-[#080E36] mb-4">Cuéntanos qué buscas</h2>
+
+      <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3">
+        <div class="relative flex-grow">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+            <i class="fas fa-wand-magic-sparkles text-[#CDAD60]"></i>
+          </div>
+          <input type="text" name="consultaIa" [(ngModel)]="consultaIa" [maxlength]="longitudMaximaConsulta"
+            aria-label="Describe el inmueble que buscas"
+            placeholder="Apartamento en arriendo en El Poblado, 3 habitaciones, hasta 4 millones"
+            class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-[#CDAD60] focus:border-[#CDAD60]" />
+        </div>
+
+        <button type="submit" [disabled]="cargando"
+          class="flex items-center justify-center mx-auto md:mx-0 text-white font-bold rounded-full text-lg px-6 py-3 transition-all duration-300 transform shadow-md"
+          [ngClass]="{
+            'bg-[#080E36] hover:bg-[#CDAD60] hover:scale-105 hover:shadow-lg': !cargando,
+            'bg-gray-400 cursor-not-allowed': cargando
+          }">
+          <ng-container *ngIf="!cargando; else interpretando">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            Buscar
+          </ng-container>
+          <ng-template #interpretando>
+            <svg class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+              viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+            Buscando...
+          </ng-template>
+        </button>
+      </div>
+
+      @if (avisoIa) {
+      <p class="mt-3 text-sm text-amber-700" role="status">
+        <i class="fas fa-circle-info mr-1"></i>{{ avisoIa }}
+      </p>
+      }
+
+      <div class="mt-3 flex flex-wrap justify-end gap-4 text-sm">
+        <button type="button" (click)="tipoFiltro = 'ubicacion'" class="text-gray-500 underline hover:text-[#080E36]">
+          Filtros clásicos
+        </button>
+        <button type="button" (click)="tipoFiltro = 'codigo'" class="text-gray-500 underline hover:text-[#080E36]">
+          Buscar por código
+        </button>
+      </div>
+    </form>
     } @else {
     <div class="flex items-center mt-3 w-full">
       <!-- Contenedor del input + icono (ocupa el espacio restante) -->

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { UrlParamService } from '../../core/configs/url-param.service';
@@ -11,6 +11,9 @@ import { UrlParamService } from '../../core/configs/url-param.service';
   styleUrl: './volver.component.scss'
 })
 export class VolverComponent {
+
+  /** true: botón pequeño dentro del contenido en vez de flotante arriba a la izquierda. */
+  @Input() enLinea = false;
 
   location = inject(Location);
   router = inject(Router);

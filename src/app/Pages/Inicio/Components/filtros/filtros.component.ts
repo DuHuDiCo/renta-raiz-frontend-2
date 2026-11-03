@@ -1,5 +1,6 @@
 declare var fbq: Function;
 import {
+  afterNextRender,
   ChangeDetectorRef,
   Component,
   ElementRef,
@@ -10,7 +11,7 @@ import {
 } from '@angular/core';
 import { NavbarComponent } from '../../../../shared/navbar/navbar.component';
 import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { InmueblesService } from '../../../../core/Inmuebles/inmuebles.service';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink } from '@angular/router';
 import { firstValueFrom, forkJoin, map, Observable, startWith } from 'rxjs';
@@ -30,6 +31,8 @@ import { DatosListado } from '../../../../core/resolvers/listado.resolver';
 import { BIZ_DE_NEGOCIO, MINIMO_BARRIO, Negocio, encabezadoListado, rutaFicha, rutaListado, slugListado } from '../../../../core/listados/listados';
 import { SEO_DOMINIO, SEO_POR_DEFECTO, SEO_SUFIJO, seoMigas, SeoService } from '../../../../core/seo/seo.service';
 import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
+import { BusquedaIaConversacionService, ResultadoBusquedaIa } from '../../../../core/busqueda-ia/busqueda-ia-conversacion.service';
+import { ChatBusquedaIaComponent } from './chat-busqueda-ia/chat-busqueda-ia.component';
 
 @Component({
   selector: 'app-filtros',
@@ -49,6 +52,7 @@ import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
     OffcanvasWishlistComponent,
     BotonesFlotantesComponent,
     EnlacesListadosComponent,
+    ChatBusquedaIaComponent,
   ],
   templateUrl: './filtros.component.html',
   styleUrl: './filtros.component.scss',
@@ -181,6 +185,29 @@ export class FiltrosComponent implements OnInit {
   // Injectaciones
   router = inject(Router);
   cdRef = inject(ChangeDetectorRef);
+  private location = inject(Location);
+  conversacionIa = inject(BusquedaIaConversacionService);
+
+  /** Se llegó desde la búsqueda con IA: el panel lateral muestra el chat en vez de los filtros. */
+  modoChatIa = false;
+  /** El chat sigue disponible aunque el usuario cambie a los filtros manuales. */
+  chatIaDisponible = false;
+
+  /**
+   * El servidor no ve la marca `busquedaIa` (vive en el historial del navegador) y pinta los filtros manuales.
+   * El chat se activa después de hidratar: si se activara antes, el HTML del servidor quedaría montado debajo
+   * del chat hasta que terminaran de cargar los datos.
+   */
+  private activarChatIa = afterNextRender(() => {
+    // El esqueleto del chat (index.html) ya no hace falta: desde aquí manda el estado del componente.
+    document.documentElement.classList.remove('cargando-chat-ia');
+    const estado = this.estadoHistorial();
+    if (!this.conversacionIa.activa || !estado?.busquedaIa) return;
+    this.chatIaDisponible = true;
+    // Al recargar se abre el mismo panel que había: el chat o los filtros manuales.
+    this.modoChatIa = estado.panelIa !== 'manual';
+    this.cdRef.detectChanges();
+  });
   formBuilder = inject(FormBuilder);
   inmueblesService = inject(InmueblesService);
   geolocalizacionService = inject(GeolocalizacionService);
@@ -701,6 +728,41 @@ export class FiltrosComponent implements OnInit {
     }
   }
 
+  /** Última frase del usuario, para la franja del chat en celular. */
+  get ultimaConsultaIa(): string {
+    return [...this.conversacionIa.mensajes].reverse().find((m) => m.rol === 'usuario')?.texto || '';
+  }
+
+  /** Pinta los resultados que trajo el chat y deja la página lista para recargar o paginar con ellos. */
+  aplicarResultadoIa(resultado: ResultadoBusquedaIa) {
+    const estado = { ...resultado, busquedaIa: true };
+    this.urlParamService.guardarParamLocalStorage('data', JSON.stringify({ url: '', state: resultado }));
+
+    // Los listados con URL propia vienen del resolver; los nuevos filtros se ven en /filtros.
+    if (this.listado) {
+      this.router.navigate(['/filtros'], { state: estado });
+      return;
+    }
+
+    this.location.replaceState('/filtros', '', { ...this.estadoHistorial(), ...estado });
+    this.bloqueActual = 0;
+    this.cargarDesdeState(estado);
+    // En celular el chat ocupa la pantalla: se cierra para ver los resultados.
+    if (!this.isDesktopView) this.isDrawerOpen = false;
+  }
+
+  /** Cambia entre el chat y los filtros manuales y lo recuerda en el historial para la próxima recarga. */
+  cambiarPanelIa(chat: boolean) {
+    this.modoChatIa = chat;
+    this.location.replaceState(this.location.path(), '', { ...this.estadoHistorial(), panelIa: chat ? 'chat' : 'manual' });
+  }
+
+  /** Con filtros manuales la conversación deja de describir la búsqueda. */
+  terminarChatIa() {
+    this.conversacionIa.terminar();
+    this.modoChatIa = this.chatIaDisponible = false;
+  }
+
   toggleDrawer() {
     this.isDrawerOpen = !this.isDrawerOpen;
 
@@ -1014,11 +1076,15 @@ export class FiltrosComponent implements OnInit {
 
     this.seleccion = {
       habitaciones: convertirConPlusSeis(
-        f?.minbedroom,
-        f?.maxbedroom,
+        f?.minbed ?? f?.minbedroom,
+        f?.maxbed ?? f?.maxbedroom,
         f?.bedrooms
       ),
-      banos: convertirConPlusSeis(f?.minbathroom, f?.maxbathroom, f?.bathrooms),
+      banos: convertirConPlusSeis(
+        f?.minbath ?? f?.minbathroom,
+        f?.maxbath ?? f?.maxbathroom,
+        f?.bathrooms
+      ),
       parqueadero: convertirConPlusSeis(
         f?.minparking,
         f?.maxparking,
@@ -1235,8 +1301,8 @@ export class FiltrosComponent implements OnInit {
     if (this.seleccion.habitaciones.length > 0) {
       const values = this.seleccion.habitaciones;
       if (values.includes('+6')) {
-        this.filtrosSeleccionados.set('maxbedroom', 100);
-        this.filtrosSeleccionados.set('minbedroom', 6);
+        this.filtrosSeleccionados.set('maxbed', 100);
+        this.filtrosSeleccionados.set('minbed', 6);
       } else {
         this.filtrosSeleccionados.set('bedrooms', values.join(','));
       }
@@ -1245,8 +1311,8 @@ export class FiltrosComponent implements OnInit {
     if (this.seleccion.banos.length > 0) {
       const values = this.seleccion.banos;
       if (values.includes('+6')) {
-        this.filtrosSeleccionados.set('maxbathroom', 100);
-        this.filtrosSeleccionados.set('minbathroom', 6);
+        this.filtrosSeleccionados.set('maxbath', 100);
+        this.filtrosSeleccionados.set('minbath', 6);
       } else {
         this.filtrosSeleccionados.set('bathrooms', values.join(','));
       }

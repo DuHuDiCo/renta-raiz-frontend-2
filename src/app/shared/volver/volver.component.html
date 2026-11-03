@@ -1,3 +1,13 @@
+@if (enLinea) {
+<button (click)="vistaAnterior()"
+    class="cursor-pointer w-11 h-11 rounded-full shadow-md hover:bg-[#CDAD60] transition-all duration-300 bg-[#080E36] flex items-center justify-center"
+    aria-label="Volver atrás">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"
+        stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+    </svg>
+</button>
+} @else {
 <div class="hidden md:block fixed top-20 left-6 z-50">
     <button (click)="vistaAnterior()"
         class="cursor-pointer w-14 h-14 rounded-full shadow-lg hover:bg-[#CDAD60] transition-all duration-300 bg-[#080E36] flex items-center justify-center"
@@ -8,3 +18,4 @@
         </svg>
     </button>
 </div>
+}

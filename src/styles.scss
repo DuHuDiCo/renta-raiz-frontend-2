@@ -6,6 +6,80 @@
 @tailwind utilities;
 @import 'ngx-toastr/toastr';
 
+// Avisos (ngx-toastr) con el estilo del portal: azul marino, título dorado y el color del tipo en el ícono y la barra.
+@function icono-aviso($color, $trazo) {
+  @return url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='#{$color}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/>#{$trazo}</svg>");
+}
+
+.toast-container .ngx-toastr {
+  width: 340px;
+  max-width: calc(100vw - 24px);
+  padding: 14px 40px 16px 58px;
+  border-radius: 14px;
+  background-color: #080E36;
+  background-position: 18px 16px;
+  background-size: 24px;
+  color: #fff;
+  border: 1px solid rgba(205, 173, 96, 0.35);
+  box-shadow: 0 12px 32px rgba(8, 14, 54, 0.35);
+  opacity: 1;
+  font-size: 14px;
+  line-height: 1.4;
+
+  &:hover {
+    box-shadow: 0 14px 36px rgba(8, 14, 54, 0.45);
+  }
+
+  .toast-title {
+    color: #CDAD60;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .toast-message {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .toast-close-button {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    text-shadow: none;
+    font-weight: 400;
+    opacity: 1;
+
+    &:hover {
+      color: #CDAD60;
+    }
+  }
+
+  .toast-progress {
+    height: 3px;
+    opacity: 1;
+    background-color: #CDAD60;
+  }
+}
+
+.toast-container .toast-info {
+  background-image: icono-aviso('%23CDAD60', "<path d='M12 16v-4'/><path d='M12 8h.01'/>");
+}
+
+.toast-container .toast-success {
+  background-image: icono-aviso('%234ADE80', "<path d='m8 12 3 3 5-6'/>");
+  .toast-progress { background-color: #4ADE80; }
+}
+
+.toast-container .toast-error {
+  background-image: icono-aviso('%23F87171', "<path d='M12 8v4'/><path d='M12 16h.01'/>");
+  .toast-progress { background-color: #F87171; }
+}
+
+.toast-container .toast-warning {
+  background-image: icono-aviso('%23FBBF24', "<path d='M12 8v4'/><path d='M12 16h.01'/>");
+  .toast-progress { background-color: #FBBF24; }
+}
+
 // Tema de Angular Material (mismo indigo-pink de antes) solo para lo que usa el sitio:
 // el autocompletado de ubicación y sus opciones. El tema precompilado traía los estilos
 // de todos los componentes de Material.
@@ -23,3 +97,27 @@ $tema: mat.define-light-theme((
 @include mat.core-theme($tema);
 @include mat.autocomplete-theme($tema);
 @include mat.input-theme($tema);
+
+// Esqueleto del chat de la búsqueda con IA mientras carga la página (lo activa el script de index.html).
+.chat-ia-esqueleto {
+  display: none;
+}
+
+html.cargando-chat-ia {
+  .chat-ia-esqueleto {
+    display: flex;
+  }
+
+  .panel-filtros-manual {
+    display: none !important;
+  }
+
+  @media (min-width: 768px) {
+    #modern-drawer {
+      top: 72px;
+      height: calc(100vh - 72px);
+      max-height: none !important;
+      overflow: hidden;
+    }
+  }
+}

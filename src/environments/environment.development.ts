@@ -7,6 +7,10 @@ export const environment = {
   baserUrlTest: 'https://rentaraizbackend.duckdns.org/api/v1',
   /** Chat del asistente con respuestas de prueba, sin llamar al backend. */
   asistenteMock: false,
+  /** Opción "Con IA" en la barra de búsqueda (POST /busqueda/interpretar). */
+  busquedaIa: true,
+  /** Búsqueda con IA interpretada en el navegador con reglas simples, sin llamar al backend. */
+  busquedaIaMock: true,
 };
 
 export const conexionVault = {

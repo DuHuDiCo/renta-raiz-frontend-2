@@ -292,8 +292,8 @@ export class BarraFiltrosPrioritariosComponent implements OnChanges {
       if (this.seleccion.banos.length > 0) {
         const values = this.seleccion.banos;
         if (values.includes('+6')) {
-          this.filtrosSeleccionados.set('maxbathroom', 100);
-          this.filtrosSeleccionados.set('minbathroom', 6);
+          this.filtrosSeleccionados.set('maxbath', 100);
+          this.filtrosSeleccionados.set('minbath', 6);
         } else {
           this.filtrosSeleccionados.set('bathrooms', values.join(','));
         }
@@ -320,8 +320,8 @@ export class BarraFiltrosPrioritariosComponent implements OnChanges {
       if (this.seleccion.habitaciones.length > 0) {
         const values = this.seleccion.habitaciones;
         if (values.includes('+6')) {
-          this.filtrosSeleccionados.set('maxbedroom', 100);
-          this.filtrosSeleccionados.set('minbedroom', 6);
+          this.filtrosSeleccionados.set('maxbed', 100);
+          this.filtrosSeleccionados.set('minbed', 6);
         } else {
           this.filtrosSeleccionados.set('bedrooms', values.join(','));
         }

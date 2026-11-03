@@ -19,6 +19,10 @@ import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { log } from 'console';
 import { TipoPropiedadEnum } from '../../core/enums/TipoPropiedadEnum';
 import { BIZ_DE_NEGOCIO, Negocio, segmentosListado, slugListado, tipoPorCodigo } from '../../core/listados/listados';
+import { BusquedaIaService } from '../../core/busqueda-ia/busqueda-ia.service';
+import { BusquedaIaConversacionService } from '../../core/busqueda-ia/busqueda-ia-conversacion.service';
+import { LONGITUD_MAXIMA_CONSULTA } from '../../core/busqueda-ia/busqueda-ia.models';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-barra-filtros',
@@ -64,8 +68,14 @@ export class BarraFiltrosComponent {
   cargando = false;
   isPreciosOpen = false;
   isMasFiltrosOpen = false;
-  tipoFiltro: string = 'ubicacion';
+  readonly busquedaIaHabilitada = environment.busquedaIa;
+  /** Con la búsqueda con IA activa, es la que se ve al entrar; ubicación y código quedan como alternativas. */
+  tipoFiltro: string = this.busquedaIaHabilitada ? 'ia' : 'ubicacion';
   codPro: number | null = null;
+
+  readonly longitudMaximaConsulta = LONGITUD_MAXIMA_CONSULTA;
+  consultaIa = '';
+  avisoIa: string | null = null;
 
   // Para Categorias de inmuebles
   isPropertyDropdownOpen = false;
@@ -114,6 +124,9 @@ export class BarraFiltrosComponent {
   inmueblesService = inject(InmueblesService);
   toastr = inject(ToastrService);
   urlParamService = inject(UrlParamService);
+  busquedaIaService = inject(BusquedaIaService);
+  conversacionIa = inject(BusquedaIaConversacionService);
+  private ruta = inject(ActivatedRoute);
 
   formRangos = this.formBuilder.group({
     AreaMinima: [''],
@@ -128,6 +141,14 @@ export class BarraFiltrosComponent {
     this.urlParamService.eliminarParamLocalStorage('data');
     this.filteredMin = this.initAutoComplete(this.precioMinimoCtrl);
     this.filteredMax = this.initAutoComplete(this.precioMaximoCtrl);
+
+    // Si el formulario se envió antes de que la página terminara de cargar, el navegador lo manda como
+    // ?consultaIa=… y recarga; se hace la búsqueda igual en vez de perderla.
+    const consultaUrl = this.ruta.snapshot.queryParamMap.get('consultaIa');
+    if (consultaUrl && this.busquedaIaHabilitada && typeof window !== 'undefined') {
+      this.consultaIa = consultaUrl;
+      this.buscarConIa();
+    }
 
 
 
@@ -288,8 +309,8 @@ export class BarraFiltrosComponent {
     if (this.seleccion.banos.length > 0) {
       const values = this.seleccion.banos;
       if (values.includes('+6')) {
-        this.filtrosSeleccionados.set('maxbathroom', 100);
-        this.filtrosSeleccionados.set('minbathroom', 6);
+        this.filtrosSeleccionados.set('maxbath', 100);
+        this.filtrosSeleccionados.set('minbath', 6);
       } else {
         this.filtrosSeleccionados.set('bathrooms', values.join(','));
       }
@@ -316,8 +337,8 @@ export class BarraFiltrosComponent {
     if (this.seleccion.habitaciones.length > 0) {
       const values = this.seleccion.habitaciones;
       if (values.includes('+6')) {
-        this.filtrosSeleccionados.set('maxbedroom', 100);
-        this.filtrosSeleccionados.set('minbedroom', 6);
+        this.filtrosSeleccionados.set('maxbed', 100);
+        this.filtrosSeleccionados.set('minbed', 6);
       } else {
         this.filtrosSeleccionados.set('bedrooms', values.join(','));
       }
@@ -446,12 +467,51 @@ export class BarraFiltrosComponent {
   }
 
   getEnviarFiltros() {
+    this.conversacionIa.terminar();
     this.prepararFiltros();
+    this.navegarConFiltros();
+  }
 
+  /**
+   * Convierte la frase en filtros con la IA y busca con ellos igual que el botón de siempre.
+   * Lo que la IA no pudo convertir en filtro se avisa, para que el usuario sepa que no se aplicó.
+   */
+  buscarConIa() {
+    if (this.cargando) return;
+    const consulta = this.consultaIa.trim();
+    if (!consulta) {
+      this.avisoIa = 'Escribe lo que buscas: zona, tipo de inmueble y presupuesto.';
+      return;
+    }
+    this.avisoIa = null;
+    this.cargando = true;
+
+    this.busquedaIaService.interpretar(consulta).subscribe((respuesta) => {
+      if (respuesta.degradado) {
+        this.cargando = false;
+        this.avisoIa = 'La búsqueda con IA no está disponible en este momento. Puedes buscar por Ubicación.';
+        return;
+      }
+      const filtros = Object.entries(respuesta.filtros).filter(([, valor]) => valor !== undefined && valor !== '');
+      if (!filtros.length) {
+        this.cargando = false;
+        this.avisoIa = 'No logramos entender la búsqueda. Prueba con el tipo de inmueble, la zona y el precio.';
+        return;
+      }
+      // Lo que no pudo convertir en filtro lo cuenta el chat de la página de resultados.
+      this.conversacionIa.iniciar(consulta, respuesta);
+      this.filtrosSeleccionados = new Map(filtros);
+      this.navegarConFiltros(true);
+    });
+  }
+
+  /** `busquedaIa` marca la navegación para que los resultados muestren el chat de la búsqueda con IA. */
+  private navegarConFiltros(busquedaIa = false) {
+    const marca = busquedaIa ? { busquedaIa: true } : {};
     const rutaListado = this.rutaDeListado();
     if (rutaListado) {
       this.cargando = false;
-      this.router.navigate(rutaListado);
+      this.router.navigate(rutaListado, { state: marca });
       return;
     }
 
@@ -472,6 +532,7 @@ export class BarraFiltrosComponent {
             resultados: response.data,
             paginacion: response,
             filtros: obj,
+            ...marca,
           },
         });
         this.cargando = false;
@@ -489,6 +550,7 @@ export class BarraFiltrosComponent {
 
       },
       (error: any) => {
+        this.cargando = false;
         console.error('Error al enviar los filtros:', error);
       }
     );
