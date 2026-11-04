@@ -15,12 +15,13 @@ import { DataasesoresService } from '../../../../core/dataAsesores/dataasesores.
 import { SEO_DOMINIO, SEO_SUFIJO, seoMigas, SeoService } from '../../../../core/seo/seo.service';
 import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
 import { CompartirInmuebleComponent } from '../../../../shared/compartir-inmueble/compartir-inmueble.component';
+import { TarjetaInmuebleComponent } from '../../../../shared/tarjeta-inmueble/tarjeta-inmueble.component';
 
 
 @Component({
   selector: 'app-portafolio-asesores',
   standalone: true,
-  imports: [
+  imports: [TarjetaInmuebleComponent, 
     RutaFichaPipe,RouterLink, CommonModule, NavbarComponent2, FooterPortafolioComponent,
     BotonesFlotantesComponent, OffcanvasWishlistComponent, ModalWishlistComponent, CompartirInmuebleComponent],
   templateUrl: './portafolio-asesores.component.html',

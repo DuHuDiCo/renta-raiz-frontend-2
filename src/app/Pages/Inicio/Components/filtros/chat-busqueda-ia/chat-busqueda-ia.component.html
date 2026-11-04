@@ -18,9 +18,43 @@
     </button>
   </div>
 
+  <!-- Filtros activos: siempre a la vista aunque la conversación avance; se pueden plegar -->
+  <div class="flex-none border-b border-[#ece6d6] bg-white px-4 py-2.5">
+    <button type="button" (click)="alternarFiltros()" [attr.aria-expanded]="filtrosAbiertos" aria-controls="filtros-activos-ia"
+      class="flex w-full items-center gap-1.5 text-left text-[11px] font-semibold uppercase tracking-wide text-[#8a7a52] hover:text-[#080E36]">
+      <span>Filtros activos</span>
+      @if (filtrosActivos.length) {
+        <span class="rounded-full bg-[#F4EFE4] px-1.5 text-[10px] text-[#080E36]">{{ filtrosActivos.length }}</span>
+      }
+      @if (total !== null) {
+        <span class="font-medium normal-case tracking-normal text-[#707172]">· {{ total }} {{ total === 1 ? 'inmueble' : 'inmuebles' }}</span>
+      }
+      <i class="fas fa-chevron-down ml-auto text-[10px] transition-transform" [class.rotate-180]="filtrosAbiertos"></i>
+    </button>
+    @if (!filtrosAbiertos) {
+      <!-- Plegada: una sola línea con los filtros, para no perderlos de vista -->
+      @if (filtrosActivos.length) {
+        <p class="mt-1 truncate text-xs text-[#5c5644]">{{ resumenFiltros }}</p>
+      }
+    } @else if (filtrosActivos.length) {
+      <div id="filtros-activos-ia" class="mt-1.5 flex max-h-28 flex-wrap gap-1.5 overflow-y-auto">
+        @for (etiqueta of filtrosActivos; track etiqueta.texto) {
+          <button type="button" (click)="quitar(etiqueta.claves)" [disabled]="pensando"
+            [attr.aria-label]="'Quitar ' + etiqueta.texto"
+            class="group inline-flex items-center gap-1.5 rounded-full bg-[#F4EFE4] hover:bg-[#ecdfc0] px-2.5 py-1 text-xs text-[#080E36] transition-colors disabled:opacity-60">
+            {{ etiqueta.texto }}
+            <i class="fas fa-xmark text-[10px] text-[#8a7a52] group-hover:text-[#080E36]"></i>
+          </button>
+        }
+      </div>
+    } @else {
+      <p id="filtros-activos-ia" class="mt-1 text-xs text-[#707172]">Ninguno: estás viendo todos los inmuebles.</p>
+    }
+  </div>
+
   <!-- Conversación -->
   <div #lista class="grow basis-0 min-h-0 overflow-y-auto px-4 py-4 flex flex-col gap-3" aria-live="polite">
-    @for (mensaje of conversacion.mensajes; track mensaje; let i = $index) {
+    @for (mensaje of conversacion.mensajes; track mensaje) {
       @if (mensaje.rol === 'usuario') {
         <p class="self-end max-w-[85%] rounded-2xl rounded-br-md bg-[#CDAD60] text-[#080E36] px-3.5 py-2 text-sm">
           {{ mensaje.texto }}
@@ -38,20 +72,19 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-[#CDAD60] animate-bounce [animation-delay:300ms]"></span>
               </span>
             } @else {
-              <p>{{ mensaje.texto }}</p>
+              <p class="whitespace-pre-line">{{ textoDe(mensaje) }}</p>
             }
 
-            @if (i === indiceUltimaRespuesta && mensaje.texto !== null && etiquetas.length) {
-              <div class="mt-2 flex flex-wrap gap-1.5">
-                @for (etiqueta of etiquetas; track etiqueta.texto) {
-                  <button type="button" (click)="quitar(etiqueta.claves)" [disabled]="pensando"
-                    [attr.aria-label]="'Quitar ' + etiqueta.texto"
-                    class="group inline-flex items-center gap-1.5 rounded-full bg-[#F4EFE4] hover:bg-[#ecdfc0] px-2.5 py-1 text-xs text-[#080E36] transition-colors disabled:opacity-60">
-                    {{ etiqueta.texto }}
-                    <i class="fas fa-xmark text-[10px] text-[#8a7a52] group-hover:text-[#080E36]"></i>
-                  </button>
-                }
-              </div>
+            @for (aviso of mensaje.avisos ?? []; track aviso) {
+              <p class="mt-2 rounded-lg bg-[#FEF6DD] text-[#7a5d12] px-2.5 py-1.5 text-xs">
+                <i class="fas fa-circle-info mr-1"></i>{{ aviso }}
+              </p>
+            }
+
+            @if (mensaje.lugaresNoEncontrados?.length) {
+              <p class="mt-2 rounded-lg bg-[#FEF6DD] text-[#7a5d12] px-2.5 py-1.5 text-xs">
+                <i class="fas fa-location-dot mr-1"></i>{{ textoLugares(mensaje.lugaresNoEncontrados!) }}
+              </p>
             }
 
             @if (mensaje.noEntendido?.length) {
@@ -59,6 +92,13 @@
                 <i class="fas fa-circle-exclamation mr-1"></i>
                 No pude usar «{{ mensaje.noEntendido!.join(', ') }}». Prueba a decirlo de otra forma.
               </p>
+            }
+
+            @if (mensaje.preguntaAsistente) {
+              <button type="button" (click)="preguntarAlAsistente(mensaje.preguntaAsistente)"
+                class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#080E36] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#CDAD60] hover:text-[#080E36] transition-colors">
+                <i class="fas fa-comment-dots"></i> Preguntarle al asistente
+              </button>
             }
           </div>
         </div>
@@ -70,10 +110,15 @@
         <span class="w-7 h-7 rounded-full bg-[#080E36] text-[#CDAD60] flex items-center justify-center flex-none text-xs">
           <i class="fas fa-wand-magic-sparkles"></i>
         </span>
-        <span class="rounded-2xl rounded-tl-md bg-white border border-[#ece6d6] px-3.5 py-3 inline-flex gap-1" aria-label="Pensando">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#CDAD60] animate-bounce"></span>
-          <span class="w-1.5 h-1.5 rounded-full bg-[#CDAD60] animate-bounce [animation-delay:150ms]"></span>
-          <span class="w-1.5 h-1.5 rounded-full bg-[#CDAD60] animate-bounce [animation-delay:300ms]"></span>
+        <span class="rounded-2xl rounded-tl-md bg-white border border-[#ece6d6] px-3.5 py-3 inline-flex items-center gap-2" aria-label="Pensando">
+          <span class="inline-flex gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#CDAD60] animate-bounce"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-[#CDAD60] animate-bounce [animation-delay:150ms]"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-[#CDAD60] animate-bounce [animation-delay:300ms]"></span>
+          </span>
+          @if (textoPensando) {
+            <span class="text-xs text-[#5c5644]">{{ textoPensando }}</span>
+          }
         </span>
       </div>
     }

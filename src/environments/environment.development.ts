@@ -10,7 +10,7 @@ export const environment = {
   /** Opción "Con IA" en la barra de búsqueda (POST /busqueda/interpretar). */
   busquedaIa: true,
   /** Búsqueda con IA interpretada en el navegador con reglas simples, sin llamar al backend. */
-  busquedaIaMock: true,
+  busquedaIaMock: false,
 };
 
 export const conexionVault = {

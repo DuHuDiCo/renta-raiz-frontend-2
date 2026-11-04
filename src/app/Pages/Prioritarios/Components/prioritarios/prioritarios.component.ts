@@ -16,11 +16,12 @@ import { WishlistServiceService } from '../../../../core/wishlist/wishlist-servi
 import { OffcanvasWishlistComponent } from '../../../Inicio/Components/offcanvas-wishlist/offcanvas-wishlist.component';
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
 import { BotonesFlotantesComponent } from '../../../../shared/botones-flotantes/botones-flotantes.component';
+import { TarjetaInmuebleComponent } from '../../../../shared/tarjeta-inmueble/tarjeta-inmueble.component';
 
 @Component({
   selector: 'app-prioritarios',
   standalone: true,
-  imports: [RouterLink, CommonModule, NavbarComponent2, BarraFiltrosPrioritariosComponent, OffcanvasWishlistComponent, ModalWishlistComponent, BotonesFlotantesComponent],
+  imports: [TarjetaInmuebleComponent, RouterLink, CommonModule, NavbarComponent2, BarraFiltrosPrioritariosComponent, OffcanvasWishlistComponent, ModalWishlistComponent, BotonesFlotantesComponent],
   templateUrl: './prioritarios.component.html',
   styleUrl: './prioritarios.component.scss'
 })

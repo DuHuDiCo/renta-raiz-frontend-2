@@ -21,7 +21,15 @@ import { TipoPropiedadEnum } from '../../core/enums/TipoPropiedadEnum';
 import { BIZ_DE_NEGOCIO, Negocio, segmentosListado, slugListado, tipoPorCodigo } from '../../core/listados/listados';
 import { BusquedaIaService } from '../../core/busqueda-ia/busqueda-ia.service';
 import { BusquedaIaConversacionService } from '../../core/busqueda-ia/busqueda-ia-conversacion.service';
-import { LONGITUD_MAXIMA_CONSULTA } from '../../core/busqueda-ia/busqueda-ia.models';
+import {
+  LONGITUD_MAXIMA_CONSULTA,
+  TEXTO_DEGRADADO,
+  TEXTO_OTRO,
+  TEXTO_PREGUNTA,
+  textoEspera,
+  textoLugaresNoEncontrados,
+} from '../../core/busqueda-ia/busqueda-ia.models';
+import { AsistenteChatService } from '../../core/asistente/asistente-chat.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -76,6 +84,8 @@ export class BarraFiltrosComponent {
   readonly longitudMaximaConsulta = LONGITUD_MAXIMA_CONSULTA;
   consultaIa = '';
   avisoIa: string | null = null;
+  /** Frase que resultó ser una pregunta; se ofrece mandarla al Asistente Renta Raíz. */
+  preguntaIa: string | null = null;
 
   // Para Categorias de inmuebles
   isPropertyDropdownOpen = false;
@@ -126,6 +136,7 @@ export class BarraFiltrosComponent {
   urlParamService = inject(UrlParamService);
   busquedaIaService = inject(BusquedaIaService);
   conversacionIa = inject(BusquedaIaConversacionService);
+  asistenteChat = inject(AsistenteChatService);
   private ruta = inject(ActivatedRoute);
 
   formRangos = this.formBuilder.group({
@@ -466,6 +477,14 @@ export class BarraFiltrosComponent {
     return segmentosListado(negocio, tipo?.slug, slugListado(ciudad?.name), slugListado(barrio?.name));
   }
 
+  /** La frase era una pregunta: se la manda al Asistente Renta Raíz, que se abre con ella. */
+  preguntarAlAsistente() {
+    if (!this.preguntaIa) return;
+    this.asistenteChat.preguntar(this.preguntaIa);
+    this.preguntaIa = null;
+    this.avisoIa = null;
+  }
+
   getEnviarFiltros() {
     this.conversacionIa.terminar();
     this.prepararFiltros();
@@ -484,19 +503,34 @@ export class BarraFiltrosComponent {
       return;
     }
     this.avisoIa = null;
+    this.preguntaIa = null;
     this.cargando = true;
 
-    this.busquedaIaService.interpretar(consulta).subscribe((respuesta) => {
-      if (respuesta.degradado) {
+    // Desde el inicio no hay filtros aplicados todavía.
+    this.busquedaIaService.interpretar(consulta, {}).subscribe((respuesta) => {
+      const noBuscar = (aviso: string) => {
         this.cargando = false;
-        this.avisoIa = 'La búsqueda con IA no está disponible en este momento. Puedes buscar por Ubicación.';
-        return;
+        this.avisoIa = aviso;
+      };
+      if (respuesta.reintentarEn !== undefined) return noBuscar(textoEspera(respuesta.reintentarEn));
+      if (respuesta.degradado) return noBuscar(TEXTO_DEGRADADO);
+      if (respuesta.intencion === 'pregunta') {
+        this.preguntaIa = consulta;
+        return noBuscar(TEXTO_PREGUNTA);
       }
+      if (respuesta.intencion === 'otro') return noBuscar(TEXTO_OTRO);
+      // Desde el inicio no hay inmuebles en pantalla; si aun así llega, se muestra la respuesta.
+      if (respuesta.intencion === 'pregunta_inmuebles') return noBuscar(respuesta.respuesta || TEXTO_OTRO);
+
       const filtros = Object.entries(respuesta.filtros).filter(([, valor]) => valor !== undefined && valor !== '');
       if (!filtros.length) {
-        this.cargando = false;
-        this.avisoIa = 'No logramos entender la búsqueda. Prueba con el tipo de inmueble, la zona y el precio.';
-        return;
+        return noBuscar(
+          respuesta.avisos.length
+            ? respuesta.avisos.join(' ')
+            : respuesta.lugaresNoEncontrados.length
+            ? textoLugaresNoEncontrados(respuesta.lugaresNoEncontrados)
+            : 'No logramos entender la búsqueda. Prueba con el tipo de inmueble, la zona y el precio.'
+        );
       }
       // Lo que no pudo convertir en filtro lo cuenta el chat de la página de resultados.
       this.conversacionIa.iniciar(consulta, respuesta);

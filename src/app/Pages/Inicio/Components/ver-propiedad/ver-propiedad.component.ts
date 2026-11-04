@@ -28,12 +28,13 @@ import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wish
 import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
 import { CompartirInmuebleComponent } from '../../../../shared/compartir-inmueble/compartir-inmueble.component';
 import { busquedasSimilares, CANDIDATOS_SIMILARES, CANTIDAD_SIMILARES, mejoresSimilares } from '../../../../core/similares/similares';
+import { TarjetaInmuebleComponent } from '../../../../shared/tarjeta-inmueble/tarjeta-inmueble.component';
 
 
 @Component({
   selector: 'app-ver-propiedad',
   standalone: true,
-  imports: [
+  imports: [TarjetaInmuebleComponent, 
     RutaFichaPipe,
     CompartirInmuebleComponent,
     RouterLink,

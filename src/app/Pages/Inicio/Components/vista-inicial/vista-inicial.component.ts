@@ -26,6 +26,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import { WishlistServiceService } from '../../../../core/wishlist/wishlist-service.service';
 import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wishlist.component';
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
+import { TarjetaInmuebleComponent } from '../../../../shared/tarjeta-inmueble/tarjeta-inmueble.component';
 import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
 var document: any;
 declare const Carousel: any;
@@ -35,6 +36,7 @@ declare const Carousel: any;
   standalone: true,
   imports: [
     RutaFichaPipe,
+    TarjetaInmuebleComponent,
     RouterLink,
     CommonModule,
     ReactiveFormsModule,

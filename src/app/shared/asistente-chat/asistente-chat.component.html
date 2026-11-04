@@ -105,6 +105,18 @@
                 </li>
               }
             </ul>
+            @if (mensaje.busqueda) {
+              <div class="pl-9">
+                <button type="button" (click)="verTodosEnListado(mensaje.busqueda)" [disabled]="abriendoListado"
+                  class="inline-flex items-center gap-1.5 rounded-full bg-[#080E36] px-3.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#CDAD60] hover:text-[#080E36] disabled:opacity-60">
+                  @if (abriendoListado) {
+                    <i class="fas fa-spinner fa-spin"></i> Abriendo el listado…
+                  } @else {
+                    <i class="fas fa-table-cells-large"></i> Ver todos en el listado
+                  }
+                </button>
+              </div>
+            }
           }
         }
       }

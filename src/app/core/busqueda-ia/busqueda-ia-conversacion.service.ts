@@ -1,8 +1,19 @@
 import { inject, Injectable } from '@angular/core';
-import { catchError, map, Observable, of, switchMap } from 'rxjs';
+import { catchError, map, Observable, of, Subject, switchMap } from 'rxjs';
 import { InmueblesService } from '../Inmuebles/inmuebles.service';
 import { BusquedaIaService } from './busqueda-ia.service';
-import { ClaveFiltroIa, FiltrosIa, InterpretarBusquedaResponse } from './busqueda-ia.models';
+import {
+  ClaveFiltroIa,
+  FiltrosIa,
+  InterpretarBusquedaResponse,
+  noEntendidoSinLugares,
+  PaginaVisibleIa,
+  TEXTO_DEGRADADO,
+  TEXTO_OTRO,
+  TEXTO_PREGUNTA,
+  TEXTO_SIN_RESPUESTA_PAGINA,
+  textoEspera,
+} from './busqueda-ia.models';
 
 /** Clave de sessionStorage: la conversación dura lo que la pestaña y sobrevive a recargar. */
 const CLAVE_CONVERSACION = 'busqueda_ia_conversacion';
@@ -11,8 +22,18 @@ export interface MensajeBusquedaIa {
   rol: 'usuario' | 'ia';
   /** null mientras la IA espera el total de resultados para responder. */
   texto: string | null;
-  /** Partes de la frase que no se pudieron convertir en filtro. */
+  /** Partes de la frase que no se pudieron convertir en filtro (sin los lugares no encontrados). */
   noEntendido?: string[];
+  /** Ciudades o barrios nombrados que no existen en nuestras zonas. */
+  lugaresNoEncontrados?: string[];
+  /** Explicaciones del backend, tal como llegan. */
+  avisos?: string[];
+  /** Filtros con los que se hizo la búsqueda de este mensaje; cada respuesta conserva los suyos. */
+  etiquetas?: EtiquetaFiltroIa[];
+  /** La frase era una pregunta: el mensaje ofrece mandársela al Asistente Renta Raíz. */
+  preguntaAsistente?: string;
+  /** Respuesta a una pregunta sobre la página: inmuebles de esa página que la responden. */
+  inmueblesDestacados?: number[];
 }
 
 /** Filtro visible en el chat; algunos agrupan varias claves (mínimo y máximo de habitaciones). */
@@ -56,6 +77,38 @@ export class BusquedaIaConversacionService {
 
   private conversacion: Conversacion = this.leer();
 
+  /** Resultados que llegan de fuera del chat (el Asistente Renta Raíz) para la página de resultados abierta. */
+  private resultadoExterno = new Subject<ResultadoBusquedaIa>();
+  readonly resultadoExterno$ = this.resultadoExterno.asObservable();
+
+  /** Hay una página de resultados abierta que pinta los resultados externos. */
+  get hayListadoAbierto(): boolean {
+    return this.resultadoExterno.observed;
+  }
+
+  /**
+   * Aplica la búsqueda del asistente ("Ver todos en el listado"): reemplaza los filtros, sin mezclarlos, y
+   * busca desde la página 1. Si ya había conversación la continúa; si no, empieza una.
+   */
+  aplicarBusquedaExterna(
+    busqueda: { filtros: Record<string, string>; etiquetas: Record<string, string> },
+    elementsPerPage: number
+  ): Observable<ResultadoBusquedaIa | null> {
+    this.conversacion = {
+      mensajes: this.activa ? this.conversacion.mensajes : [],
+      filtros: this.sinVacios(busqueda.filtros as FiltrosIa),
+      etiquetas: { ...busqueda.etiquetas },
+    };
+    return this.buscar(elementsPerPage, (total) =>
+      total ? `Apliqué la búsqueda del asistente: ${this.cantidad(total)}.` : this.textoSinResultados()
+    );
+  }
+
+  /** Entrega a la página de resultados abierta lo que buscó el asistente. */
+  publicarResultadoExterno(resultado: ResultadoBusquedaIa): void {
+    this.resultadoExterno.next(resultado);
+  }
+
   get activa(): boolean {
     return this.conversacion.mensajes.length > 0;
   }
@@ -64,16 +117,24 @@ export class BusquedaIaConversacionService {
     return this.conversacion.mensajes;
   }
 
+  /** Filtros aplicados por la conversación; la paginación los necesita para lo que el panel manual no tiene. */
+  get filtros(): FiltrosIa {
+    return this.conversacion.filtros;
+  }
+
   /** Primera frase, buscada desde la barra de filtros. La respuesta se completa al conocer el total. */
   iniciar(consulta: string, respuesta: InterpretarBusquedaResponse): void {
     this.conversacion = {
-      mensajes: [
-        { rol: 'usuario', texto: consulta },
-        { rol: 'ia', texto: null, noEntendido: respuesta.noEntendido },
-      ],
+      mensajes: [{ rol: 'usuario', texto: consulta }],
       filtros: this.sinVacios(respuesta.filtros),
       etiquetas: { ...respuesta.etiquetas },
     };
+    this.conversacion.mensajes.push({
+      rol: 'ia',
+      texto: null,
+      etiquetas: this.etiquetas(),
+      ...this.avisos(respuesta),
+    });
     this.guardar();
   }
 
@@ -81,7 +142,7 @@ export class BusquedaIaConversacionService {
   completarTotal(total: number): void {
     const ultimo = this.conversacion.mensajes.at(-1);
     if (ultimo?.rol !== 'ia' || ultimo.texto !== null) return;
-    ultimo.texto = total ? `Encontré ${this.cantidad(total)}. Busqué con:` : this.textoSinResultados();
+    ultimo.texto = total ? `Encontré ${this.cantidad(total)}.` : this.textoSinResultados();
     this.guardar();
   }
 
@@ -94,26 +155,51 @@ export class BusquedaIaConversacionService {
     }
   }
 
-  /** Cambia los filtros con una frase ("más barato", "mejor en Envigado"). null si no hubo cambios que buscar. */
-  refinar(consulta: string, elementsPerPage: number): Observable<ResultadoBusquedaIa | null> {
+  /**
+   * Cambia los filtros con una frase ("más barato", "mejor en Envigado") o responde una pregunta sobre los
+   * inmuebles de `paginaVisible` ("¿cuál tiene piscina?"). null si no hubo cambios que buscar.
+   */
+  refinar(
+    consulta: string,
+    elementsPerPage: number,
+    paginaVisible: PaginaVisibleIa = { inmueblesVisibles: [] }
+  ): Observable<ResultadoBusquedaIa | null> {
     this.conversacion.mensajes.push({ rol: 'usuario', texto: consulta });
     this.guardar();
 
-    return this.busquedaIa.interpretar(consulta, this.conversacion.filtros).pipe(
+    return this.busquedaIa.interpretar(consulta, this.conversacion.filtros, paginaVisible).pipe(
       switchMap((respuesta) => {
-        if (respuesta.degradado) {
-          return this.responderSinBuscar('La búsqueda con IA no está disponible en este momento. Puedes usar los filtros manuales.');
+        // En estos casos los filtros actuales no se tocan.
+        if (respuesta.reintentarEn !== undefined) return this.responderSinBuscar({ texto: textoEspera(respuesta.reintentarEn) });
+        if (respuesta.degradado) return this.responderSinBuscar({ texto: TEXTO_DEGRADADO });
+        if (respuesta.intencion === 'pregunta_inmuebles') {
+          return this.responderSinBuscar({
+            texto: respuesta.respuesta || TEXTO_SIN_RESPUESTA_PAGINA,
+            inmueblesDestacados: respuesta.inmueblesDestacados,
+          });
         }
+        if (respuesta.intencion === 'pregunta') return this.responderSinBuscar({ texto: TEXTO_PREGUNTA, preguntaAsistente: consulta });
+        if (respuesta.intencion === 'otro') return this.responderSinBuscar({ texto: TEXTO_OTRO });
+
+        // Los filtros que devuelve el backend ya incluyen los actuales: reemplazan, no se mezclan.
         const filtros = this.sinVacios(respuesta.filtros);
         if (this.mismosFiltros(filtros, this.conversacion.filtros)) {
-          return this.responderSinBuscar(
-            'No logré convertir eso en un cambio de búsqueda. Prueba con la zona, el tipo de inmueble, el precio o las habitaciones.',
-            respuesta.noEntendido
-          );
+          return this.responderSinBuscar({
+            texto: respuesta.lugaresNoEncontrados.length || respuesta.avisos.length
+              ? 'No cambié la búsqueda.'
+              : 'No logré convertir eso en un cambio de búsqueda. Prueba con la zona, el tipo de inmueble, el precio o las habitaciones.',
+            ...this.avisos(respuesta),
+          });
         }
+        const antes = this.etiquetas();
         this.conversacion.filtros = filtros;
         this.conversacion.etiquetas = this.etiquetasVigentes({ ...this.conversacion.etiquetas, ...respuesta.etiquetas });
-        return this.buscar(elementsPerPage, (total) => (total ? `Listo, ahora son ${this.cantidad(total)}.` : this.textoSinResultados()), respuesta.noEntendido);
+        const quitados = this.textoQuitados(antes);
+        return this.buscar(
+          elementsPerPage,
+          (total) => (total ? `${quitados}${quitados ? 'Ahora' : 'Listo, ahora'} son ${this.cantidad(total)}.` : `${quitados}${this.textoSinResultados()}`),
+          this.avisos(respuesta)
+        );
       })
     );
   }
@@ -130,7 +216,7 @@ export class BusquedaIaConversacionService {
     );
   }
 
-  /** Filtros actuales en palabras, para las etiquetas del chat. */
+  /** Filtros actuales en palabras; cada respuesta que busca guarda una copia en su mensaje. */
   etiquetas(): EtiquetaFiltroIa[] {
     const f = this.conversacion.filtros;
     const e = this.conversacion.etiquetas;
@@ -138,9 +224,9 @@ export class BusquedaIaConversacionService {
     const agregar = (texto: string, ...claves: ClaveFiltroIa[]) => lista.push({ texto, claves });
 
     if (f.biz && NEGOCIOS[f.biz]) agregar(NEGOCIOS[f.biz], 'biz');
-    if (f.type) agregar(e.type || 'Tipo de inmueble', 'type');
-    if (f.neighborhood_code) agregar(e.neighborhood_code || 'Barrio', 'neighborhood_code');
-    if (f.city) agregar(e.city || 'Ciudad', 'city');
+    if (f.type) agregar(e.type?.trim() || 'Tipo de inmueble', 'type');
+    if (f.neighborhood_code) agregar(e.neighborhood_code?.trim() || 'Barrio', 'neighborhood_code');
+    if (f.city) agregar(e.city?.trim() || 'Ciudad', 'city');
     const precioMin = f.pvmin || f.pcmin;
     const precioMax = f.pvmax || f.pcmax;
     if (precioMin) agregar(`Desde ${this.precio(precioMin)}`, f.pvmin ? 'pvmin' : 'pcmin');
@@ -151,7 +237,9 @@ export class BusquedaIaConversacionService {
       agregar(f.minarea && f.maxarea ? `${f.minarea} a ${f.maxarea} m²` : f.minarea ? `Desde ${f.minarea} m²` : `Hasta ${f.maxarea} m²`, 'minarea', 'maxarea');
     }
     if (f.minparking) agregar('Con parqueadero', 'minparking');
-    if (f.stratum) agregar(`Estrato ${f.stratum}`, 'stratum');
+    if (f.stratum) agregar(`Estrato ${f.stratum.split(',').map((e) => e.trim()).join(', ')}`, 'stratum');
+    // Un solo chip para todas las características: quitarlo borra la clave entera.
+    if (f.amenities) agregar(e.amenities?.trim() || 'Características', 'amenities');
     return lista;
   }
 
@@ -168,26 +256,59 @@ export class BusquedaIaConversacionService {
     return lista.slice(0, 4);
   }
 
+  /** Inmuebles que destacó la última respuesta, si fue a una pregunta sobre la página. */
+  destacadosRecientes(): number[] {
+    return this.conversacion.mensajes.at(-1)?.inmueblesDestacados ?? [];
+  }
+
+  /** El orden y la página los pone el front: cada búsqueda nueva vuelve a la página 1. */
   private buscar(
     elementsPerPage: number,
     texto: (total: number) => string,
-    noEntendido: string[] = []
+    avisos: Pick<MensajeBusquedaIa, 'noEntendido' | 'lugaresNoEncontrados' | 'avisos'> = {}
   ): Observable<ResultadoBusquedaIa | null> {
     const filtros = { ...this.conversacion.filtros, sort: 'desc', order: 'consignation_date', page: 1 };
     return this.inmuebles.getFiltrosEnviar(filtros, elementsPerPage).pipe(
       map((respuesta: any) => {
-        this.conversacion.mensajes.push({ rol: 'ia', texto: texto(Number(respuesta?.total) || 0), noEntendido });
+        this.conversacion.mensajes.push({
+          rol: 'ia',
+          texto: texto(Number(respuesta?.total) || 0),
+          etiquetas: this.etiquetas(),
+          ...avisos,
+        });
         this.guardar();
         return { resultados: respuesta?.data || [], paginacion: respuesta, filtros };
       }),
-      catchError(() => this.responderSinBuscar('No pude cargar los inmuebles. Intenta de nuevo en un momento.'))
+      catchError(() => this.responderSinBuscar({ texto: 'No pude cargar los inmuebles. Intenta de nuevo en un momento.' }))
     );
   }
 
-  private responderSinBuscar(texto: string, noEntendido: string[] = []): Observable<null> {
-    this.conversacion.mensajes.push({ rol: 'ia', texto, noEntendido });
+  private responderSinBuscar(mensaje: Omit<MensajeBusquedaIa, 'rol'>): Observable<null> {
+    this.conversacion.mensajes.push({ rol: 'ia', ...mensaje });
     this.guardar();
     return of(null);
+  }
+
+  /** Avisos de lo que no se pudo usar; los lugares no encontrados van aparte y no se repiten. */
+  private avisos(respuesta: InterpretarBusquedaResponse): Pick<MensajeBusquedaIa, 'noEntendido' | 'lugaresNoEncontrados' | 'avisos'> {
+    return {
+      noEntendido: noEntendidoSinLugares(respuesta),
+      lugaresNoEncontrados: respuesta.lugaresNoEncontrados,
+      avisos: respuesta.avisos,
+    };
+  }
+
+  /**
+   * "Quité el filtro «Piscina». " si la frase quitó filtros ("sin importar el precio", "que no tengan piscina").
+   * Solo cuenta los que desaparecieron del todo; un valor que cambió (venta por arriendo) no es un filtro quitado.
+   * Domus no excluye características: "que no tengan piscina" solo quita ese filtro, y así se dice.
+   */
+  private textoQuitados(antes: EtiquetaFiltroIa[]): string {
+    const f = this.conversacion.filtros;
+    const nombres = antes.filter((e) => e.claves.every((clave) => !f[clave])).map((e) => `«${e.texto}»`);
+    if (!nombres.length) return '';
+    if (nombres.length === 1) return `Quité el filtro ${nombres[0]}. `;
+    return `Quité los filtros ${nombres.slice(0, -1).join(', ')} y ${nombres.at(-1)}. `;
   }
 
   private textoSinResultados(): string {

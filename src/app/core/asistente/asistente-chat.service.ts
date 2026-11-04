@@ -2,13 +2,15 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, timeout } from 'rxjs';
+import { Observable, Subject, timeout } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { codigoDeFicha } from '../listados/listados';
 import {
   AsistenteMensajeRequest,
   AsistenteMensajeResponse,
+  LONGITUD_MAXIMA_MENSAJE,
   ContextoAsistente,
+  ListadoVisibleAsistente,
   MensajeChat,
   PaginaAsistente,
 } from './asistente.models';
@@ -44,8 +46,38 @@ export class AsistenteChatService {
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
 
+  /** Pregunta mandada desde otra parte del sitio que el chat aún no ha enviado (puede no haber cargado). */
+  private preguntaPendiente: string | null = null;
+  private avisoPregunta = new Subject<void>();
+  /** El chat lo escucha para abrirse y enviar `tomarPreguntaPendiente()`. */
+  readonly preguntaRecibida$ = this.avisoPregunta.asObservable();
+
   private get enNavegador(): boolean {
     return isPlatformBrowser(this.platformId);
+  }
+
+  /** Abre el chat y le envía el texto como si el visitante lo hubiera escrito (p. ej. desde la búsqueda con IA). */
+  preguntar(texto: string): void {
+    this.preguntaPendiente = texto.trim().slice(0, LONGITUD_MAXIMA_MENSAJE);
+    this.avisoPregunta.next();
+  }
+
+  /**
+   * La página de resultados registra cómo leer lo que muestra; se consulta en cada mensaje para que el
+   * asistente tenga siempre los filtros y la página actuales. Devuelve la función para quitar el registro.
+   */
+  registrarListado(leer: () => ListadoVisibleAsistente): () => void {
+    this.leerListado = leer;
+    return () => {
+      if (this.leerListado === leer) this.leerListado = null;
+    };
+  }
+  private leerListado: (() => ListadoVisibleAsistente) | null = null;
+
+  tomarPreguntaPendiente(): string | null {
+    const pregunta = this.preguntaPendiente;
+    this.preguntaPendiente = null;
+    return pregunta;
   }
 
   enviar(peticion: AsistenteMensajeRequest): Observable<AsistenteMensajeResponse> {
@@ -80,6 +112,13 @@ export class AsistenteChatService {
         if (!PARAMETROS_NO_FILTRO.includes(clave) && valor != null && valor !== '') filtros[clave] = String(valor);
       }
       if (Object.keys(filtros).length) contexto.filtros = filtros;
+
+      const listado = this.leerListado?.();
+      if (listado) {
+        if (Object.keys(listado.filtros).length) contexto.filtros = listado.filtros;
+        contexto.inmueblesVisibles = listado.inmueblesVisibles;
+        contexto.numeroPagina = listado.numeroPagina;
+      }
     }
 
     const utm: ContextoAsistente['utm'] = {};

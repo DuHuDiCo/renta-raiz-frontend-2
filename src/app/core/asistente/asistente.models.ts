@@ -28,10 +28,24 @@ export interface ContextoAsistente {
   titulo: string;
   /** Código Domus del inmueble cuando `pagina` es 'propiedad'. */
   codpro?: number;
-  /** Filtros de la URL cuando `pagina` es 'listado' (sin utm_* ni fbclid). */
+  /**
+   * Cuando `pagina` es 'listado': los filtros aplicados, con las claves de GET /properties/ (los de la barra
+   * "Filtros activos"). Si la página de resultados no los publica, los de la URL (sin utm_* ni fbclid).
+   */
   filtros?: Record<string, string>;
+  /** Cuando `pagina` es 'listado': códigos (codpro) de la página de resultados abierta, en orden. */
+  inmueblesVisibles?: number[];
+  /** Cuando `pagina` es 'listado': número de esa página. */
+  numeroPagina?: number;
   /** Atribución de campaña que el sitio ya guarda en localStorage. */
   utm?: Partial<Record<'utm_source' | 'utm_medium' | 'utm_campaign' | 'utm_content' | 'utm_term', string>>;
+}
+
+/** Lo que la página de resultados publica para el asistente; se lee en cada mensaje. */
+export interface ListadoVisibleAsistente {
+  filtros: Record<string, string>;
+  inmueblesVisibles: number[];
+  numeroPagina: number;
 }
 
 export interface AsistenteMensajeRequest {
@@ -70,6 +84,15 @@ export interface AsistenteMensajeResponse {
   sugerencias?: string[];
   /** Tarjetas que van debajo del último globo; ausente o null si no se buscaron inmuebles. */
   inmuebles?: InmuebleChat[] | null;
+  /** Solo cuando las tarjetas salen de una búsqueda por filtros: permite verlas todas en el listado. */
+  busqueda?: BusquedaAsistente | null;
+}
+
+/** Búsqueda con la que el asistente sacó las tarjetas, con las claves de GET /properties/. */
+export interface BusquedaAsistente {
+  filtros: Record<string, string>;
+  /** Nombres para los chips: { type: 'Apartamento', city: 'Medellín' }. */
+  etiquetas: Record<string, string>;
 }
 
 /** Mensaje tal como lo pinta el chat (y como queda guardado en el navegador). */
@@ -82,6 +105,8 @@ export interface MensajeChat {
   error?: boolean;
   /** Tarjetas de inmuebles que acompañan a este globo del asistente. */
   inmuebles?: InmuebleChat[];
+  /** Búsqueda de esas tarjetas: muestra "Ver todos en el listado". */
+  busqueda?: BusquedaAsistente;
 }
 
 export const LONGITUD_MAXIMA_MENSAJE = 1000;

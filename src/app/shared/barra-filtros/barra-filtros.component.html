@@ -320,9 +320,9 @@
             <i class="fas fa-wand-magic-sparkles text-[#CDAD60]"></i>
           </div>
           <input type="text" name="consultaIa" [(ngModel)]="consultaIa" [maxlength]="longitudMaximaConsulta"
-            aria-label="Describe el inmueble que buscas"
+            aria-label="Describe el inmueble que buscas" autocomplete="off"
             placeholder="Apartamento en arriendo en El Poblado, 3 habitaciones, hasta 4 millones"
-            class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-[#CDAD60] focus:border-[#CDAD60]" />
+            class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg placeholder:text-gray-400 focus:ring-[#CDAD60] focus:border-[#CDAD60]" />
         </div>
 
         <button type="submit" [disabled]="cargando"
@@ -350,9 +350,17 @@
       </div>
 
       @if (avisoIa) {
-      <p class="mt-3 text-sm text-amber-700" role="status">
-        <i class="fas fa-circle-info mr-1"></i>{{ avisoIa }}
-      </p>
+      <div class="mt-3 flex flex-wrap items-center gap-3" role="status">
+        <p class="text-sm text-amber-700">
+          <i class="fas fa-circle-info mr-1"></i>{{ avisoIa }}
+        </p>
+        @if (preguntaIa) {
+        <button type="button" (click)="preguntarAlAsistente()"
+          class="inline-flex items-center gap-1.5 rounded-full bg-[#080E36] px-4 py-1.5 text-sm font-medium text-white hover:bg-[#CDAD60] hover:text-[#080E36] transition-colors">
+          <i class="fas fa-comment-dots"></i> Preguntarle al asistente
+        </button>
+        }
+      </div>
       }
 
       <div class="mt-3 flex flex-wrap justify-end gap-4 text-sm">

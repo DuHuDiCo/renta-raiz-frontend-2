@@ -10,11 +10,12 @@ import { BarraFiltrosComponent } from '../../../../shared/barra-filtros/barra-fi
 import { VolverComponent } from '../../../../shared/volver/volver.component';
 import { SEO_DOMINIO, SEO_REF_AGENCIA, SEO_SUFIJO, seoMigas, SeoService } from '../../../../core/seo/seo.service';
 import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
+import { TarjetaInmuebleComponent } from '../../../../shared/tarjeta-inmueble/tarjeta-inmueble.component';
 
 @Component({
   selector: 'app-ver-blog',
   standalone: true,
-  imports: [
+  imports: [TarjetaInmuebleComponent, 
     RutaFichaPipe,
     RouterLink,
     CommonModule,

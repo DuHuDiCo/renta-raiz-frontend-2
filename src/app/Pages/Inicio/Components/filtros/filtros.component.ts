@@ -6,6 +6,8 @@ import {
   ElementRef,
   HostListener,
   inject,
+  NgZone,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
@@ -30,6 +32,9 @@ import { EnlacesListadosComponent } from '../../../../shared/enlaces-listados/en
 import { DatosListado } from '../../../../core/resolvers/listado.resolver';
 import { BIZ_DE_NEGOCIO, MINIMO_BARRIO, Negocio, encabezadoListado, rutaFicha, rutaListado, slugListado } from '../../../../core/listados/listados';
 import { SEO_DOMINIO, SEO_POR_DEFECTO, SEO_SUFIJO, seoMigas, SeoService } from '../../../../core/seo/seo.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AsistenteChatService } from '../../../../core/asistente/asistente-chat.service';
+import { TarjetaInmuebleComponent } from '../../../../shared/tarjeta-inmueble/tarjeta-inmueble.component';
 import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
 import { BusquedaIaConversacionService, ResultadoBusquedaIa } from '../../../../core/busqueda-ia/busqueda-ia-conversacion.service';
 import { ChatBusquedaIaComponent } from './chat-busqueda-ia/chat-busqueda-ia.component';
@@ -39,6 +44,7 @@ import { ChatBusquedaIaComponent } from './chat-busqueda-ia/chat-busqueda-ia.com
   standalone: true,
   imports: [
     RutaFichaPipe,
+    TarjetaInmuebleComponent,
     RouterLink,
     NavbarComponent,
     FormsModule,
@@ -57,7 +63,7 @@ import { ChatBusquedaIaComponent } from './chat-busqueda-ia/chat-busqueda-ia.com
   templateUrl: './filtros.component.html',
   styleUrl: './filtros.component.scss',
 })
-export class FiltrosComponent implements OnInit {
+export class FiltrosComponent implements OnInit, OnDestroy {
   private scrollTimeout: any;
 
   precioMinimoCtrl = new FormControl('');
@@ -198,15 +204,20 @@ export class FiltrosComponent implements OnInit {
    * El chat se activa después de hidratar: si se activara antes, el HTML del servidor quedaría montado debajo
    * del chat hasta que terminaran de cargar los datos.
    */
+  private zonaAngular = inject(NgZone);
   private activarChatIa = afterNextRender(() => {
     // El esqueleto del chat (index.html) ya no hace falta: desde aquí manda el estado del componente.
     document.documentElement.classList.remove('cargando-chat-ia');
     const estado = this.estadoHistorial();
     if (!this.conversacionIa.activa || !estado?.busquedaIa) return;
-    this.chatIaDisponible = true;
-    // Al recargar se abre el mismo panel que había: el chat o los filtros manuales.
-    this.modoChatIa = estado.panelIa !== 'manual';
-    this.cdRef.detectChanges();
+    // afterNextRender corre fuera de la zona de Angular: si el chat se creara aquí, sus eventos (el Enter del
+    // formulario) también quedarían fuera y la pantalla no se actualizaría hasta el siguiente evento.
+    this.zonaAngular.run(() => {
+      this.chatIaDisponible = true;
+      // Al recargar se abre el mismo panel que había: el chat o los filtros manuales.
+      this.modoChatIa = estado.panelIa !== 'manual';
+      this.cdRef.detectChanges();
+    });
   });
   formBuilder = inject(FormBuilder);
   inmueblesService = inject(InmueblesService);
@@ -733,6 +744,84 @@ export class FiltrosComponent implements OnInit {
     return [...this.conversacionIa.mensajes].reverse().find((m) => m.rol === 'usuario')?.texto || '';
   }
 
+  /** Códigos de la página abierta para las preguntas del chat; se recalcula solo cuando cambian los resultados. */
+  get codigosVisibles(): number[] {
+    if (this.resultadosConCodigos !== this.resultados) {
+      this.resultadosConCodigos = this.resultados;
+      this.codigosCalculados = (this.resultados || []).map((inmueble) => Number(inmueble?.codpro)).filter((codigo) => codigo > 0);
+      this.destacados = new Set();
+    }
+    return this.codigosCalculados;
+  }
+  private resultadosConCodigos: any[] | null = null;
+  private codigosCalculados: number[] = [];
+
+  /** El Asistente Renta Raíz lee de aquí, en cada mensaje, los filtros y la página que se están viendo. */
+  private asistente = inject(AsistenteChatService);
+  private quitarListadoAsistente = this.asistente.registrarListado(() => ({
+    filtros: this.filtrosAplicados(),
+    inmueblesVisibles: this.codigosVisibles,
+    numeroPagina: this.paginaActual || 1,
+  }));
+
+  ngOnDestroy(): void {
+    this.quitarListadoAsistente();
+  }
+
+  /** "Ver todos en el listado" del asistente con esta página abierta: se pinta aquí, con el chat de la IA. */
+  private resultadosDelAsistente = this.conversacionIa.resultadoExterno$
+    .pipe(takeUntilDestroyed())
+    .subscribe((resultado) => {
+      this.chatIaDisponible = true;
+      this.modoChatIa = true;
+      if (this.isDesktopView) this.isDrawerOpen = true;
+      this.aplicarResultadoIa(resultado);
+    });
+
+  /** Los mismos filtros de la barra "Filtros activos": los de la búsqueda con IA o los del panel manual. */
+  private filtrosAplicados(): Record<string, string> {
+    const origen: Record<string, unknown> = this.conversacionIa.activa
+      ? { ...this.conversacionIa.filtros }
+      : Object.fromEntries(this.filtrosSeleccionados);
+    const internos = ['page', 'sort', 'order', 'elementsPerPage', 'isManualSelection'];
+    return Object.fromEntries(
+      Object.entries(origen)
+        .filter(([clave, valor]) => !internos.includes(clave) && valor !== undefined && valor !== null && valor !== '')
+        .map(([clave, valor]) => [clave, String(valor)])
+    );
+  }
+
+  /** Inmuebles que respondieron la última pregunta del chat. */
+  destacados = new Set<number>();
+
+  esDestacado(inmueble: any): boolean {
+    return this.destacados.has(Number(inmueble?.codpro));
+  }
+
+  /** Resalta las tarjetas que respondieron la pregunta y lleva a la primera. */
+  destacarInmuebles(codigos: number[]) {
+    this.destacados = new Set(codigos);
+    if (!codigos.length || typeof document === 'undefined') return;
+    // En celular el chat tapa la grilla: se cierra para ver las tarjetas.
+    if (!this.isDesktopView) this.isDrawerOpen = false;
+    setTimeout(() => this.llevarATarjeta(codigos[0]));
+  }
+
+  /**
+   * Desplaza hasta la tarjeta dejándola entera a la vista: el buscador de arriba es fijo (sticky) y taparía
+   * su parte superior, así que se descuenta su altura cuando ya está pegado arriba, más un pequeño margen.
+   */
+  private llevarATarjeta(codigo: number) {
+    const tarjeta = document.getElementById(`inmueble-${codigo}`);
+    if (!tarjeta) return;
+    const encabezado = document.querySelector<HTMLElement>('.sticky-element');
+    const ocupado = encabezado
+      ? (parseFloat(getComputedStyle(encabezado).top) || 0) + encabezado.getBoundingClientRect().height
+      : 0;
+    const destino = tarjeta.getBoundingClientRect().top + window.scrollY - ocupado - 16;
+    window.scrollTo({ top: Math.max(0, destino), behavior: 'smooth' });
+  }
+
   /** Pinta los resultados que trajo el chat y deja la página lista para recargar o paginar con ellos. */
   aplicarResultadoIa(resultado: ResultadoBusquedaIa) {
     const estado = { ...resultado, busquedaIa: true };
@@ -747,6 +836,8 @@ export class FiltrosComponent implements OnInit {
     this.location.replaceState('/filtros', '', { ...this.estadoHistorial(), ...estado });
     this.bloqueActual = 0;
     this.cargarDesdeState(estado);
+    // Los resultados son otros: se vuelve al principio de la lista, aunque el usuario estuviera más abajo.
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
     // En celular el chat ocupa la pantalla: se cierra para ver los resultados.
     if (!this.isDesktopView) this.isDrawerOpen = false;
   }
@@ -1175,6 +1266,13 @@ export class FiltrosComponent implements OnInit {
     }
     if (savedNeighborhood) {
       this.filtrosSeleccionados.set('neighborhood_code', savedNeighborhood);
+    }
+    // Con la búsqueda con IA activa esto solo pagina u ordena (aplicar filtros manuales la termina antes):
+    // mandan los filtros de la conversación, que incluyen lo que el panel no tiene, como las características.
+    if (this.conversacionIa.activa) {
+      Object.entries(this.conversacionIa.filtros).forEach(([clave, valor]) => {
+        if (valor) this.filtrosSeleccionados.set(clave, valor);
+      });
     }
 
     const filtrosObj = Object.fromEntries(this.filtrosSeleccionados);
@@ -1609,6 +1707,7 @@ export class FiltrosComponent implements OnInit {
     this.ubicacion = this.searchTerm;
     this.filtrosSeleccionados.set('isManualSelection', 'true');
     if (this.searchTerm != '') {
+      if (this.chatIaDisponible) this.terminarChatIa();
       this.enviarFiltros(1);
     }
   }
@@ -1665,6 +1764,7 @@ export class FiltrosComponent implements OnInit {
 
     this.cdRef.detectChanges();
 
+    if (this.chatIaDisponible) this.terminarChatIa();
     this.enviarFiltros(1);
   }
 

@@ -13,7 +13,8 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { AsistenteChatService } from '../../core/asistente/asistente-chat.service';
-import {
+import { BusquedaIaConversacionService } from '../../core/busqueda-ia/busqueda-ia-conversacion.service';
+import { BusquedaAsistente,
   AsistenteMensajeRequest,
   AsistenteMensajeResponse,
   InmuebleChat,
@@ -56,6 +57,9 @@ const SUGERENCIAS_PROPIEDAD = ['¿Qué requisitos piden?', '¿Qué incluye el ca
 export class AsistenteChatComponent implements OnInit, OnDestroy {
   private asistente = inject(AsistenteChatService);
   private router = inject(Router);
+  private conversacionIa = inject(BusquedaIaConversacionService);
+  /** Mientras se aplica la búsqueda de "Ver todos en el listado". */
+  abriendoListado = false;
   private platformId = inject(PLATFORM_ID);
   private documento = inject(DOCUMENT);
 
@@ -101,11 +105,24 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
         .subscribe((e) => this.actualizarMargen(e.urlAfterRedirects))
     );
 
+    // Preguntas que llegan desde otra parte del sitio (la búsqueda con IA), también la que se hizo antes de cargar el chat.
+    this.suscripciones.add(this.asistente.preguntaRecibida$.subscribe(() => this.enviarPreguntaExterna()));
+    this.enviarPreguntaExterna();
+
     if (!this.invitacionYaVista() && this.mensajes.length === 0) {
       this.programar(() => {
         if (!this.abierto) this.mostrarInvitacion = true;
       }, ESPERA_INVITACION_MS);
     }
+  }
+
+  /** Abre el panel y envía la pregunta pendiente como texto del visitante. */
+  private enviarPreguntaExterna(): void {
+    if (this.esperando) return;
+    const pregunta = this.asistente.tomarPreguntaPendiente();
+    if (!pregunta) return;
+    if (!this.abierto) this.abrir();
+    this.enviar(pregunta, 'texto');
   }
 
   ngOnDestroy(): void {
@@ -207,6 +224,27 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
     return valor > 0 ? `${etiqueta} $${Math.round(valor).toLocaleString('es-CO')}` : '';
   }
 
+  /**
+   * Lleva la búsqueda del asistente al listado: reemplaza los filtros del panel de búsqueda con IA, busca desde
+   * la página 1 y la pinta en /filtros (en la misma página si ya está abierta; si no, navega).
+   */
+  verTodosEnListado(busqueda: BusquedaAsistente): void {
+    if (this.abriendoListado) return;
+    this.abriendoListado = true;
+    this.asistente.registrarEvento('asistente_ver_listado', { pagina: this.asistente.contextoActual().pagina });
+    this.conversacionIa.aplicarBusquedaExterna(busqueda, 12).subscribe({
+      next: (resultado) => {
+        this.abriendoListado = false;
+        if (!resultado) return;
+        if (this.conversacionIa.hayListadoAbierto) this.conversacionIa.publicarResultadoExterno(resultado);
+        else this.router.navigate(['/filtros'], { state: { ...resultado, busquedaIa: true } });
+        // En móvil el chat ocupa toda la pantalla: se cierra para que se vean los resultados.
+        if (window.matchMedia('(max-width: 767px)').matches) this.cerrar();
+      },
+      error: () => (this.abriendoListado = false),
+    });
+  }
+
   alAbrirInmueble(inmueble: InmuebleChat): void {
     this.asistente.registrarEvento('asistente_inmueble_click', { codpro: inmueble.codpro });
     // En móvil el chat ocupa toda la pantalla: se cierra para que se vea la ficha.
@@ -255,17 +293,26 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
     if (globos.length === 0) globos.push('¿Me lo explicas de otra forma?');
 
     const inmuebles = respuesta.inmuebles?.length ? respuesta.inmuebles : undefined;
+    // "Ver todos en el listado" solo tiene sentido con tarjetas que salieron de una búsqueda por filtros.
+    const busqueda = inmuebles && respuesta.busqueda?.filtros ? respuesta.busqueda : undefined;
 
     globos.forEach((texto, i) => {
       this.programar(() => {
         const ultimo = i === globos.length - 1;
         // Las tarjetas van con el último globo, después del texto que las presenta.
-        this.agregar({ autor: 'asistente', texto, ...(ultimo && inmuebles ? { inmuebles } : {}) });
+        this.agregar({
+          autor: 'asistente',
+          texto,
+          ...(ultimo && inmuebles ? { inmuebles } : {}),
+          ...(ultimo && busqueda ? { busqueda } : {}),
+        });
         if (!ultimo) return;
 
         this.esperando = false;
         this.sugerencias = respuesta.sugerencias ?? [];
         if (!this.abierto) this.noLeidos += globos.length;
+        // Una pregunta de la búsqueda con IA que llegó mientras se esperaba esta respuesta.
+        this.enviarPreguntaExterna();
       }, i * PAUSA_ENTRE_GLOBOS_MS);
     });
   }

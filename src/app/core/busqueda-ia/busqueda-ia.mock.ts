@@ -121,5 +121,37 @@ export function interpretarSimulado(
   }
   resto = resto.replace(/\s+/g, ' ').trim();
 
-  return of({ filtros, etiquetas, noEntendido: resto ? [resto] : [], degradado: false }).pipe(delay(600));
+  // "casas en Narnia": un nombre propio después de "en" que no está en los catálogos.
+  const lugarNombrado = !ciudad && !barrio && peticion.consulta.match(/\ben ((?:[A-ZÁÉÍÓÚÑ][\wáéíóúñ]+ ?)+)/)?.[1].trim();
+  const lugaresNoEncontrados = lugarNombrado ? [lugarNombrado] : [];
+  const noEntendido = [...lugaresNoEncontrados, ...(resto ? [textoOriginal(peticion.consulta, resto, lugaresNoEncontrados)] : [])].filter(Boolean);
+
+  const original = normalizar(peticion.consulta);
+  const sinCambios = Object.keys(filtros).length === Object.keys(peticion.filtrosActuales ?? {}).length && !tipo && !ciudad && !barrio;
+  const intencion: InterpretarBusquedaResponse['intencion'] =
+    /[¿?]/.test(peticion.consulta) || / (requisitos?|horarios?|documentos|como (pago|hago|arriendo)|cuanto cuesta|que necesito) /.test(original)
+      ? 'pregunta'
+      : sinCambios && / (hola|buenas|buenos dias|buenas tardes|gracias|ok|chao) /.test(original)
+        ? 'otro'
+        : 'busqueda';
+
+  const respuesta: InterpretarBusquedaResponse =
+    intencion === 'busqueda'
+      ? { filtros, etiquetas, noEntendido, degradado: false, intencion, lugaresNoEncontrados, avisos: [], inmueblesDestacados: [] }
+      : { filtros: { ...peticion.filtrosActuales }, etiquetas: {}, noEntendido: [], degradado: false, intencion, lugaresNoEncontrados: [], avisos: [], inmueblesDestacados: [] };
+  return of(respuesta).pipe(delay(600));
+}
+
+/** Las palabras de la frase original que quedaron sin usar, con sus tildes y eñes. */
+function textoOriginal(consulta: string, resto: string, excluir: string[]): string {
+  const sinUsar = new Set(resto.split(' '));
+  const yaAvisadas = new Set(excluir.flatMap((l) => normalizar(l).trim().split(' ')));
+  return consulta
+    .split(/\s+/)
+    .filter((palabra) => {
+      const n = normalizar(palabra).trim();
+      return n && sinUsar.has(n) && !yaAvisadas.has(n);
+    })
+    .join(' ')
+    .replace(/[,.;:]+$/, '');
 }
