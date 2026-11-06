@@ -8,16 +8,11 @@
         class="absolute inset-0 w-full h-full object-fill md:object-cover lg:object-cover xl:object-cover 2xl:object-cover z-10"
         alt="Fondo" />
 
-      <!-- Imagen de Texto (Más grande en móvil) -->
-      <div class="absolute inset-0 z-30 flex items-center">
-        <img src="assets/images/TEXTOQUIENESOMOS.png"
-          class="hidden lg:block w-[100%] md:w-[60%] lg:w-[70%] md:mb-16 2xl:mb-0 xl:w-[60%] 2xl:w-[50%] h-auto object-contain md:-translate-y-48 xl:-translate-y-[-50px] translate-x-26 md:translate-x-60 lg:translate-x-2 xl:ml-[195px] 2xl:translate-x-64 custom-1024:translate-x-custom-1024"
-          alt="Quiénes Somos Desktop" />
-        <!-- Mobile & Tablet Image (up to lg) -->
-        <div class="flex justify-center lg:hidden">
-          <img src="assets/images/QUIENES SOMOS-MOVIL.png"
-            class="w-[70%] md:w-[85%] h-auto object-contain md:-translate-y-[-190px] -translate-y-[-70px]"
-            alt="Quiénes Somos Mobile" />
+      <!-- Texto del slider (antes era una imagen); estilos en src/styles.scss. -->
+      <div class="hero-capa">
+        <div class="hero-texto">
+          <p class="hero-titulo">Donde todo comienza<span class="hidden lg:inline">:</span></p>
+          <p class="hero-subtitulo">Con confianza, experiencia y propósito.</p>
         </div>
       </div>
     </div>
@@ -132,8 +127,10 @@
 
   <!-- Sección azul recta y compacta -->
   <div class="w-full flex flex-col justify-center items-center py-16 md:py-24 mt-20 bg-[#060F29]">
-    <img loading="lazy" decoding="async" src="assets/images/2TextoBarra2-e1675443584947.png" alt="Texto decorativo"
-      class="w-[80%] sm:w-[60%] md:w-[50%] h-auto mb-6" />
+    <p class="frase" style="--t: 0.052; --s: 0.0975">
+      <span class="frase-titulo frase-titulo--negrita">Somos el lugar perfecto<br />para aquellos que buscan</span>
+      <span class="frase-script">Un hogar y una vida excepcional</span>
+    </p>
 
     <div class="flex flex-wrap justify-center gap-3">
       <button type="button" (click)="

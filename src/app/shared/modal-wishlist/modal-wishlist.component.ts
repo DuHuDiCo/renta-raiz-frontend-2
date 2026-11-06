@@ -1,12 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, HostListener, inject, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { environment } from '../../../environments/environment';
+import { FormularioRecorridoComponent } from '../formulario-recorrido/formulario-recorrido.component';
 import { DomSanitizer } from '@angular/platform-browser';
 import { WishlistServiceService } from '../../core/wishlist/wishlist-service.service';
 
 @Component({
   selector: 'app-modal-wishlist',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormularioRecorridoComponent],
   templateUrl: './modal-wishlist.component.html',
   styleUrl: './modal-wishlist.component.scss'
 })
@@ -16,6 +18,8 @@ export class ModalWishlistComponent implements OnInit, OnChanges {
 
 
   visible: boolean = false;
+  /** Formulario propio de disponibilidad; sin él se muestra el widget de LeadConnector. */
+  readonly recorridoPropio = environment.recorridoPropio;
   sanitizer = inject(DomSanitizer);
   iframeId = '1WJfiMGJcT4VpcFo1G8h_1763138081735';
   iframeTitle = '';
@@ -58,6 +62,11 @@ export class ModalWishlistComponent implements OnInit, OnChanges {
     this.generarUrlIframe();
   }
 
+
+  @HostListener('document:keydown.escape')
+  alPresionarEscape() {
+    if (this.mostrarModalRecorrido) this.cerrarModal();
+  }
 
   cerrarModal() {
     this.cerrar.emit();

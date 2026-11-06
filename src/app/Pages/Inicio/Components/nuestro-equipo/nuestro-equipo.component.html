@@ -8,17 +8,11 @@
         class="absolute inset-0 w-full h-full object-fill object-top md:object-cover md:object-top lg:object-cover lg:object-top xl:object-cover xl:object-top 2xl:object-cover 2xl:object-top z-10"
         alt="Fondo" />
 
-      <!-- Imagen de Texto (Más grande en móvil) -->
-      <div class="absolute inset-0 z-30 flex items-center">
-        <img src="assets/images/TEXTOSLIDEREXPERTOS.png"
-          class="hidden lg:block w-[100%] md:w-[60%] lg:w-[70%] xl:w-[60%] 2xl:w-[50%] md:mb-16 2xl:mb-0 h-auto object-contain -translate-y-6 md:-translate-y-4 xl:-translate-y-2md:-translate-y-4 xl:-translate-y-[-50px] translate-x-26 md:translate-x-60 lg:translate-x-2 xl:ml-[195px] 2xl:translate-x-64 custom-1024:translate-x-custom-1024"
-          alt="Expertos Desktop" />
-
-        <!-- Mobile & Tablet Image (up to lg) -->
-        <div class="flex justify-center lg:hidden">
-          <img src="assets/images/EXPERTOS-MOVIL.png"
-            class="block lg:hidden w-[100%] h-auto object-contain md:-translate-y-[-190px] -translate-y-[-70px] md:w-[90%] sm:w-[70%] xs:w-[70%]"
-            alt="Expertos Mobile" />
+      <!-- Texto del slider (antes era una imagen); estilos en src/styles.scss. -->
+      <div class="hero-capa">
+        <div class="hero-texto">
+          <p class="hero-titulo hero-titulo--largo">El equipo detrás del lujo</p>
+          <p class="hero-subtitulo">Expertos en lujo, detalles y confianza.</p>
         </div>
       </div>
     </div>
@@ -37,37 +31,60 @@
       Que nadie venga a nosotros sin irse mejor y más feliz
     </h2>
 
-    <div class="flex flex-wrap justify-center gap-8 w-full max-w-6xl">
+    <div class="flex flex-wrap justify-center gap-6 w-full max-w-6xl">
       @for (asesor of equipo; track asesor.id) {
-        <div class="bg-white rounded-xl shadow-md p-8 py-10 flex flex-col items-center w-full sm:w-[16.5rem] transition hover:scale-105 duration-300">
-          <a [routerLink]="['/portafolio', asesor.id]" class="flex flex-col items-center">
+        <article class="group flex w-full flex-col items-center rounded-2xl border border-[#eee5d3] bg-white px-6 pb-6 pt-8 text-center shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:w-[16.5rem]">
+          <a [routerLink]="['/portafolio', asesor.id]" class="flex flex-col items-center" [attr.aria-label]="'Ver el portafolio de ' + asesor.nombre">
             <img loading="lazy" decoding="async" [src]="asesor.avatar" [alt]="asesor.nombre"
-              class="w-32 h-32 rounded-full object-cover" />
-            <h3 class="text-lg font-bold text-gray-900 mt-4 text-center">
-              {{ asesor.nombre }}
-            </h3>
-            <p class="text-sm font-medium text-gray-900 text-center">
-              {{ asesor.cargo }}
-            </p>
-            <div class="flex items-center text-gray-600 mt-2">
-              <i class="fa-solid fa-phone text-lg"></i>
-              <span class="ml-2 text-sm">{{ asesor.telefono }}</span>
-            </div>
-            <div class="flex items-center text-gray-600 mt-1">
-              <i class="fa-solid fa-envelope text-lg"></i>
-              <span class="ml-2 text-sm break-all">{{ asesor.email }}</span>
-            </div>
+              class="h-28 w-28 rounded-full object-cover ring-2 ring-[#CDAD60] ring-offset-4 ring-offset-white" />
+            <h3 class="mt-5 text-lg font-bold leading-tight text-[#080E36]">{{ asesor.nombre }}</h3>
+            <p class="mt-1 text-sm text-[#707172]">{{ asesor.cargo }}</p>
           </a>
-          <div class="mt-5 w-full flex flex-col gap-2">
-            <a [routerLink]="['/asesor', asesor.slug]"
-              class="text-center text-sm font-medium text-[#080E36] underline underline-offset-4 decoration-[#CDAD60] hover:text-[#CDAD60]">
-              Ver tarjeta digital
+
+          <!-- Datos de confianza: los mismos totales del portafolio -->
+          <dl class="mt-5 grid w-full grid-cols-2 border-y border-[#eee5d3] py-3">
+            <div>
+              <dt class="sr-only">Inmuebles en venta</dt>
+              <dd class="text-lg font-bold text-[#080E36]">{{ totales[asesor.id]?.venta ?? '—' }}</dd>
+              <dd class="text-xs text-[#707172]">en venta</dd>
+            </div>
+            <div class="border-l border-[#eee5d3]">
+              <dt class="sr-only">Inmuebles en arriendo</dt>
+              <dd class="text-lg font-bold text-[#080E36]">{{ totales[asesor.id]?.arriendo ?? '—' }}</dd>
+              <dd class="text-xs text-[#707172]">en arriendo</dd>
+            </div>
+          </dl>
+
+          <!-- Contacto directo -->
+          <div class="mt-5 flex items-center justify-center gap-2.5">
+            <a [href]="enlaceWhatsapp(asesor)" target="_blank" rel="noopener" (click)="registrarContacto('whatsapp', asesor)"
+              [attr.aria-label]="'Escribir por WhatsApp a ' + asesor.nombre" title="WhatsApp"
+              class="flex h-10 w-10 items-center justify-center rounded-full bg-[#1f9d55] text-white transition-opacity hover:opacity-90">
+              <i class="fab fa-whatsapp text-lg"></i>
             </a>
-            <app-compartir-inmueble [url]="urlPerfil(asesor)" [titulo]="asesor.nombre" etiqueta="Compartir asesor"
+            <a [href]="enlaceLlamada(asesor)" (click)="registrarContacto('llamada', asesor)"
+              [attr.aria-label]="'Llamar a ' + asesor.nombre + ' al ' + asesor.telefono" [title]="asesor.telefono"
+              class="flex h-10 w-10 items-center justify-center rounded-full border border-[#e6dfcf] bg-white text-[#080E36] transition-colors hover:border-[#CDAD60] hover:bg-[#CDAD60] hover:text-white">
+              <i class="fas fa-phone"></i>
+            </a>
+            <a [href]="'mailto:' + asesor.email" (click)="registrarContacto('correo', asesor)"
+              [attr.aria-label]="'Escribir un correo a ' + asesor.nombre" [title]="asesor.email"
+              class="flex h-10 w-10 items-center justify-center rounded-full border border-[#e6dfcf] bg-white text-[#080E36] transition-colors hover:border-[#CDAD60] hover:bg-[#CDAD60] hover:text-white">
+              <i class="fas fa-envelope"></i>
+            </a>
+            <app-compartir-inmueble variante="icono" [url]="urlPerfil(asesor)" [titulo]="asesor.nombre" etiqueta="Compartir asesor"
               [mensaje]="'Te comparto el contacto de ' + asesor.nombre + ', ' + asesor.cargo + ' de Renta Raíz:'"
               evento="compartir_asesor"></app-compartir-inmueble>
           </div>
-        </div>
+
+          <div class="mt-auto flex items-center justify-center gap-4 pt-5 text-sm font-medium">
+            <a [routerLink]="['/portafolio', asesor.id]"
+              class="text-[#080E36] underline decoration-[#CDAD60] underline-offset-4 hover:text-[#CDAD60]">Ver portafolio</a>
+            <span class="h-4 w-px bg-[#eee5d3]" aria-hidden="true"></span>
+            <a [routerLink]="['/asesor', asesor.slug]"
+              class="text-[#707172] underline decoration-transparent underline-offset-4 hover:text-[#080E36] hover:decoration-[#CDAD60]">Tarjeta digital</a>
+          </div>
+        </article>
       }
     </div>
   </section>

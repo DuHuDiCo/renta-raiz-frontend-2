@@ -1,0 +1,22 @@
+
+/* La píldora aparece cuando el panel termina de encogerse hacia ella. */
+.pildora-entrada {
+  animation: pildora-entrada 0.22s ease-out 0.18s both;
+}
+
+@keyframes pildora-entrada {
+  from {
+    opacity: 0;
+    transform: translateX(var(--pildora-x, -50%)) scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(var(--pildora-x, -50%)) scale(1);
+  }
+}
+
+@media (min-width: 1024px) {
+  .pildora-entrada {
+    --pildora-x: 0;
+  }
+}

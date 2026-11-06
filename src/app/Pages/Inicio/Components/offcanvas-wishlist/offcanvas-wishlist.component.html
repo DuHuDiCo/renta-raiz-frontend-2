@@ -1,19 +1,12 @@
+<!-- Panel desplegado: crece desde la píldora y se encoge hacia ella al retraerse (en celular, abajo al centro;
+     en computador, abajo a la derecha). Con el chat del asistente abierto se corre a su izquierda. -->
 <div
-  class="fixed z-50 bg-white shadow-2xl transform transition-transform duration-300 overflow-hidden
-         flex flex-col  /* MOBILE: Pantalla completa desde la izquierda */
-         top-0 left-0 h-full w-full sm:w-96 sm:rounded-r-2xl
-
-         /* DESKTOP: Popup abajo derecha */
-         lg:top-auto lg:left-auto lg:bottom-0 lg:right-24 lg:h-auto lg:w-96 lg:rounded-r-none lg:rounded-t-2xl
-         lg:border lg:border-b-0 lg:border-[#CDAD60]/40
-
-         /* DESKTOP con el chat del asistente abierto: se corre a su izquierda (92px + 380px del chat + 12px) */
-         lg:transition-[transform,right] lg:[.asistente-abierto_&]:right-[484px]"
-
-  [ngClass]="{
-    'translate-x-0': visible,
-    '-translate-x-full lg:translate-x-0 lg:translate-y-full': !visible
-  }">
+  class="fixed z-50 flex flex-col overflow-hidden bg-white shadow-2xl origin-bottom transition-[transform,opacity] duration-300 ease-out
+         inset-0 sm:inset-auto sm:bottom-4 sm:left-1/2 sm:h-[min(560px,calc(100vh-2rem))] sm:w-96 sm:-translate-x-1/2 sm:rounded-2xl
+         lg:left-auto lg:right-20 lg:h-auto lg:translate-x-0 lg:origin-bottom-right lg:border lg:border-[#CDAD60]/40
+         lg:transition-[transform,opacity,right] lg:[.asistente-abierto_&]:right-[484px]"
+  [ngClass]="panelAbierto ? 'scale-100 opacity-100' : 'pointer-events-none scale-[0.15] opacity-0'"
+  [attr.aria-hidden]="!panelAbierto">
 
   <!-- Encabezado: en computador despliega o retrae el panel -->
   <div class="flex-none flex items-center gap-3 px-4 py-2.5 bg-[#080E36] text-white cursor-pointer select-none"
@@ -32,8 +25,7 @@
       class="min-w-[1.5rem] h-6 px-2 rounded-full bg-[#CDAD60] text-[#080E36] text-xs font-bold flex items-center justify-center">
       {{ favoritos.length }}
     </span>
-    <i class="hidden lg:block fas fa-chevron-up text-[#CDAD60] transition-transform duration-300"
-       [class.rotate-180]="!minimizado" aria-hidden="true"></i>
+    <i class="hidden lg:block fas fa-chevron-down text-[#CDAD60]" aria-hidden="true"></i>
     <button class="lg:hidden text-white/70 hover:text-white text-2xl leading-none" aria-label="Cerrar recorrido"
       (click)="cerrar(); $event.stopPropagation()">
       &times;
@@ -41,10 +33,7 @@
   </div>
 
   <div class="flex flex-col flex-1 min-h-0 transition-all duration-300"
-       [ngClass]="{
-         'lg:max-h-0 overflow-hidden': minimizado,
-         'lg:max-h-[400px]': !minimizado
-       }">
+       [ngClass]="{ 'lg:max-h-[400px]': true }">
 
       <div class="flex-1 overflow-y-auto px-4 py-3 bg-[#F8F6F1]">
 
@@ -95,3 +84,20 @@
 
   </div>
 </div>
+
+<!-- Retraído: una píldora pequeña que despliega el panel; la X la oculta sin borrar el recorrido -->
+@if (pildoraVisible) {
+  <div class="pildora-entrada fixed bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-1/2 z-50 flex -translate-x-1/2 items-center rounded-full bg-[#080E36] p-1 text-white shadow-lg shadow-[#080E36]/25 ring-1 ring-[#CDAD60]/40
+              lg:bottom-4 lg:left-auto lg:right-20 lg:translate-x-0 lg:[.asistente-abierto_&]:right-[484px]">
+    <button type="button" (click)="toggleMinimizado()" aria-label="Abrir mi recorrido"
+      class="flex items-center gap-2 rounded-full py-1.5 pl-2 pr-3 text-sm font-medium transition-colors hover:bg-white/10">
+      <i class="fas fa-route text-[#CDAD60]"></i>
+      Mi recorrido
+      <span class="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[#CDAD60] px-1.5 text-[11px] font-bold text-[#080E36]">{{ favoritos.length }}</span>
+    </button>
+    <button type="button" (click)="ocultar()" aria-label="Ocultar mi recorrido" title="Ocultar"
+      class="flex h-7 w-7 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white">
+      <i class="fas fa-xmark text-xs"></i>
+    </button>
+  </div>
+}

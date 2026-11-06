@@ -1,0 +1,68 @@
+<article class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_10px_25px_rgba(0,0,0,0.08)]">
+
+  <!-- Precio en franja azul -->
+  <div class="bg-[#080E36] px-5 py-5 text-white xl:px-6">
+    @if (negocio === 3) {
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-wider text-[#CDAD60]">Valor de venta</p>
+          <p class="mt-1 text-xl font-bold">{{ propiedad.saleprice | currency : 'COP' : 'symbol-narrow' : '1.0-0' }}</p>
+        </div>
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-wider text-[#CDAD60]">Valor de arriendo</p>
+          <p class="mt-1 text-xl font-bold">
+            {{ propiedad.rent | currency : 'COP' : 'symbol-narrow' : '1.0-0' }}<span class="text-xs font-normal text-white/60"> / mes</span>
+          </p>
+        </div>
+      </div>
+    } @else {
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-[#CDAD60]">
+        {{ negocio === 2 ? 'Valor de venta' : 'Valor de arriendo' }}
+      </p>
+      <p class="mt-1 text-3xl font-bold">
+        $ {{ propiedad.price_format }}
+        @if (negocio === 1) { <span class="text-sm font-normal text-white/60">/ mes</span> }
+      </p>
+    }
+  </div>
+
+  <div class="px-5 py-5 xl:px-6">
+    <!-- Datos clave -->
+    <ul class="grid grid-cols-2 gap-x-3 gap-y-3 text-[13px] text-[#080E36] xl:text-sm">
+      <li class="flex items-center gap-2 whitespace-nowrap"><i class="fas fa-bed w-4 text-center text-[#CDAD60]"></i>{{ propiedad.bedrooms || '—' }} habitaciones</li>
+      <li class="flex items-center gap-2 whitespace-nowrap"><i class="fas fa-bath w-4 text-center text-[#CDAD60]"></i>{{ propiedad.bathrooms || '—' }} baños</li>
+      <li class="flex items-center gap-2 whitespace-nowrap"><i class="fas fa-ruler-combined w-4 text-center text-[#CDAD60]"></i>{{ propiedad.area_cons || propiedad.area_lot || '—' }} m²</li>
+      <li class="flex items-center gap-2 whitespace-nowrap"><i class="fas fa-car w-4 text-center text-[#CDAD60]"></i>{{ propiedad.parking || 0 }} parqueaderos</li>
+      <li class="flex items-center gap-2 whitespace-nowrap"><i class="fas fa-layer-group w-4 text-center text-[#CDAD60]"></i>Estrato {{ propiedad.stratum || '—' }}</li>
+      @if (propiedad.build_year) {
+        <li class="flex items-center gap-2 whitespace-nowrap"><i class="fas fa-calendar w-4 text-center text-[#CDAD60]"></i>Año {{ propiedad.build_year }}</li>
+      }
+    </ul>
+
+    <!-- Acciones -->
+    <div class="mt-5 space-y-2.5">
+      <app-boton-recorrido [inmueble]="propiedad" (agendar)="agendar.emit()" />
+      <div class="grid grid-cols-2 gap-2.5">
+        <button type="button" (click)="whatsapp.emit()"
+          class="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-medium text-[#080E36] transition-colors hover:border-[#1f9d55] hover:bg-[#EEF8F2]">
+          <i class="fab fa-whatsapp text-base text-[#1f9d55]"></i> WhatsApp
+        </button>
+        <app-compartir-inmueble variante="contorno" etiqueta="Compartir" [url]="urlCompartir" [titulo]="tituloPagina" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Asesor del inmueble -->
+  @if (asesor?.nombre) {
+    <button type="button" (click)="verAsesor.emit()" [attr.aria-label]="'Ver el perfil de ' + asesor.nombre"
+      class="group flex w-full items-center gap-3 border-t border-[#ecdfc0] bg-[#FBF7EE] px-5 py-4 xl:px-6 text-left transition-colors hover:bg-[#F4EFE4]">
+      <img [src]="asesor.imagen || 'assets/images/rentaraiz.png'" [alt]="asesor.nombre" loading="lazy" decoding="async"
+        class="h-12 w-12 flex-none rounded-full object-cover ring-2 ring-[#CDAD60] ring-offset-2 ring-offset-[#FBF7EE]" />
+      <span class="min-w-0 flex-1">
+        <span class="block truncate text-sm font-bold text-[#080E36]">{{ asesor.nombre }}</span>
+        <span class="block truncate text-xs text-gray-500">{{ asesor.cargo || 'Tu asesor para este inmueble' }}</span>
+      </span>
+      <span class="flex-none text-xs font-medium text-[#080E36] underline decoration-[#CDAD60] underline-offset-4 group-hover:text-[#9c7d32]">Ver perfil</span>
+    </button>
+  }
+</article>

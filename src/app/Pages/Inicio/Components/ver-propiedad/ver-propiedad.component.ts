@@ -26,17 +26,16 @@ import { encabezadoListado, negocioDeBiz, rutaFicha, rutaListado, slugListado, t
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
 import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wishlist.component';
 import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
-import { CompartirInmuebleComponent } from '../../../../shared/compartir-inmueble/compartir-inmueble.component';
 import { busquedasSimilares, CANDIDATOS_SIMILARES, CANTIDAD_SIMILARES, mejoresSimilares } from '../../../../core/similares/similares';
+import { TarjetaFichaComponent } from './tarjeta-ficha/tarjeta-ficha.component';
 import { TarjetaInmuebleComponent } from '../../../../shared/tarjeta-inmueble/tarjeta-inmueble.component';
 
 
 @Component({
   selector: 'app-ver-propiedad',
   standalone: true,
-  imports: [TarjetaInmuebleComponent, 
+  imports: [TarjetaInmuebleComponent, TarjetaFichaComponent, 
     RutaFichaPipe,
-    CompartirInmuebleComponent,
     RouterLink,
     NavbarComponent,
     FormsModule,

@@ -1,0 +1,354 @@
+<div class="flex h-[100dvh] flex-col overflow-hidden bg-white shadow-2xl sm:h-[min(92dvh,46rem)] sm:rounded-2xl md:grid md:grid-cols-[19rem_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)]">
+
+  <!-- Columna izquierda: el recorrido y cómo funciona -->
+  <aside class="flex-none bg-[#080E36] px-6 py-5 text-white md:min-h-0 md:overflow-y-auto md:py-6">
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider text-[#CDAD60]">Agenda tu recorrido</p>
+        <h2 class="mt-1 text-xl font-bold leading-tight">Cuéntanos cuándo puedes</h2>
+      </div>
+      <button type="button" (click)="cerrar.emit()" aria-label="Cerrar"
+        class="-mr-2 -mt-1 flex h-9 w-9 flex-none items-center justify-center rounded-full text-2xl leading-none text-white/70 hover:bg-white/10 md:hidden">&times;</button>
+    </div>
+
+    <p class="mt-5 text-xs font-semibold uppercase tracking-wide text-white/60">
+      Inmuebles del recorrido · {{ inmuebles.length }}
+    </p>
+    @if (inmuebles.length) {
+      <ul class="mt-2 flex gap-2 overflow-x-auto pb-1 md:flex-col md:overflow-visible">
+        @for (inmueble of inmuebles; track inmueble.codpro) {
+          <li class="flex min-w-[13rem] items-center gap-3 rounded-xl bg-white/5 p-2 md:min-w-0">
+            <img [src]="inmueble.image1 || 'assets/images/renta-1.jpg'" alt="" loading="lazy"
+              class="h-12 w-12 flex-none rounded-lg object-cover" />
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-semibold">{{ (inmueble.neighborhood || inmueble.city || 'Inmueble') | titlecase }}</p>
+              <p class="truncate text-xs text-white/60">{{ inmueble.type | titlecase }} · Código {{ inmueble.codpro }}</p>
+            </div>
+            @if (estado !== 'exito') {
+              <button type="button" (click)="quitarInmueble(inmueble)" [attr.aria-label]="'Quitar el inmueble ' + inmueble.codpro"
+                class="flex h-8 w-8 flex-none items-center justify-center rounded-full text-white/50 hover:bg-white/10 hover:text-white">
+                <i class="fas fa-xmark text-sm"></i>
+              </button>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="mt-2 rounded-xl bg-white/5 p-3 text-sm text-white/70">
+        Tu recorrido está vacío. Toca el carrito de los inmuebles que quieras visitar y vuelve aquí.
+      </p>
+    }
+
+    <ol class="mt-6 hidden space-y-4 border-t border-white/10 pt-6 md:block">
+      <li class="flex gap-3">
+        <span class="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-[#CDAD60] text-xs font-bold text-[#080E36]">1</span>
+        <p class="text-sm text-white/80"><span class="font-semibold text-white">Nos dices cuándo puedes.</span> Uno o varios rangos de fechas.</p>
+      </li>
+      <li class="flex gap-3">
+        <span class="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-[#CDAD60] text-xs font-bold text-[#080E36]">2</span>
+        <p class="text-sm text-white/80"><span class="font-semibold text-white">Organizamos la ruta</span> con los propietarios y un asesor.</p>
+      </li>
+      <li class="flex gap-3">
+        <span class="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-[#CDAD60] text-xs font-bold text-[#080E36]">3</span>
+        <p class="text-sm text-white/80"><span class="font-semibold text-white">Te confirmamos</span> el día y la hora exactos.</p>
+      </li>
+    </ol>
+  </aside>
+
+  <!-- Columna derecha -->
+  <section class="relative flex min-h-0 flex-1 flex-col md:h-full">
+    <button type="button" (click)="cerrar.emit()" aria-label="Cerrar"
+      class="absolute right-3 top-3 z-10 hidden h-9 w-9 items-center justify-center rounded-full text-2xl leading-none text-gray-400 hover:bg-gray-100 hover:text-[#080E36] md:flex">&times;</button>
+
+    @if (estado === 'exito') {
+      <!-- Enviado -->
+      <div class="flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
+        <span class="flex h-16 w-16 items-center justify-center rounded-full bg-[#F4EFE4] text-3xl text-[#CDAD60]">
+          <i class="fas fa-calendar-check"></i>
+        </span>
+        <h3 class="mt-5 text-2xl font-bold text-[#080E36]">¡Listo, {{ primerNombre }}!</h3>
+        <p class="mt-3 max-w-md text-gray-600">
+          Recibimos tu disponibilidad. El equipo la revisará para organizar el recorrido y un asesor te contactará
+          por WhatsApp
+          para confirmar el día y la hora.
+        </p>
+        <p class="mt-2 text-sm text-gray-500">Te escribiremos apenas tengamos lista la ruta de tu recorrido.</p>
+        @if (idSolicitud) {
+          <p class="mt-4 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">Solicitud {{ idSolicitud }}</p>
+        }
+        <button type="button" (click)="cerrar.emit()"
+          class="mt-8 rounded-lg bg-[#080E36] px-6 py-3 font-semibold text-white hover:bg-[#CDAD60] hover:text-[#080E36]">Entendido</button>
+      </div>
+    } @else {
+      <form (submit)="$event.preventDefault(); enviar()" class="flex min-h-0 flex-1 flex-col" novalidate>
+        <div data-zona-formulario class="relative min-h-0 flex-1 space-y-8 overflow-y-auto overscroll-contain px-6 pb-6 pt-6 md:px-8 md:pt-8">
+
+          <!-- Disponibilidad -->
+          <fieldset>
+            <legend class="text-lg font-bold text-[#080E36]">¿Cuándo tienes disponibilidad?</legend>
+            <p class="mt-1 text-sm text-gray-500">Cuéntanos qué días y en qué horario te quedaría bien visitar los inmuebles.</p>
+
+            <!-- Opciones ya agregadas -->
+            @if (confirmados.length) {
+              <ul class="mt-4 space-y-2" aria-label="Opciones de fechas agregadas">
+                @for (rango of confirmados; track rango.desde + rango.hasta + rango.franjas.join(); let i = $index) {
+                  <li class="flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-all duration-500"
+                    [class]="i === recienAgregado ? 'border-[#4f8a32] bg-[#EEF6E8] ring-2 ring-[#4f8a32]/30' : 'border-[#ecdfc0] bg-[#FBF7EE]'">
+                    <span class="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-[#080E36] text-xs font-bold text-[#CDAD60]">{{ i + 1 }}</span>
+                    <p class="min-w-0 flex-1 text-sm font-medium text-[#080E36]">{{ resumen(rango) }}</p>
+                    <button type="button" (click)="editarConfirmado(i)" [attr.aria-label]="'Editar la opción ' + (i + 1)" title="Editar"
+                      class="flex h-8 w-8 flex-none items-center justify-center rounded-full text-[#8a7a52] hover:bg-white hover:text-[#080E36]">
+                      <i class="fas fa-pen text-xs"></i>
+                    </button>
+                    <button type="button" (click)="quitarConfirmado(i)" [attr.aria-label]="'Quitar la opción ' + (i + 1)" title="Quitar"
+                      class="flex h-8 w-8 flex-none items-center justify-center rounded-full text-[#8a7a52] hover:bg-white hover:text-red-600">
+                      <i class="fas fa-trash-can text-xs"></i>
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+
+            <!-- Opción en edición: se confirma con "Agregar esta opción" -->
+            @if (puedeAgregarMas) {
+              <div [formGroup]="borrador" class="mt-4 rounded-xl border p-4 transition-colors"
+                [class.border-red-300]="errorRango(borrador)" [class.border-gray-200]="!errorRango(borrador)"
+                [attr.data-error]="errorRango(borrador) ? '' : null">
+                <div class="flex items-center justify-between gap-2">
+                  <p class="text-sm font-semibold text-[#080E36]">
+                    {{ confirmados.length ? 'Otra opción' : 'Tu primera opción' }}
+                    @if (resumenBorrador) {
+                      <span class="font-normal text-gray-500">· {{ resumenBorrador }}</span>
+                    }
+                  </p>
+                  @if (!borradorVacio) {
+                    <button type="button" (click)="limpiarBorrador()"
+                      class="text-xs font-medium text-gray-500 underline underline-offset-2 hover:text-red-600">Borrar</button>
+                  }
+                </div>
+
+                <p class="mt-2 flex items-start gap-2 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600">
+                  <i class="far fa-clock mt-0.5 text-[#CDAD60]"></i> {{ textoHorario }}
+                </p>
+
+                <div class="mt-3 flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-medium text-gray-500">Atajos:</span>
+                  <button type="button" (click)="usarAtajo('semana')" class="rounded-full border border-gray-300 px-3 py-1 text-xs font-medium text-[#080E36] hover:border-[#CDAD60] hover:bg-[#F4EFE4]">Esta semana</button>
+                  <button type="button" (click)="usarAtajo('proxima')" class="rounded-full border border-gray-300 px-3 py-1 text-xs font-medium text-[#080E36] hover:border-[#CDAD60] hover:bg-[#F4EFE4]">Próxima semana</button>
+                  <button type="button" (click)="usarAtajo('sabado')" class="rounded-full border border-gray-300 px-3 py-1 text-xs font-medium text-[#080E36] hover:border-[#CDAD60] hover:bg-[#F4EFE4]">Este sábado</button>
+                </div>
+
+                <div class="mt-3 grid grid-cols-2 gap-3">
+                  <label class="block">
+                    <span class="text-xs font-medium text-gray-600">Desde</span>
+                    <input type="date" formControlName="desde" [min]="hoy" [max]="limite" (change)="alCambiarDesde(borrador)"
+                      class="mt-1 w-full rounded-lg border-gray-300 text-sm text-[#080E36] focus:border-[#CDAD60] focus:ring-[#CDAD60]" />
+                  </label>
+                  <label class="block">
+                    <span class="text-xs font-medium text-gray-600">Hasta</span>
+                    <input type="date" formControlName="hasta" [min]="borrador.controls.desde.value || hoy" [max]="limite"
+                      class="mt-1 w-full rounded-lg border-gray-300 text-sm text-[#080E36] focus:border-[#CDAD60] focus:ring-[#CDAD60]" />
+                  </label>
+                </div>
+
+                <p class="mt-3 text-xs font-medium text-gray-600">Franja horaria</p>
+                @if (esSoloSabado(borrador.getRawValue())) {
+                  <!-- Solo sábado: una única franja, ya marcada -->
+                  <p class="mt-1.5 inline-flex items-center gap-2 rounded-full border border-[#080E36] bg-[#080E36] px-3 py-1.5 text-xs font-medium text-white">
+                    <i class="fas {{ franjaSabado.icono }} text-[11px]"></i>
+                    {{ franjaSabado.nombre }} <span class="opacity-70">{{ franjaSabado.horas }}</span>
+                  </p>
+                  <p class="mt-1.5 text-xs text-gray-500">Los sábados los recorridos son solo en este horario.</p>
+                } @else {
+                <div class="mt-1.5 flex flex-wrap gap-2" role="group" aria-label="Franjas horarias">
+                  @for (franja of franjasDe(borrador); track franja.valor) {
+                    <button type="button" (click)="alternarFranja(borrador, franja.valor)" [attr.aria-pressed]="tieneFranja(borrador, franja.valor)"
+                      class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors"
+                      [class]="tieneFranja(borrador, franja.valor)
+                        ? 'border-[#080E36] bg-[#080E36] text-white'
+                        : 'border-gray-300 bg-white text-[#080E36] hover:border-[#CDAD60]'">
+                      <i class="fas {{ franja.icono }} text-[11px]"></i>
+                      {{ franja.nombre }} <span class="opacity-70">{{ franja.horas }}</span>
+                    </button>
+                  }
+                  <button type="button" (click)="cualquierHora(borrador)"
+                    class="rounded-full px-3 py-1.5 text-xs font-medium text-[#8a7a52] underline decoration-[#CDAD60] underline-offset-2 hover:text-[#080E36]">
+                    Cualquier hora
+                  </button>
+                </div>
+                @if (incluyeSabado(borrador.getRawValue())) {
+                  <p class="mt-1.5 flex items-center gap-1.5 text-xs text-[#8a7a52]">
+                    <i class="fas fa-circle-info text-[11px]"></i> El sábado el horario es de 9:00 a 11:00 a. m.
+                  </p>
+                }
+                }
+
+                @if (errorRango(borrador); as error) {
+                  <p class="mt-3 text-xs text-red-600">{{ error }}</p>
+                }
+
+                <!-- Pie de la opción: dice si está lista y la confirma -->
+                <div class="-mx-4 -mb-4 mt-4 flex flex-col gap-3 rounded-b-xl border-t border-gray-100 bg-gray-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p class="flex items-center gap-2 text-xs" [class]="borrador.valid ? 'font-medium text-[#3f6b2a]' : 'text-gray-500'">
+                    @if (borrador.valid) {
+                      <i class="fas fa-circle-check text-sm text-[#4f8a32]"></i> Lista para agregar
+                    } @else {
+                      <i class="far fa-circle text-sm"></i> Completa las fechas y la franja horaria
+                    }
+                  </p>
+                  <button type="button" (click)="confirmarRango()" [attr.aria-label]="'Agregar la opción ' + (confirmados.length + 1)"
+                    class="group inline-flex flex-none items-center justify-center gap-2.5 whitespace-nowrap rounded-full py-2 pl-2 pr-5 text-sm font-semibold transition-all"
+                    [class]="borrador.valid
+                      ? 'bg-[#080E36] text-white shadow-md shadow-[#080E36]/20 hover:-translate-y-0.5 hover:shadow-lg'
+                      : 'bg-white text-gray-400 ring-1 ring-gray-200 hover:text-gray-600'">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-full transition-colors"
+                      [class]="borrador.valid ? 'bg-[#CDAD60] text-[#080E36]' : 'bg-gray-100 text-gray-400'">
+                      <i class="fas fa-plus text-xs transition-transform group-hover:rotate-90"></i>
+                    </span>
+                    Agregar opción {{ confirmados.length + 1 }}
+                  </button>
+                </div>
+              </div>
+              <p class="mt-2 text-xs text-gray-500">
+                Puedes agregar hasta {{ maximoRangos }} opciones; entre más nos des, más fácil es coordinar el recorrido.
+              </p>
+            } @else {
+              <p class="mt-3 text-xs text-gray-500">Ya agregaste {{ maximoRangos }} opciones, el máximo. Quita o edita alguna para cambiarla.</p>
+            }
+          </fieldset>
+
+          <!-- Datos de contacto -->
+          <fieldset [formGroup]="datos" class="space-y-4">
+            <legend class="text-lg font-bold text-[#080E36]">¿Cómo te contactamos?</legend>
+
+            <label class="block">
+              <span class="text-sm font-medium text-gray-700">Nombre completo</span>
+              <input type="text" formControlName="nombre" autocomplete="name"
+                class="mt-1 w-full rounded-lg border-gray-300 text-sm focus:border-[#CDAD60] focus:ring-[#CDAD60]"
+                [class.border-red-400]="invalido('nombre')" />
+              @if (invalido('nombre')) { <span class="mt-1 block text-xs text-red-600">Escribe tu nombre.</span> }
+            </label>
+
+            <div>
+              <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                <i class="fab fa-whatsapp text-base text-[#1f9d55]"></i> Celular con WhatsApp
+              </span>
+              <div class="mt-1 flex gap-2">
+                <select formControlName="indicativo" aria-label="Indicativo del país"
+                  class="w-40 min-w-0 flex-none rounded-lg border-gray-300 text-sm focus:border-[#CDAD60] focus:ring-[#CDAD60] sm:w-52">
+                  @for (pais of indicativos; track pais.codigo) {
+                    <option [value]="pais.codigo">+{{ pais.codigo }} {{ pais.pais }}</option>
+                  }
+                </select>
+                <input type="tel" formControlName="telefono" autocomplete="tel-national" inputmode="tel" aria-label="Número de celular"
+                  class="w-full min-w-0 flex-1 rounded-lg border-gray-300 text-sm focus:border-[#CDAD60] focus:ring-[#CDAD60]"
+                  [class.border-red-400]="invalido('telefono')" />
+              </div>
+              @if (invalido('telefono')) {
+                <span class="mt-1 block text-xs text-red-600">Escribe un número válido.</span>
+              } @else {
+                <span class="mt-1 block text-xs text-gray-500">Por aquí te escribirá el asesor para confirmar el recorrido.</span>
+              }
+            </div>
+
+            <label class="block">
+              <span class="text-sm font-medium text-gray-700">
+                Correo electrónico
+                <span class="font-normal text-gray-400">(opcional)</span>
+              </span>
+              <input type="email" formControlName="email" autocomplete="email"
+                class="mt-1 w-full rounded-lg border-gray-300 text-sm focus:border-[#CDAD60] focus:ring-[#CDAD60]"
+                [class.border-red-400]="invalido('email')" />
+              @if (invalido('email')) { <span class="mt-1 block text-xs text-red-600">Escribe un correo válido.</span> }
+            </label>
+
+            <label class="block">
+              <span class="text-sm font-medium text-gray-700">Comentarios <span class="font-normal text-gray-400">(opcional)</span></span>
+              <textarea formControlName="comentarios" rows="3" [maxlength]="longitudComentarios"
+                placeholder="Por ejemplo: prefiero empezar por el de El Poblado, o vendré con mi familia."
+                class="mt-1 w-full resize-none rounded-lg border-gray-300 text-sm placeholder:text-gray-400 focus:border-[#CDAD60] focus:ring-[#CDAD60]"></textarea>
+            </label>
+
+            <label class="flex cursor-pointer items-start gap-3 text-sm text-gray-600">
+              <input type="checkbox" formControlName="aceptaPolitica"
+                class="mt-0.5 h-4 w-4 flex-none rounded border-gray-300 text-[#080E36] focus:ring-[#CDAD60]" />
+              <span>
+                Autorizo el tratamiento de mis datos personales según la
+                <a href="/politicas-de-privacidad" target="_blank" rel="noopener"
+                  class="font-medium text-[#080E36] underline underline-offset-2 hover:text-[#9c7d32]">Política de privacidad</a>.
+              </span>
+            </label>
+            @if (invalido('aceptaPolitica')) {
+              <p class="-mt-2 text-xs text-red-600">Debes aceptar la política de privacidad para continuar.</p>
+            }
+          </fieldset>
+        </div>
+
+        <!-- Pie fijo con el envío -->
+        <div class="flex-none border-t border-gray-100 bg-white px-6 py-4 md:px-8">
+          @if (estado === 'error') {
+            <p class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+              No pudimos enviar tu disponibilidad. Revisa tu conexión e inténtalo de nuevo.
+            </p>
+          }
+          <div class="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p class="flex items-center gap-1.5 text-xs text-gray-500"><i class="fab fa-whatsapp text-sm text-[#1f9d55]"></i> Un asesor te confirmará por WhatsApp.</p>
+            <button type="submit" [disabled]="estado === 'enviando' || !inmuebles.length"
+              class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#CDAD60] px-6 py-3 font-semibold text-[#080E36] transition-colors hover:bg-[#080E36] hover:text-white disabled:cursor-not-allowed disabled:opacity-60">
+              @if (estado === 'enviando') {
+                <i class="fas fa-spinner fa-spin"></i> Enviando…
+              } @else {
+                <i class="fas fa-paper-plane"></i> Enviar mi disponibilidad
+              }
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Recordatorio amable antes de enviar: las fechas son una guía, no una cita -->
+      @if (estado === 'confirmando' || estado === 'enviando') {
+        <div class="absolute inset-0 z-20 flex items-end justify-center bg-[#080E36]/40 p-4 backdrop-blur-[2px] sm:items-center"
+          (click)="estado === 'confirmando' && revisarFechas()">
+          <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl" role="alertdialog" aria-modal="true"
+            aria-labelledby="recordatorio-titulo" aria-describedby="recordatorio-texto" (click)="$event.stopPropagation()">
+            <span class="flex h-12 w-12 items-center justify-center rounded-full bg-[#F4EFE4] text-xl text-[#CDAD60]">
+              <i class="fas fa-handshake"></i>
+            </span>
+            <h3 id="recordatorio-titulo" class="mt-4 text-xl font-bold text-[#080E36]">¡Gracias, {{ primerNombreFormulario }}! Un último detalle</h3>
+            <div id="recordatorio-texto" class="mt-2 space-y-2 text-sm leading-relaxed text-gray-600">
+              <p>
+                Las fechas que elegiste nos sirven como guía para planear tu recorrido junto con los propietarios de cada
+                inmueble, así que todavía no son una cita fija.
+              </p>
+              <p>
+                Muy pronto un asesor te escribirá por WhatsApp para acordar contigo el día y la hora que mejor
+                funcionen. ¡Haremos lo posible por ajustarnos a lo que nos propusiste!
+              </p>
+            </div>
+
+            <ul class="mt-4 space-y-1.5 rounded-xl bg-[#FBF7EE] p-3 text-sm text-[#5c4a1e]">
+              @for (rango of confirmados; track rango.desde + rango.hasta + rango.franjas.join(); let i = $index) {
+                <li class="flex items-start gap-2"><i class="fas fa-calendar-day mt-0.5 text-xs text-[#CDAD60]"></i>{{ resumen(rango) }}</li>
+              }
+            </ul>
+
+            <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button type="button" (click)="revisarFechas()" [disabled]="estado === 'enviando'"
+                class="rounded-lg px-4 py-2.5 text-sm font-medium text-[#080E36] hover:bg-gray-100 disabled:opacity-50">
+                Revisar mis fechas
+              </button>
+              <button type="button" (click)="confirmarEnvio()" [disabled]="estado === 'enviando'"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#CDAD60] px-5 py-2.5 text-sm font-semibold text-[#080E36] transition-colors hover:bg-[#080E36] hover:text-white disabled:opacity-70">
+                @if (estado === 'enviando') {
+                  <i class="fas fa-spinner fa-spin"></i> Enviando…
+                } @else {
+                  <i class="fas fa-paper-plane"></i> Perfecto, enviar
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </section>
+</div>

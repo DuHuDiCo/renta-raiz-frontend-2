@@ -8,18 +8,14 @@
         class="absolute inset-0 w-full h-full object-fill md:object-cover lg:object-cover xl:object-cover 2xl:object-cover z-10"
         alt="Fondo" />
 
-      <!-- Imagen de Texto (Más grande en móvil) -->
-      <div class="absolute inset-0 z-30 flex items-center">
-        <img src="assets/images/TEXTOSLIDERPUBLICATUPROPIEDAD.png"
-          class="hidden lg:block w-[100%] md:w-[60%] lg:w-[70%] xl:w-[60%] 2xl:w-[50%] h-auto object-contain md:-translate-y-4 translate-x-26 md:translate-x-60 lg:translate-x-2 xl:ml-[195px] 2xl:translate-x-64 custom-1024:translate-x-custom-1024"
-          alt="Publica Tu Propiedad Desktop" />
-
-        <div class="flex justify-center items-center">
-          <img src="assets/images/PUBLICA-TU-PROPIEDAD-MOVIL.png"
-            class="block lg:hidden w-[100%] h-auto object-contain md:w-[85%] sm:w-[70%] xs:w-[70%]"
-            alt="Publica Tu Propiedad Mobile" />
+      <!-- Texto del slider (antes era una imagen); estilos en src/styles.scss.
+           El corte de línea cambia: escritorio "…propiedad / entra…", móvil "…entra / al mundo…". -->
+      <div class="hero-capa">
+        <div class="hero-texto">
+          <p class="hero-titulo hero-titulo--largo">Aquí, tu propiedad<br class="hidden lg:block" />
+            entra<br class="lg:hidden" /> al mundo correcto</p>
+          <p class="hero-subtitulo">Publica fácil, conecta con clientes reales y déjala en manos expertas.</p>
         </div>
-        <!-- Mobile & Tablet Image (up to lg) -->
       </div>
     </div>
   </div>

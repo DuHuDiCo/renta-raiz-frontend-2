@@ -15,13 +15,12 @@
       </div>
 
       <div class="absolute inset-0 z-30 bg-black/50 flex items-center justify-center">
-        <!-- Un solo <img>: cada dispositivo descarga únicamente su versión del texto (antes bajaban las dos). -->
-        <picture class="contents">
-          <source media="(min-width: 1024px)" srcset="assets/images/TextoSlider-vistaInicial.png" />
-          <img src="assets/images/HOME-MOVIL.webp"
-            class="w-full sm:w-[70%] md:w-[85%] lg:w-[70%] xl:w-[60%] 2xl:w-[50%] h-auto object-contain translate-y-[30px] lg:-translate-y-4 xl:-translate-y-2"
-            alt="Lo que sueñas, lo encuentras aquí. En el portal inmobiliario de Renta Raíz, expertos en propiedades de lujo." />
-        </picture>
+        <!-- Texto real (antes era una imagen): más liviano, nítido en cualquier pantalla e indexable. -->
+        <div class="hero-texto translate-y-[30px] lg:-translate-y-4 xl:-translate-y-2">
+          <p class="hero-titulo">Lo que sueñas,<br />lo encuentras aquí</p>
+          <p class="hero-subtitulo hero-subtitulo--justificado">En el portal inmobiliario de Renta Raíz</p>
+          <p class="hero-firma">Expertos en propiedades de lujo</p>
+        </div>
       </div>
     </div>
   </div>
@@ -241,8 +240,10 @@
 
   <!-- Sección azul con frase -->
   <div class="relative w-full flex flex-col justify-center items-center py-12 md:py-24 bg-[#060F29]">
-    <img loading="lazy" decoding="async" src="assets/images/frase3.png" alt="Texto decorativo"
-      class="w-[80%] sm:w-[60%] md:w-[50%] h-auto relative z-10 mb-6" />
+    <p class="frase">
+      <span class="frase-titulo">Confía en las manos</span>
+      <span class="frase-script">Que hacen que todo suceda</span>
+    </p>
 
     <div class="flex flex-wrap justify-center gap-3 relative z-10">
       <button type="button" (click)="redirigirContactanos()"
@@ -466,8 +467,10 @@
 
     <div class="absolute top-0 left-0 w-full h-full bg-[#060F29]/90 z-0"></div>
 
-    <img loading="lazy" decoding="async" src="assets/images/frase-confia.png" alt="Texto decorativo"
-      class="w-[80%] sm:w-[60%] md:w-[50%] h-auto relative z-10 mb-6" />
+    <p class="frase" style="--t: 0.048; --s: 0.134">
+      <span class="frase-titulo">En Renta Raíz hacemos que<br />comprar, vender y arrendar</span>
+      <span class="frase-script">sea más sencillo</span>
+    </p>
 
     <div class="flex gap-3 justify-center relative z-10 space-x-4">
       <button type="button" [disabled]="cargando" (click)="redirigirFiltros()"

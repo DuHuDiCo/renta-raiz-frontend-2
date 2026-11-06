@@ -8,6 +8,7 @@ import { Component, Input } from '@angular/core';
   selector: 'app-compartir-inmueble',
   standalone: true,
   templateUrl: './compartir-inmueble.component.html',
+  host: { '[class.relative]': 'flotante', '[class.inline-block]': "variante === 'icono'" },
 })
 export class CompartirInmuebleComponent {
   /** Dirección pública y limpia de la ficha (sin parámetros de campaña). */
@@ -20,8 +21,13 @@ export class CompartirInmuebleComponent {
   @Input() mensaje = '';
   /** Nombre del evento en Google Tag Manager. */
   @Input() evento = 'compartir_inmueble';
-  /** 'oscuro' para fondos azul marino (perfil del asesor). */
-  @Input() variante: 'claro' | 'oscuro' = 'claro';
+  /** 'oscuro' para fondos azul marino (perfil del asesor); 'icono' es un botón redondo sin texto (tarjetas del equipo). */
+  @Input() variante: 'claro' | 'oscuro' | 'icono' | 'contorno' = 'claro';
+
+  /** 'icono' y 'contorno' abren las opciones en un menú flotante, sin empujar lo que hay debajo. */
+  get flotante(): boolean {
+    return this.variante === 'icono' || this.variante === 'contorno';
+  }
 
   opcionesAbiertas = false;
   copiado = false;

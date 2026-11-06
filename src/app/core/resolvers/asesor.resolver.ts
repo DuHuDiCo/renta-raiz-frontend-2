@@ -16,7 +16,7 @@ export const asesorResolver: ResolveFn<any> = (route) => {
   // Muestra la página "no encontrada" sin cambiar la dirección del navegador.
   const noDisponible = (codigo: number) => {
     seo.responderCon(codigo);
-    router.navigate(['/no-encontrado'], { skipLocationChange: true });
+    router.navigate(['/no-encontrado'], { skipLocationChange: true, state: { codigo } });
     return EMPTY;
   };
 

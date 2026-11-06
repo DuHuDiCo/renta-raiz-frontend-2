@@ -15,7 +15,35 @@ const CLAVE_MINIMIZADO = 'recorrido_minimizado';
 export class OffcanvasWishlistComponent {
 
   favoritos: any[] = [];
-  @Input() visible = false;
+
+  /**
+   * La página cambia este valor cada vez que se toca el carrito del menú (es un interruptor y puede quedar desfasado
+   * de lo que se ve). Por eso cada cambio se toma como un clic: si el panel no está abierto lo abre, y si lo está lo
+   * retrae a la píldora. Abrirlo también deshace el "ocultar" de la píldora.
+   */
+  @Input() set visible(valor: boolean) {
+    if (this.inicializado && valor !== this.ultimoValorPagina) {
+      if (this.panelAbierto) {
+        this.cambiarMinimizado(true);
+      } else {
+        this.oculto = false;
+        this.visibleInterno = true;
+        this.cambiarMinimizado(false);
+      }
+    } else if (valor) {
+      this.visibleInterno = true;
+    }
+    this.ultimoValorPagina = valor;
+  }
+  get visible(): boolean {
+    return this.visibleInterno;
+  }
+  private visibleInterno = false;
+  private ultimoValorPagina = false;
+  private inicializado = false;
+
+  /** La píldora se ocultó con su X: vuelve al agregar un inmueble o al tocar el carrito del menú. */
+  oculto = false;
 
   /**
    * Estado retraído en computador. La página puede sugerirlo, pero si el usuario ya eligió uno
@@ -43,11 +71,30 @@ export class OffcanvasWishlistComponent {
     this.favService.favoritos$.subscribe(favs => {
       // Al agregar un inmueble se despliega para mostrarlo; al cargar la página se respeta lo guardado.
       const agregoUno = cantidadAnterior !== null && favs.length > cantidadAnterior;
-      if (favs.length > 0) this.visible = true;
-      if (agregoUno) this.cambiarMinimizado(false);
+      if (favs.length > 0) this.visibleInterno = true;
+      if (agregoUno) {
+        this.oculto = false;
+        this.cambiarMinimizado(false);
+      }
       cantidadAnterior = favs.length;
       this.favoritos = favs;
     });
+    this.inicializado = true;
+  }
+
+  /** La X de la píldora: la quita de la pantalla sin borrar el recorrido. */
+  ocultar(): void {
+    this.oculto = true;
+  }
+
+  /** Panel completo a la vista (en celular a pantalla completa; en computador como ventana abajo a la derecha). */
+  get panelAbierto(): boolean {
+    return this.visible && !this.oculto && !this.minimizado;
+  }
+
+  /** Píldora retraída: solo si hay inmuebles en el recorrido. */
+  get pildoraVisible(): boolean {
+    return this.visible && !this.oculto && this.minimizado && this.favoritos.length > 0;
   }
 
 
@@ -58,7 +105,9 @@ export class OffcanvasWishlistComponent {
   }
 
   cerrar(): void {
-    this.visible = false;
+    // Con inmuebles en el recorrido se retrae a la píldora; sin ellos desaparece.
+    if (this.favoritos.length) this.cambiarMinimizado(true);
+    else this.visibleInterno = false;
     this.cerrarNotificacion.emit();
   }
 
@@ -73,7 +122,8 @@ export class OffcanvasWishlistComponent {
   limpiar(): void {
     this.favService.eliminarAll();
     this.favoritos = [];
-    this.cerrar();
+    this.visibleInterno = false;
+    this.cerrarNotificacion.emit();
   }
 
   private cambiarMinimizado(valor: boolean): void {

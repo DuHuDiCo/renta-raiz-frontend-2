@@ -1,4 +1,7 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { afterNextRender, Component, inject, NgZone, OnInit } from '@angular/core';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { InmueblesService } from '../../../../core/Inmuebles/inmuebles.service';
 import { NavbarComponent } from "../../../../shared/navbar/navbar.component";
 import { BotonesFlotantesComponent } from "../../../../shared/botones-flotantes/botones-flotantes.component";
 import { FooterComponent } from "../../../../shared/footer/footer.component";
@@ -23,6 +26,47 @@ import { CompartirInmuebleComponent } from '../../../../shared/compartir-inmuebl
 export class NuestroEquipoComponent implements OnInit {
 
   equipo = inject(DataasesoresService).getEquipo();
+  private inmuebles = inject(InmueblesService);
+
+  /** Inmuebles publicados por asesor (venta y arriendo), los mismos totales del portafolio. Se piden en el navegador. */
+  totales: Record<number, { venta: number | null; arriendo: number | null }> = {};
+
+  private zona = inject(NgZone);
+  // afterNextRender corre fuera de la zona de Angular: sin zone.run la pantalla no se enteraría de los totales.
+  private cargarTotales = afterNextRender(() => this.zona.run(() => {
+    const total = (broker: number, biz: number) =>
+      this.inmuebles.getFiltrosEnviar({ broker, biz, page: 1 }, 1).pipe(
+        map((respuesta: any) => Number(respuesta?.total) || 0),
+        catchError(() => of(null))
+      );
+    for (const asesor of this.equipo) {
+      forkJoin({ venta: total(asesor.id, 2), arriendo: total(asesor.id, 1) }).subscribe(
+        (cuenta) => (this.totales = { ...this.totales, [asesor.id]: cuenta })
+      );
+    }
+  }));
+
+  /** "350 223 9363" → "573502239363", el formato que piden WhatsApp y tel:. */
+  private telefonoInternacional(asesor: any): string {
+    const digitos = String(asesor.telefono || '').replace(/\D/g, '');
+    return digitos.startsWith('57') && digitos.length > 10 ? digitos : `57${digitos}`;
+  }
+
+  enlaceWhatsapp(asesor: any): string {
+    const nombre = String(asesor.nombre || '').split(' ')[0];
+    const texto = `Hola ${nombre}, vi tu perfil en Renta Raíz y quiero información sobre un inmueble.`;
+    return `https://wa.me/${this.telefonoInternacional(asesor)}?text=${encodeURIComponent(texto)}`;
+  }
+
+  enlaceLlamada(asesor: any): string {
+    return `tel:+${this.telefonoInternacional(asesor)}`;
+  }
+
+  /** Evento para Google Tag Manager. */
+  registrarContacto(medio: string, asesor: any): void {
+    const capa = ((window as any).dataLayer = (window as any).dataLayer || []);
+    capa.push({ event: 'contacto_asesor', medio, asesor: asesor.slug });
+  }
 
   mostrarModalRecorrido = false
 

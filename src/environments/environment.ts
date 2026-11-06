@@ -11,6 +11,10 @@ export const environment = {
   busquedaIa: false,
   /** Búsqueda con IA interpretada en el navegador con reglas simples, sin llamar al backend. */
   busquedaIaMock: false,
+  /** Formulario propio de disponibilidad para el recorrido (POST /recorridos) en lugar del widget de LeadConnector. */
+  recorridoPropio: false,
+  /** Simula la respuesta de POST /recorridos, sin llamar al backend (mientras no exista el endpoint). */
+  recorridoMock: false,
 };
 
 export const conexionVault = {

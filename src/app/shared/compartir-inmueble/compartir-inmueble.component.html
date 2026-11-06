@@ -1,13 +1,27 @@
-<button type="button" (click)="compartir()" [attr.aria-expanded]="opcionesAbiertas"
-  class="w-full flex items-center justify-center gap-2 border focus:ring-4 focus:outline-none font-medium px-5 text-center transition-all duration-300"
-  [class]="variante === 'oscuro'
-    ? 'rounded-full py-3.5 text-base text-[#CDAD60] border-[#CDAD60] hover:bg-[#CDAD60] hover:text-[#060F29] focus:ring-[#CDAD60]/30'
-    : 'rounded-lg py-2.5 text-sm text-[#080E36] hover:text-white border-[#080E36] hover:bg-[#080E36] focus:ring-[#080E36]/30'">
-  <i class="fas fa-share-nodes fa-sm"></i> {{ etiqueta }}
-</button>
+@if (variante === 'icono') {
+  <button type="button" (click)="compartir()" [attr.aria-expanded]="opcionesAbiertas" [attr.aria-label]="etiqueta" [title]="etiqueta"
+    class="flex h-10 w-10 items-center justify-center rounded-full border border-[#e6dfcf] bg-white text-[#080E36] transition-colors hover:border-[#CDAD60] hover:bg-[#CDAD60] hover:text-white">
+    <i class="fas fa-share-nodes"></i>
+  </button>
+} @else if (variante === 'contorno') {
+  <button type="button" (click)="compartir()" [attr.aria-expanded]="opcionesAbiertas"
+    class="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-medium text-[#080E36] transition-colors hover:border-[#CDAD60] hover:bg-[#FBF7EE]">
+    <i class="fas fa-share-nodes text-sm"></i> {{ etiqueta }}
+  </button>
+} @else {
+  <button type="button" (click)="compartir()" [attr.aria-expanded]="opcionesAbiertas"
+    class="w-full flex items-center justify-center gap-2 border focus:ring-4 focus:outline-none font-medium px-5 text-center transition-all duration-300"
+    [class]="variante === 'oscuro'
+      ? 'rounded-full py-3.5 text-base text-[#CDAD60] border-[#CDAD60] hover:bg-[#CDAD60] hover:text-[#060F29] focus:ring-[#CDAD60]/30'
+      : 'rounded-lg py-2.5 text-sm text-[#080E36] hover:text-white border-[#080E36] hover:bg-[#080E36] focus:ring-[#080E36]/30'">
+    <i class="fas fa-share-nodes fa-sm"></i> {{ etiqueta }}
+  </button>
+}
 
 @if (opcionesAbiertas) {
-  <div class="mt-2 grid grid-cols-3 gap-2 text-xs" [class.bg-white]="variante === 'oscuro'" [class.rounded-xl]="variante === 'oscuro'" [class.p-2]="variante === 'oscuro'">
+  <div class="mt-2 grid grid-cols-3 gap-2 text-xs" [class.bg-white]="variante !== 'claro'" [class.rounded-xl]="variante !== 'claro'" [class.p-2]="variante !== 'claro'"
+    [class.absolute]="flotante" [class.right-0]="flotante" [class.top-full]="flotante" [class.z-20]="flotante"
+    [class.w-64]="flotante" [class.shadow-xl]="flotante" [class.ring-1]="flotante" [class.ring-gray-200]="flotante">
     <a [href]="enlaceWhatsapp" target="_blank" rel="noopener" (click)="registrar('whatsapp')"
       class="flex flex-col items-center gap-1 rounded-lg border border-gray-200 py-2 text-gray-700 hover:border-green-600 hover:text-green-700">
       <i class="fab fa-whatsapp text-lg"></i> WhatsApp

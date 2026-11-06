@@ -1,0 +1,28 @@
+@if (!enRecorrido) {
+  <button type="button" (click)="agregar()"
+    class="group flex w-full items-center justify-center gap-2.5 rounded-lg bg-[#CDAD60] px-5 py-3 text-sm font-semibold text-[#080E36] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#080E36] hover:text-white hover:shadow-md">
+    <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[#080E36]/10 transition-colors group-hover:bg-white/15">
+      <i class="fas fa-plus text-[11px] transition-transform group-hover:rotate-90"></i>
+    </span>
+    Agregar a mi recorrido
+  </button>
+  <p class="mt-1.5 text-center text-xs text-gray-500">Junta varios inmuebles y visítalos el mismo día.</p>
+} @else {
+  <div class="rounded-lg border border-[#4f8a32]/40 bg-[#EEF6E8] p-3 ring-[#4f8a32]/30 transition-all"
+    [class.ring-2]="recienAgregado">
+    <div class="flex items-center justify-between gap-3">
+      <p class="flex items-center gap-2 text-sm font-semibold text-[#2f5a1c]">
+        <i class="fas fa-circle-check text-[#4f8a32]"></i>
+        {{ recienAgregado ? '¡Agregado a tu recorrido!' : 'En tu recorrido' }}
+      </p>
+      <button type="button" (click)="quitar()" class="text-xs font-medium text-gray-500 underline underline-offset-2 hover:text-red-600">
+        Quitar
+      </button>
+    </div>
+    <button type="button" (click)="agendar.emit()"
+      class="mt-2.5 flex w-full items-center justify-center gap-2 rounded-lg bg-[#080E36] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#CDAD60] hover:text-[#080E36]">
+      <i class="fas fa-calendar-check text-xs"></i>
+      Agendar visita{{ cantidad > 1 ? ' a ' + cantidad + ' inmuebles' : '' }}
+    </button>
+  </div>
+}

@@ -121,3 +121,172 @@ html.cargando-chat-ia {
     }
   }
 }
+
+// Texto de los sliders (antes eran imágenes PNG con el texto). Uso:
+//   <div class="hero-texto">
+//     <p class="hero-titulo">Título</p>
+//     <p class="hero-subtitulo">Subtítulo</p>   (solo escritorio)
+//     <p class="hero-firma">Firma manuscrita</p> (solo escritorio)
+//   </div>
+.hero-texto {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0 1rem;
+  text-align: left;
+}
+
+.hero-titulo {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.12;
+  white-space: nowrap;
+  font-size: clamp(1rem, 5.9vw, 3.1rem);
+  color: #e8b964;
+  // Degradado dorado con brillo al centro, igual que las imágenes originales.
+  background: linear-gradient(90deg, #dcaa52 0%, #f3cf86 42%, #e9bf6f 70%, #ddb058 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  @media (min-width: 1024px) {
+    letter-spacing: 0.09em;
+    font-size: clamp(1.5rem, 2.2vw, 2.4rem);
+  }
+}
+
+.hero-subtitulo,
+.hero-firma {
+  display: none;
+  color: #fff;
+}
+
+@media (min-width: 1024px) {
+  .hero-subtitulo,
+  .hero-firma {
+    display: block;
+  }
+
+  .hero-subtitulo {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    text-transform: uppercase;
+    font-size: clamp(0.55rem, 0.7vw, 0.8rem);
+    letter-spacing: 0.32em;
+    margin-top: 0.35rem;
+  }
+
+  // Estira el subtítulo al ancho del título.
+  .hero-subtitulo--justificado {
+    width: 100%;
+    text-align: justify;
+    text-align-last: justify;
+  }
+
+  .hero-firma {
+    font-family: 'Mrs Saint Delafield', cursive;
+    font-size: clamp(1.3rem, 1.7vw, 2rem);
+    line-height: 1;
+    margin-top: 0.1rem;
+  }
+}
+
+// Capa que ubica .hero-texto sobre la foto del banner de las páginas internas.
+// Móvil: centrado, algo por debajo del medio. Escritorio: abajo a la izquierda; el padding inferior
+// deja libre la tarjeta de filtros, que monta 3.5rem sobre el banner.
+.hero-capa {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 6rem;
+
+  @media (min-width: 1024px) {
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 0 0 calc(3.5rem + 3vh) 18.5%;
+  }
+
+  .hero-texto {
+    align-items: center;
+    text-align: center;
+
+    @media (min-width: 1024px) {
+      align-items: flex-start;
+      text-align: left;
+    }
+  }
+}
+
+// Títulos largos: letra más pequeña en móvil para que quepan sin cortarse.
+@media (max-width: 1023.98px) {
+  .hero-titulo--largo {
+    font-size: 4.4vw;
+  }
+}
+
+// Frases de las franjas azules (antes imágenes: frase3, frase-confia, 2TextoBarra2). Uso:
+//   <p class="frase">
+//     <span class="frase-titulo">Texto en mayúsculas</span>
+//     <span class="frase-script">Texto manuscrito dorado</span>
+//   </p>
+// --w es el ancho que ocupaba la imagen; los tamaños de letra son proporcionales a él.
+// --t y --s son el tamaño del título y del manuscrito (fracción de --w); cada frase puede
+// ajustarlos con style="--t: …; --s: …" para que ocupe lo mismo que su imagen original.
+.frase {
+  --w: 80vw;
+  --t: 0.0545;
+  --s: 0.154;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--w);
+  margin-bottom: 2.75rem;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+
+  @media (min-width: 640px) {
+    --w: 60vw;
+  }
+
+  @media (min-width: 768px) {
+    --w: 50vw;
+  }
+}
+
+.frase-titulo {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  text-transform: uppercase;
+  color: #fff;
+  font-size: calc(var(--w) * var(--t));
+  line-height: 1.2;
+}
+
+.frase-titulo--negrita {
+  font-weight: 700;
+}
+
+.frase-script {
+  // Si Allison no carga, Brush Script (viene con Windows/Mac) se parece más que el "cursive" genérico.
+  font-family: 'Allison', 'Brush Script MT', cursive;
+  white-space: nowrap;
+  color: #b89a6a;
+  font-size: calc(var(--w) * var(--s));
+  line-height: 0.8;
+  // Sube para montarse sobre la línea de arriba, como en el diseño.
+  margin-top: -0.18em;
+}
+
+// Título "Noticias" del banner de Blogs (antes noticias.png).
+.titulo-noticias {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 400;
+  color: #fff;
+  font-size: clamp(2rem, 7.5vw, 6.5rem);
+  line-height: 1;
+  margin-top: 11.5vw;
+}
