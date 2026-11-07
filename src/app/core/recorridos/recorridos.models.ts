@@ -43,6 +43,16 @@ export interface RangoDisponibilidad {
   franjas: FranjaRecorrido[];
 }
 
+/** Un inmueble del recorrido: el código y, para que el equipo y Lía lo reconozcan sin buscarlo, título y ficha. */
+export interface InmuebleRecorrido {
+  /** Código Domus. */
+  codpro: number;
+  /** "Apartamento en arriendo en Otra Parte, Envigado" (como el encabezado de la ficha, hasta 200 caracteres). */
+  titulo: string;
+  /** Dirección absoluta de la ficha: "https://rentaraiz.co/inmueble/…-7561". */
+  url: string;
+}
+
 /** El equipo confirma los recorridos solo por WhatsApp. */
 export type CanalRecorrido = 'whatsapp';
 
@@ -53,8 +63,8 @@ export interface SolicitudRecorridoRequest {
   /** Opcional. */
   email: string | null;
   canalPreferido: CanalRecorrido;
-  /** Códigos Domus (codpro) de los inmuebles del recorrido, en el orden en que los agregó. */
-  inmuebles: number[];
+  /** Inmuebles del recorrido, en el orden en que los agregó (entre 1 y MAXIMO_INMUEBLES). */
+  inmuebles: InmuebleRecorrido[];
   /** Entre 1 y MAXIMO_RANGOS rangos, sin repetir. Son una sugerencia, no una reserva. */
   disponibilidad: RangoDisponibilidad[];
   comentarios: string | null;
@@ -74,6 +84,8 @@ export interface SolicitudRecorridoResponse {
 }
 
 export const MAXIMO_RANGOS = 5;
+/** Inmuebles por solicitud que acepta el backend. */
+export const MAXIMO_INMUEBLES = 20;
 /** Hasta cuántos días hacia adelante se puede proponer disponibilidad. */
 export const DIAS_MAXIMOS_ADELANTE = 60;
 export const LONGITUD_MAXIMA_COMENTARIOS = 500;

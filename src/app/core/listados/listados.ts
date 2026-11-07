@@ -74,6 +74,47 @@ export function rutaFicha(inmueble: any): string {
   return `/inmueble/${texto ? `${texto}-` : ''}${Number(inmueble.codpro)}`;
 }
 
+/** "otra parte" → "Otra Parte". */
+function capitalizarPalabras(texto: string): string {
+  return String(texto || '').trim().toLowerCase().replace(/(^|\s)\S/g, (letra) => letra.toUpperCase());
+}
+
+/** "$5.000.000". */
+function pesos(valor: number): string {
+  return `$${Math.round(valor).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+}
+
+export interface ResumenInmueble {
+  /** "Apartamento en arriendo en Otra Parte, Envigado": el mismo encabezado de la ficha. */
+  titulo: string;
+  /** "Otra Parte, Envigado". */
+  zona: string;
+  /** "$5.000.000 / mes", "$450.000.000" o, en arriendo y venta, "Arriendo $5.000.000 / mes · Venta $450.000.000". */
+  precio: string;
+  /** Dirección absoluta de la ficha. */
+  url: string;
+}
+
+/**
+ * Título, zona, precio y dirección absoluta de un inmueble, como se muestran en su ficha. Viajan con las
+ * solicitudes de contacto y de recorrido para que el equipo (y Lía) sepan de qué inmueble se trata.
+ * `dominio` va sin "/" final, por ejemplo "https://rentaraiz.co".
+ */
+export function resumenInmueble(inmueble: any, dominio: string): ResumenInmueble {
+  const tipo = capitalizarPalabras(inmueble?.type) || 'Inmueble';
+  const biz = String(inmueble?.biz_code);
+  const negocio = biz === '3' ? 'arriendo y venta' : biz === '2' ? 'venta' : 'arriendo';
+  const zona = [capitalizarPalabras(inmueble?.neighborhood), capitalizarPalabras(inmueble?.city)].filter(Boolean).join(', ');
+  const arriendo = biz !== '2' && Number(inmueble?.rent) > 0 ? `${pesos(Number(inmueble.rent))} / mes` : '';
+  const venta = biz !== '1' && Number(inmueble?.saleprice) > 0 ? pesos(Number(inmueble.saleprice)) : '';
+  return {
+    titulo: `${tipo} en ${negocio}${zona ? ` en ${zona}` : ''}`,
+    zona,
+    precio: arriendo && venta ? `Arriendo ${arriendo} · Venta ${venta}` : arriendo || venta,
+    url: `${dominio}${rutaFicha(inmueble)}`,
+  };
+}
+
 /** Código del inmueble a partir del último tramo de la dirección de su ficha. Lo único que identifica la ficha es el código. */
 export function codigoDeFicha(slug: string): number {
   return Number(/(?:^|-)(\d+)$/.exec(slug)?.[1]);

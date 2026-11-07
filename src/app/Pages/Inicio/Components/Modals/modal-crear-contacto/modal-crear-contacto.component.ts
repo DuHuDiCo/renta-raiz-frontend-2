@@ -6,6 +6,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { InmueblesService } from '../../../../../core/Inmuebles/inmuebles.service';
+import { ResumenInmueble, resumenInmueble } from '../../../../../core/listados/listados';
+import { SEO_DOMINIO } from '../../../../../core/seo/seo.service';
 
 type Accion = 'whatsapp' | 'email';
 type TipoNegocio = 'arriendo' | 'compra';
@@ -47,6 +49,8 @@ export class ModalCrearContactoComponent {
   bizCode?: number;
   whatsappUrl = '';
   primerNombre = '';
+  /** Título, zona y precio del inmueble de la ficha, para que el equipo sepa de cuál se trata. */
+  private resumen: ResumenInmueble | null = null;
 
   contacto = this.fb.group({
     nombre: ['', [Validators.required, Validators.minLength(3)]],
@@ -62,9 +66,10 @@ export class ModalCrearContactoComponent {
     return this.bizCode !== 1 && this.bizCode !== 2;
   }
 
-  abrirModal(codPro: number, accion: Accion, bizCode?: number | string) {
+  abrirModal(codPro: number, accion: Accion, bizCode?: number | string, inmueble?: any) {
     const codProPrevio = this.codPro;
     this.codPro = codPro;
+    this.resumen = inmueble?.codpro ? resumenInmueble(inmueble, SEO_DOMINIO) : null;
     this.accion = accion;
     this.bizCode = bizCode != null ? Number(bizCode) : undefined;
 
@@ -126,6 +131,9 @@ export class ModalCrearContactoComponent {
       tipoNegocio,
       aceptaPolitica: true,
       urlInmueble,
+      tituloInmueble: this.resumen?.titulo || null,
+      zonaInmueble: this.resumen?.zona || null,
+      precioInmueble: this.resumen?.precio || null,
       utm_source: this.leerUtm('utm_source'),
       utm_medium: this.leerUtm('utm_medium'),
       utm_campaign: this.leerUtm('utm_campaign'),

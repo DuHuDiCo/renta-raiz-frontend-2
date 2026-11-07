@@ -22,7 +22,7 @@ import { VolverComponent } from '../../../../shared/volver/volver.component';
 import { SafeUrlPipePipe } from '../../../../shared/pipes/safe-url-pipe.pipe';
 import { DataasesoresService } from '../../../../core/dataAsesores/dataasesores.service';
 import { SEO_DOMINIO, SEO_REF_AGENCIA, SEO_SUFIJO, seoMigas, SeoService } from '../../../../core/seo/seo.service';
-import { encabezadoListado, negocioDeBiz, rutaFicha, rutaListado, slugListado, tipoPorCodigo } from '../../../../core/listados/listados';
+import { encabezadoListado, negocioDeBiz, resumenInmueble, rutaFicha, rutaListado, slugListado, tipoPorCodigo } from '../../../../core/listados/listados';
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
 import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wishlist.component';
 import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
@@ -444,12 +444,10 @@ export class VerPropiedadComponent implements OnInit {
       (texto || '').trim().toLowerCase().replace(/(^|\s)\S/g, (letra) => letra.toUpperCase());
     const pesos = (valor: number) => `$${Math.round(valor).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
 
-    const tipo = capitalizar(p.type) || 'Inmueble';
-    const negocio = p.biz_code == 3 ? 'arriendo y venta' : p.biz_code == 2 ? 'venta' : 'arriendo';
-    const lugar = [capitalizar(p.neighborhood), capitalizar(p.city)].filter(Boolean).join(', ');
-    const encabezado = `${tipo} en ${negocio}${lugar ? ` en ${lugar}` : ''}`;
+    const resumen = resumenInmueble(p, SEO_DOMINIO);
+    const encabezado = resumen.titulo;
     this.tituloPagina = encabezado;
-    this.urlCompartir = `${SEO_DOMINIO}${rutaFicha(p)}`;
+    this.urlCompartir = resumen.url;
 
     const detalles = [
       p.area_cons > 0 ? `${p.area_cons} m²` : '',
@@ -536,7 +534,7 @@ export class VerPropiedadComponent implements OnInit {
     codPro: number,
     accion: 'whatsapp' | 'email'
   ) {
-    this.modalCrearContacto.abrirModal(codPro, accion, this.propiedad?.biz_code);
+    this.modalCrearContacto.abrirModal(codPro, accion, this.propiedad?.biz_code, this.propiedad);
   }
 
 

@@ -12,6 +12,8 @@ import { TitleCasePipe } from '@angular/common';
 import { finalize } from 'rxjs';
 import { WishlistServiceService } from '../../core/wishlist/wishlist-service.service';
 import { RecorridosService } from '../../core/recorridos/recorridos.service';
+import { resumenInmueble } from '../../core/listados/listados';
+import { SEO_DOMINIO } from '../../core/seo/seo.service';
 import {
   CIERRE_ENTRE_SEMANA,
   CIERRE_SABADO,
@@ -19,6 +21,8 @@ import {
   FRANJA_SABADO,
   FranjaRecorrido,
   FRANJAS_RECORRIDO,
+  InmuebleRecorrido,
+  MAXIMO_INMUEBLES,
   OpcionFranja,
   TEXTO_HORARIO,
   LONGITUD_MAXIMA_COMENTARIOS,
@@ -358,6 +362,23 @@ export class FormularioRecorridoComponent implements OnInit {
 
   // ---------- Envío ----------
 
+  /** Inmuebles con código válido, sin repetir y en el orden en que se agregaron, con su título y su ficha. */
+  private inmueblesSolicitud(): InmuebleRecorrido[] {
+    const vistos = new Set<number>();
+    return this.inmuebles
+      .filter((i) => {
+        const codigo = Number(i?.codpro);
+        if (!(codigo > 0) || vistos.has(codigo)) return false;
+        vistos.add(codigo);
+        return true;
+      })
+      .slice(0, MAXIMO_INMUEBLES)
+      .map((i) => {
+        const { titulo, url } = resumenInmueble(i, SEO_DOMINIO);
+        return { codpro: Number(i.codpro), titulo: titulo.slice(0, 200), url };
+      });
+  }
+
   invalido(campo: 'nombre' | 'telefono' | 'email' | 'aceptaPolitica'): boolean {
     const control = this.datos.controls[campo];
     return control.invalid && (control.touched || control.dirty);
@@ -402,7 +423,7 @@ export class FormularioRecorridoComponent implements OnInit {
         email: email.trim() || null,
         // El equipo confirma siempre por WhatsApp.
         canalPreferido: 'whatsapp',
-        inmuebles: this.inmuebles.map((i) => Number(i.codpro)).filter((c) => c > 0),
+        inmuebles: this.inmueblesSolicitud(),
         disponibilidad,
         comentarios: comentarios.trim() || null,
         aceptaPolitica: true,
