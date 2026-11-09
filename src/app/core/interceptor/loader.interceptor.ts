@@ -1,9 +1,16 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpContextToken, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { NgxUiLoaderService } from 'ngx-ui-loader';
 import { finalize } from 'rxjs/operators';
 
+/** Peticiones que muestran su propio indicador de avance (p. ej. la subida de fotos de una captación). */
+export const SIN_LOADER_GLOBAL = new HttpContextToken<boolean>(() => false);
+
 export const loaderInterceptor: HttpInterceptorFn = (req, next) => {
+  if (req.context.get(SIN_LOADER_GLOBAL)) {
+    return next(req);
+  }
+
   // Inyectamos el servicio del loader
   const loaderService = inject(NgxUiLoaderService);
   let requestCount = 0;

@@ -11,6 +11,8 @@ import { VolverComponent } from "../../../../shared/volver/volver.component";
 import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wishlist.component';
 import { ModalWishlistComponent } from '../../../../shared/modal-wishlist/modal-wishlist.component';
 import { WishlistServiceService } from '../../../../core/wishlist/wishlist-service.service';
+import { FormularioCaptacionComponent } from '../../../../shared/formulario-captacion/formulario-captacion.component';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-publicar-inmueble',
@@ -24,12 +26,16 @@ import { WishlistServiceService } from '../../../../core/wishlist/wishlist-servi
     CommonModule,
     VolverComponent,
     OffcanvasWishlistComponent,
-    ModalWishlistComponent
+    ModalWishlistComponent,
+    FormularioCaptacionComponent,
   ],
   templateUrl: './publicar-inmueble.component.html',
   styleUrl: './publicar-inmueble.component.scss',
 })
 export class PublicarInmuebleComponent implements OnInit {
+  /** Formulario propio de captación (POST /captaciones); sin él se muestra el iframe de LeadConnector. */
+  readonly captacionPropia = environment.captacionPropia;
+
   cargando = false;
   fotosBase64: string[] = [];
 

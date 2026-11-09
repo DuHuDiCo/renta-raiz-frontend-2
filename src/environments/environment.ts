@@ -15,6 +15,10 @@ export const environment = {
   recorridoPropio: false,
   /** Simula la respuesta de POST /recorridos, sin llamar al backend (mientras no exista el endpoint). */
   recorridoMock: false,
+  /** Formulario propio "Consigna tu propiedad" (POST /captaciones) en lugar del iframe de LeadConnector. */
+  captacionPropia: false,
+  /** Simula la respuesta de POST /captaciones, sin llamar al backend (mientras no exista el endpoint). */
+  captacionMock: false,
 };
 
 export const conexionVault = {

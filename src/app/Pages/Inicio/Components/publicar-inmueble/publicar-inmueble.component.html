@@ -46,19 +46,23 @@
               <!-- <h1 style="text-align: center; font-weight: bold; font-size: 1.5rem">
                 Publica tu propiedad
               </h1> -->
-              <iframe src="https://api.leadconnectorhq.com/widget/form/1tX0YU5sZDx0rLjf5RJs" loading="lazy" style="
-                  width: 100%;
-                  height: 100%;
-                  border: none;
-                  border-radius: 3px;
-                " id="inline-1tX0YU5sZDx0rLjf5RJs" data-layout="{'id':'INLINE'}" data-trigger-type="alwaysShow"
-                data-trigger-value="" data-activation-type="alwaysActivated" data-activation-value=""
-                data-deactivation-type="neverDeactivate" data-deactivation-value=""
-                data-form-name="Publica tu propiedad" data-height="597"
-                data-layout-iframe-id="inline-1tX0YU5sZDx0rLjf5RJs" data-form-id="1tX0YU5sZDx0rLjf5RJs"
-                title="Publica tu propiedad">
-              </iframe>
-              <script src="https://link.msgsndr.com/js/form_embed.js"></script>
+              @if (captacionPropia) {
+                <app-formulario-captacion></app-formulario-captacion>
+              } @else {
+                <iframe src="https://api.leadconnectorhq.com/widget/form/1tX0YU5sZDx0rLjf5RJs" loading="lazy" style="
+                    width: 100%;
+                    height: 100%;
+                    border: none;
+                    border-radius: 3px;
+                  " id="inline-1tX0YU5sZDx0rLjf5RJs" data-layout="{'id':'INLINE'}" data-trigger-type="alwaysShow"
+                  data-trigger-value="" data-activation-type="alwaysActivated" data-activation-value=""
+                  data-deactivation-type="neverDeactivate" data-deactivation-value=""
+                  data-form-name="Publica tu propiedad" data-height="597"
+                  data-layout-iframe-id="inline-1tX0YU5sZDx0rLjf5RJs" data-form-id="1tX0YU5sZDx0rLjf5RJs"
+                  title="Publica tu propiedad">
+                </iframe>
+                <script src="https://link.msgsndr.com/js/form_embed.js"></script>
+              }
               <!-- <form [formGroup]="formPublicarInmueble">
                 <div class="space-y-4">
                   <div>
@@ -145,8 +149,8 @@
             </div>
           </div>
         </div>
-        <!-- Card 1: Beneficios -->
-        <div class="w-full lg:w-1/2">
+        <!-- Card 1: Beneficios (junto al formulario propio, que es más largo, queda fija al desplazarse) -->
+        <div class="w-full lg:w-1/2" [ngClass]="captacionPropia ? 'lg:sticky lg:top-28 lg:self-start' : ''">
           <div
             class="bg-white rounded-[40px] shadow-[0_12px_40px_rgba(0,0,0,0.35)] overflow-hidden h-full transform transition-all">
             <div class="px-6 py-4 text-white mt-6">

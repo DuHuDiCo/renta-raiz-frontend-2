@@ -1,0 +1,351 @@
+@if (estado === 'exito') {
+  <!-- Enviado -->
+  <div class="flex flex-col items-center px-2 py-10 text-center sm:px-6" role="status">
+    <span class="flex h-16 w-16 items-center justify-center rounded-full bg-[#F4EFE4] text-3xl text-[#CDAD60]">
+      <i class="fas fa-house-circle-check"></i>
+    </span>
+    <h2 class="mt-5 text-2xl font-bold text-[#080E36]">¡Gracias, {{ primerNombre }}!</h2>
+    <p class="mt-3 max-w-md text-gray-600">
+      Recibimos la información de tu inmueble. Lía, nuestra asistente, o un asesor de Renta Raíz te escribirá por
+      <span class="font-semibold text-[#1f9d55]"><i class="fab fa-whatsapp"></i> WhatsApp</span>
+      al <span class="font-semibold text-[#080E36]">{{ telefonoEnviado }}</span> para contarte los siguientes pasos.
+    </p>
+    @if (idCaptacion) {
+      <p class="mt-5 rounded-full bg-gray-100 px-4 py-1.5 text-sm text-gray-600">
+        Número de solicitud <span class="font-semibold text-[#080E36]" data-id-captacion>{{ idCaptacion }}</span>
+      </p>
+    }
+    <button type="button" (click)="consignarOtro()"
+      class="mt-8 rounded-lg bg-[#080E36] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#CDAD60] hover:text-[#080E36]">
+      Consignar otro inmueble
+    </button>
+  </div>
+} @else {
+  <form [formGroup]="form" (submit)="$event.preventDefault(); enviar()" novalidate class="space-y-8 text-left">
+    <div class="text-center">
+      <h2 class="text-2xl font-bold text-[#080E36]">Cuéntanos de tu inmueble</h2>
+      <p class="mt-1 text-sm text-gray-500">Te toma unos minutos. Un asesor te escribirá por WhatsApp para continuar.</p>
+    </div>
+
+    <!-- Propietario -->
+    <fieldset class="space-y-4">
+      <legend class="mb-3 flex items-center gap-2 text-lg font-bold text-[#080E36]">
+        <span class="flex h-7 w-7 items-center justify-center rounded-full bg-[#080E36] text-xs font-bold text-[#CDAD60]">1</span>
+        Tus datos
+      </legend>
+
+      <label class="block">
+        <span class="text-sm font-medium text-gray-700">Nombre completo</span>
+        <input type="text" formControlName="nombre" autocomplete="name"
+          class="mt-1 w-full rounded-lg border-gray-300 text-sm focus:border-[#CDAD60] focus:ring-[#CDAD60]"
+          [class.border-red-400]="invalido('nombre')" />
+        @if (invalido('nombre')) { <span class="mt-1 block text-xs text-red-600">Escribe tu nombre (mínimo 3 letras).</span> }
+      </label>
+
+      <div>
+        <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+          <i class="fab fa-whatsapp text-base text-[#1f9d55]"></i> Celular con WhatsApp
+        </span>
+        <div class="mt-1 flex gap-2">
+          <select formControlName="indicativo" aria-label="Indicativo del país"
+            class="w-36 min-w-0 flex-none rounded-lg border-gray-300 text-sm focus:border-[#CDAD60] focus:ring-[#CDAD60] sm:w-52">
+            @for (pais of indicativos; track pais.codigo) {
+              <option [value]="pais.codigo">+{{ pais.codigo }} {{ pais.pais }}</option>
+            }
+          </select>
+          <input type="tel" formControlName="telefono" autocomplete="tel-national" inputmode="tel" aria-label="Número de celular"
+            class="w-full min-w-0 flex-1 rounded-lg border-gray-300 text-sm focus:border-[#CDAD60] focus:ring-[#CDAD60]"
+            [class.border-red-400]="invalido('telefono')" />
+        </div>
+        @if (invalido('telefono')) {
+          <span class="mt-1 block text-xs text-red-600">Escribe un número válido.</span>
+        } @else {
+          <span class="mt-1 block text-xs text-gray-500">Por aquí te escribiremos para continuar con tu inmueble.</span>
+        }
+      </div>
+
+      <label class="block">
+        <span class="text-sm font-medium text-gray-700">Correo electrónico <span class="font-normal text-gray-400">(opcional)</span></span>
+        <input type="email" formControlName="email" autocomplete="email"
+          class="mt-1 w-full rounded-lg border-gray-300 text-sm focus:border-[#CDAD60] focus:ring-[#CDAD60]"
+          [class.border-red-400]="invalido('email')" />
+        @if (invalido('email')) { <span class="mt-1 block text-xs text-red-600">Escribe un correo válido.</span> }
+      </label>
+    </fieldset>
+
+    <!-- Inmueble -->
+    <fieldset class="space-y-4">
+      <legend class="mb-3 flex items-center gap-2 text-lg font-bold text-[#080E36]">
+        <span class="flex h-7 w-7 items-center justify-center rounded-full bg-[#080E36] text-xs font-bold text-[#CDAD60]">2</span>
+        Tu inmueble
+      </legend>
+
+      <label class="block">
+        <span class="text-sm font-medium text-gray-700">Tipo de inmueble</span>
+        <select formControlName="tipo"
+          class="mt-1 w-full rounded-lg border-gray-300 text-sm focus:border-[#CDAD60] focus:ring-[#CDAD60]"
+          [class.border-red-400]="invalido('tipo')">
+          <option value="" disabled>Escoge el tipo</option>
+          @for (tipo of tipos; track tipo.valor) {
+            <option [value]="tipo.valor">{{ tipo.nombre }}</option>
+          }
+        </select>
+        @if (invalido('tipo')) { <span class="mt-1 block text-xs text-red-600">Escoge el tipo de inmueble.</span> }
+      </label>
+
+      <div>
+        <span class="text-sm font-medium text-gray-700" id="negocio-etiqueta">¿Qué quieres hacer con él?</span>
+        <div class="mt-1.5 grid grid-cols-3 gap-2" role="radiogroup" aria-labelledby="negocio-etiqueta">
+          @for (negocio of negocios; track negocio.valor) {
+            <label class="cursor-pointer">
+              <input type="radio" formControlName="negocio" [value]="negocio.valor" class="peer sr-only" />
+              <span class="flex h-full items-center justify-center rounded-lg border px-2 py-2.5 text-center text-sm font-medium transition-colors
+                peer-checked:border-[#080E36] peer-checked:bg-[#080E36] peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-[#CDAD60]"
+                [class]="invalido('negocio') ? 'border-red-400 text-[#080E36]' : 'border-gray-300 text-[#080E36] hover:border-[#CDAD60]'">
+                {{ negocio.nombre }}
+              </span>
+            </label>
+          }
+        </div>
+        @if (invalido('negocio')) { <span class="mt-1 block text-xs text-red-600">Escoge si es para arriendo, venta o ambos.</span> }
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <label class="block">
+          <span class="text-sm font-medium text-gray-700">Ciudad o municipio</span>
+          <input type="text" formControlName="ciudad" list="captacion-ciudades" [maxlength]="longitudUbicacion" autocomplete="address-level2"
+            placeholder="Medellín"
+            class="mt-1 w-full rounded-lg border-gray-300 text-sm placeholder:text-gray-400 focus:border-[#CDAD60] focus:ring-[#CDAD60]"
+            [class.border-red-400]="invalido('ciudad')" />
+          <datalist id="captacion-ciudades">
+            @for (ciudad of ciudades; track ciudad) { <option [value]="ciudad"></option> }
+          </datalist>
+          @if (invalido('ciudad')) { <span class="mt-1 block text-xs text-red-600">Escribe la ciudad.</span> }
+        </label>
+        <label class="block">
+          <span class="text-sm font-medium text-gray-700">Barrio o sector</span>
+          <input type="text" formControlName="barrio" [maxlength]="longitudUbicacion" placeholder="El Poblado"
+            class="mt-1 w-full rounded-lg border-gray-300 text-sm placeholder:text-gray-400 focus:border-[#CDAD60] focus:ring-[#CDAD60]"
+            [class.border-red-400]="invalido('barrio')" />
+          @if (invalido('barrio')) { <span class="mt-1 block text-xs text-red-600">Escribe el barrio.</span> }
+          @else { <span class="mt-1 block text-xs text-gray-500">No necesitamos la dirección exacta.</span> }
+        </label>
+      </div>
+
+      @if (conArriendo || conVenta) {
+        <div class="grid gap-4 sm:grid-cols-2">
+          @if (conArriendo) {
+            <label class="block">
+              <span class="text-sm font-medium text-gray-700">Precio de arriendo mensual</span>
+              <div class="relative mt-1">
+                <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-400">$</span>
+                <input type="text" inputmode="numeric" formControlName="precioArriendo" (input)="formatearMonto('precioArriendo', $event)"
+                  placeholder="4.500.000"
+                  class="w-full rounded-lg border-gray-300 pl-7 text-sm placeholder:text-gray-400 focus:border-[#CDAD60] focus:ring-[#CDAD60]"
+                  [class.border-red-400]="invalido('precioArriendo')" />
+              </div>
+              @if (invalido('precioArriendo')) { <span class="mt-1 block text-xs text-red-600">Escribe el precio de arriendo.</span> }
+            </label>
+          }
+          @if (conVenta) {
+            <label class="block">
+              <span class="text-sm font-medium text-gray-700">Precio de venta</span>
+              <div class="relative mt-1">
+                <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-400">$</span>
+                <input type="text" inputmode="numeric" formControlName="precioVenta" (input)="formatearMonto('precioVenta', $event)"
+                  placeholder="650.000.000"
+                  class="w-full rounded-lg border-gray-300 pl-7 text-sm placeholder:text-gray-400 focus:border-[#CDAD60] focus:ring-[#CDAD60]"
+                  [class.border-red-400]="invalido('precioVenta')" />
+              </div>
+              @if (invalido('precioVenta')) { <span class="mt-1 block text-xs text-red-600">Escribe el precio de venta.</span> }
+            </label>
+          }
+        </div>
+      }
+
+      <div class="grid grid-cols-2 gap-4">
+        <label class="block">
+          <span class="text-sm font-medium text-gray-700">Administración <span class="font-normal text-gray-400">(opcional)</span></span>
+          <div class="relative mt-1">
+            <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-400">$</span>
+            <input type="text" inputmode="numeric" formControlName="administracion" (input)="formatearMonto('administracion', $event)"
+              placeholder="450.000"
+              class="w-full rounded-lg border-gray-300 pl-7 text-sm placeholder:text-gray-400 focus:border-[#CDAD60] focus:ring-[#CDAD60]" />
+          </div>
+        </label>
+        <label class="block">
+          <span class="text-sm font-medium text-gray-700">Área (m²) <span class="font-normal text-gray-400">(opcional)</span></span>
+          <input type="text" inputmode="decimal" formControlName="area" placeholder="85"
+            class="mt-1 w-full rounded-lg border-gray-300 text-sm placeholder:text-gray-400 focus:border-[#CDAD60] focus:ring-[#CDAD60]"
+            [class.border-red-400]="invalido('area')" />
+          @if (invalido('area')) { <span class="mt-1 block text-xs text-red-600">Entre 1 y 100.000 m².</span> }
+        </label>
+      </div>
+
+      <div class="grid grid-cols-3 gap-3">
+        <label class="block">
+          <span class="text-sm font-medium text-gray-700">Habitaciones</span>
+          <input type="text" inputmode="numeric" formControlName="habitaciones" placeholder="3"
+            class="mt-1 w-full rounded-lg border-gray-300 text-sm placeholder:text-gray-400 focus:border-[#CDAD60] focus:ring-[#CDAD60]"
+            [class.border-red-400]="invalido('habitaciones')" />
+        </label>
+        <label class="block">
+          <span class="text-sm font-medium text-gray-700">Baños</span>
+          <input type="text" inputmode="numeric" formControlName="banos" placeholder="2"
+            class="mt-1 w-full rounded-lg border-gray-300 text-sm placeholder:text-gray-400 focus:border-[#CDAD60] focus:ring-[#CDAD60]"
+            [class.border-red-400]="invalido('banos')" />
+        </label>
+        <label class="block">
+          <span class="text-sm font-medium text-gray-700">Parqueaderos</span>
+          <input type="text" inputmode="numeric" formControlName="parqueaderos" placeholder="1"
+            class="mt-1 w-full rounded-lg border-gray-300 text-sm placeholder:text-gray-400 focus:border-[#CDAD60] focus:ring-[#CDAD60]"
+            [class.border-red-400]="invalido('parqueaderos')" />
+        </label>
+      </div>
+      @if (invalido('habitaciones') || invalido('banos') || invalido('parqueaderos')) {
+        <p class="-mt-2 text-xs text-red-600">Habitaciones, baños y parqueaderos: números enteros de 0 a 50.</p>
+      }
+
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <label class="block">
+          <span class="text-sm font-medium text-gray-700">Estrato</span>
+          <select formControlName="estrato"
+            class="mt-1 w-full rounded-lg border-gray-300 text-sm focus:border-[#CDAD60] focus:ring-[#CDAD60]">
+            <option value="">Sin indicar</option>
+            @for (estrato of estratos; track estrato) { <option [value]="estrato">{{ estrato }}</option> }
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-sm font-medium text-gray-700">¿Amoblado?</span>
+          <select formControlName="amoblado"
+            class="mt-1 w-full rounded-lg border-gray-300 text-sm focus:border-[#CDAD60] focus:ring-[#CDAD60]">
+            <option value="">Sin indicar</option>
+            <option value="si">Sí</option>
+            <option value="no">No</option>
+          </select>
+        </label>
+        <label class="col-span-2 block sm:col-span-1">
+          <span class="text-sm font-medium text-gray-700">Disponible desde</span>
+          <input type="date" formControlName="disponibleDesde" [min]="hoy" [max]="limiteDisponible"
+            class="mt-1 w-full rounded-lg border-gray-300 text-sm text-[#080E36] focus:border-[#CDAD60] focus:ring-[#CDAD60]"
+            [class.border-red-400]="invalido('disponibleDesde')" />
+          @if (invalido('disponibleDesde')) { <span class="mt-1 block text-xs text-red-600">Escoge una fecha de hoy a un año.</span> }
+        </label>
+      </div>
+
+      <label class="block">
+        <span class="flex items-baseline justify-between gap-2 text-sm font-medium text-gray-700">
+          <span>Descripción <span class="font-normal text-gray-400">(opcional)</span></span>
+          <span class="text-xs font-normal" [class]="longitudDescripcionActual >= longitudDescripcion ? 'text-red-600' : 'text-gray-400'">
+            {{ longitudDescripcionActual }}/{{ longitudDescripcion }}
+          </span>
+        </span>
+        <textarea formControlName="descripcion" rows="4" [maxlength]="longitudDescripcion"
+          placeholder="Cuéntanos lo que lo hace especial: vista, iluminación, remodelaciones, zonas comunes, cercanía a…"
+          class="mt-1 w-full resize-y rounded-lg border-gray-300 text-sm placeholder:text-gray-400 focus:border-[#CDAD60] focus:ring-[#CDAD60]"></textarea>
+      </label>
+    </fieldset>
+
+    <!-- Fotos -->
+    <fieldset>
+      <legend class="mb-1 flex items-center gap-2 text-lg font-bold text-[#080E36]">
+        <span class="flex h-7 w-7 items-center justify-center rounded-full bg-[#080E36] text-xs font-bold text-[#CDAD60]">3</span>
+        Fotos <span class="text-sm font-normal text-gray-400">(opcional)</span>
+      </legend>
+      <p class="text-sm text-gray-500">
+        Con fotos podemos darte una primera opinión del precio y el asesor llega más preparado. Sube hasta {{ maximoFotos }};
+        con las del celular basta.
+      </p>
+
+      @if (fotos.length || procesandoFotos) {
+        <ul class="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5" aria-label="Fotos agregadas">
+          @for (foto of fotos; track foto.id; let i = $index) {
+            <li class="group relative aspect-square overflow-hidden rounded-xl bg-gray-100">
+              <img [src]="foto.url" [alt]="'Foto ' + (i + 1)" class="h-full w-full object-cover" />
+              @if (estado !== 'enviando') {
+                <button type="button" (click)="quitarFoto(foto)" [attr.aria-label]="'Quitar la foto ' + (i + 1)"
+                  class="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-[#080E36]/80 text-sm text-white hover:bg-red-600">
+                  <i class="fas fa-xmark"></i>
+                </button>
+              }
+            </li>
+          }
+          @for (n of marcadoresProcesando; track $index) {
+            <li class="flex aspect-square items-center justify-center rounded-xl bg-gray-100 text-gray-400">
+              <i class="fas fa-spinner fa-spin"></i>
+            </li>
+          }
+        </ul>
+      }
+
+      @if (espacioFotos > 0) {
+        <label class="mt-3 flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors"
+          [class]="arrastrando ? 'border-[#CDAD60] bg-[#FBF7EE]' : 'border-gray-300 hover:border-[#CDAD60] hover:bg-[#FBF7EE]'"
+          (dragover)="alArrastrar($event, true)" (dragleave)="alArrastrar($event, false)" (drop)="alSoltar($event)">
+          <i class="fas fa-camera text-2xl text-[#CDAD60]"></i>
+          <span class="text-sm font-semibold text-[#080E36]">{{ fotos.length ? 'Agregar más fotos' : 'Agregar fotos' }}</span>
+          <span class="text-xs text-gray-500">
+            {{ fotos.length }}/{{ maximoFotos }} · JPG, PNG o WebP · las reducimos para que suban rápido
+          </span>
+          <input type="file" accept="image/*" multiple class="sr-only" (change)="alSeleccionarFotos($event)"
+            [disabled]="estado === 'enviando'" data-fotos-captacion />
+        </label>
+      } @else if (!procesandoFotos) {
+        <p class="mt-3 text-xs text-gray-500">Ya agregaste {{ maximoFotos }} fotos, el máximo. Quita alguna para cambiarla.</p>
+      }
+
+      @for (aviso of avisosFotos; track $index) {
+        <p class="mt-2 flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800" role="alert">
+          <i class="fas fa-triangle-exclamation mt-0.5"></i> {{ aviso }}
+        </p>
+      }
+    </fieldset>
+
+    <!-- Política y envío -->
+    <div class="space-y-4 border-t border-gray-100 pt-6">
+      <label class="flex cursor-pointer items-start gap-3 text-sm text-gray-600">
+        <input type="checkbox" formControlName="aceptaPolitica"
+          class="mt-0.5 h-4 w-4 flex-none rounded border-gray-300 text-[#080E36] focus:ring-[#CDAD60]" />
+        <span>
+          Autorizo el tratamiento de mis datos personales según la
+          <a href="/politicas-de-privacidad" target="_blank" rel="noopener"
+            class="font-medium text-[#080E36] underline underline-offset-2 hover:text-[#9c7d32]">Política de privacidad</a>.
+        </span>
+      </label>
+      @if (invalido('aceptaPolitica')) {
+        <p class="-mt-2 text-xs text-red-600">Debes aceptar la política de privacidad para continuar.</p>
+      }
+
+      @if (estado === 'error') {
+        <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700" role="alert" data-error-captacion>{{ mensajeError }}</p>
+      }
+
+      @if (estado === 'enviando') {
+        <div aria-live="polite">
+          <div class="flex justify-between text-xs text-gray-500">
+            <span>{{ progreso < 100 ? (fotos.length ? 'Subiendo tus fotos…' : 'Enviando…') : 'Casi listo…' }}</span>
+            <span>{{ progreso }} %</span>
+          </div>
+          <div class="mt-1 h-2 overflow-hidden rounded-full bg-gray-100" role="progressbar" [attr.aria-valuenow]="progreso"
+            aria-valuemin="0" aria-valuemax="100" aria-label="Avance del envío">
+            <div class="h-full rounded-full bg-[#CDAD60] transition-all duration-300" [style.width.%]="progreso"></div>
+          </div>
+        </div>
+      }
+
+      <button type="submit" [disabled]="estado === 'enviando'"
+        class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#CDAD60] px-6 py-3 font-semibold text-[#080E36] transition-colors hover:bg-[#080E36] hover:text-white disabled:cursor-not-allowed disabled:opacity-60">
+        @if (estado === 'enviando') {
+          <i class="fas fa-spinner fa-spin"></i> Enviando…
+        } @else if (estado === 'error') {
+          <i class="fas fa-rotate-right"></i> Intentar de nuevo
+        } @else {
+          <i class="fas fa-paper-plane"></i> Enviar mi inmueble
+        }
+      </button>
+      <p class="flex items-center justify-center gap-1.5 text-xs text-gray-500">
+        <i class="fab fa-whatsapp text-sm text-[#1f9d55]"></i> Te contactaremos por WhatsApp. Sin compromiso.
+      </p>
+    </div>
+  </form>
+}
