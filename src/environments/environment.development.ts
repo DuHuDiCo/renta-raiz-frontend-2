@@ -19,6 +19,8 @@ export const environment = {
   captacionPropia: true,
   /** Simula la respuesta de POST /captaciones, sin llamar al backend (mientras no exista el endpoint). */
   captacionMock: false,
+  /** Pruebas: el formulario de captación conserva lo escrito (también al recargar) y no se borra tras enviar. */
+  captacionConservarDatos: true,
 };
 
 export const conexionVault = {
