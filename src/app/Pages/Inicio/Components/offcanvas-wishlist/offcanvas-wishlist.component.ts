@@ -1,6 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { WishlistServiceService } from '../../../../core/wishlist/wishlist-service.service';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
 
 /** Clave del navegador donde se recuerda si el panel quedó retraído ('1') o desplegado ('0'). */
 const CLAVE_MINIMIZADO = 'recorrido_minimizado';
@@ -8,7 +10,7 @@ const CLAVE_MINIMIZADO = 'recorrido_minimizado';
 @Component({
   selector: 'app-offcanvas-wishlist',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink, RutaFichaPipe],
   templateUrl: './offcanvas-wishlist.component.html',
   styleUrl: './offcanvas-wishlist.component.scss'
 })
@@ -102,6 +104,13 @@ export class OffcanvasWishlistComponent {
   abrirModalRecorrido(){
     this.visibleModalRecorrido.emit()
 
+  }
+
+  /** En celular el panel tapa toda la pantalla: al abrir un inmueble se retrae para que se vea la ficha. */
+  alAbrirInmueble(): void {
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 1023.98px)').matches) {
+      this.cambiarMinimizado(true);
+    }
   }
 
   cerrar(): void {

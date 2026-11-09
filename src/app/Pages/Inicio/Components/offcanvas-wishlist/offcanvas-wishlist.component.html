@@ -44,13 +44,17 @@
         <ng-container *ngIf="favoritos.length > 0; else vacio">
           <div *ngFor="let fav of favoritos"
             class="group flex items-center gap-3 mb-2.5 rounded-xl bg-white p-2 pr-3 border border-transparent hover:border-[#CDAD60]/50 transition-colors">
-            <img loading="lazy" decoding="async" [src]="fav.image1" [alt]="fav.address"
-              class="w-16 h-16 object-cover rounded-lg flex-none" />
-            <div class="flex-1 min-w-0">
-              <p class="font-semibold text-[#080E36] text-sm leading-tight truncate">{{ fav.address }}</p>
-              <p class="text-gray-500 text-xs truncate">{{ fav.city }}</p>
-              <p *ngIf="fav.codpro" class="mt-1 text-[11px] font-medium text-[#b8963f]">Código {{ fav.codpro }}</p>
-            </div>
+            <!-- Foto y datos llevan a la ficha del inmueble -->
+            <a [routerLink]="fav | rutaFicha" (click)="alAbrirInmueble()" [attr.aria-label]="'Ver inmueble ' + fav.codpro"
+              class="flex flex-1 min-w-0 items-center gap-3 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CDAD60]">
+              <img loading="lazy" decoding="async" [src]="fav.image1" [alt]="fav.address"
+                class="w-16 h-16 object-cover rounded-lg flex-none" />
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-[#080E36] text-sm leading-tight truncate group-hover:underline">{{ fav.address }}</p>
+                <p class="text-gray-500 text-xs truncate">{{ fav.city }}</p>
+                <p *ngIf="fav.codpro" class="mt-1 text-[11px] font-medium text-[#b8963f]">Código {{ fav.codpro }}</p>
+              </div>
+            </a>
             <button (click)="eliminar(fav.codpro)" aria-label="Quitar del recorrido"
               class="flex-none w-8 h-8 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
               <i class="fas fa-trash-can text-sm"></i>
