@@ -41,6 +41,7 @@ const SUGERENCIAS_INICIO = [
   'Quiero publicar mi inmueble',
   'Horarios de atención',
 ];
+const SUGERENCIA_RECORRIDO = 'Compárame los inmuebles de mi recorrido';
 const SUGERENCIAS_PROPIEDAD = ['¿Qué requisitos piden?', '¿Qué incluye el canon?', '¿Cómo agendo una visita?'];
 
 /**
@@ -326,7 +327,11 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
         ? '¡Hola! 👋 Soy el asistente virtual de Renta Raíz. ¿Tienes alguna pregunta sobre este inmueble?'
         : '¡Hola! 👋 Soy el asistente virtual de Renta Raíz. Resuelvo tus dudas sobre arriendos, ventas, pagos y nuestros servicios.',
     });
-    this.sugerencias = enFicha ? SUGERENCIAS_PROPIEDAD : SUGERENCIAS_INICIO;
+    const sugerencias = enFicha ? SUGERENCIAS_PROPIEDAD : SUGERENCIAS_INICIO;
+    // Con inmuebles en "Mi recorrido", se invita a preguntar por ellos.
+    this.sugerencias = this.asistente.codigosRecorrido().length
+      ? [SUGERENCIA_RECORRIDO, ...sugerencias.slice(0, 3)]
+      : sugerencias;
   }
 
   private agregar(mensaje: Omit<MensajeChat, 'id' | 'fecha'>, guardar = true): void {

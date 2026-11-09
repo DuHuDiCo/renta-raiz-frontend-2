@@ -5,7 +5,9 @@
  * Chat de servicio al cliente, solo preguntas y respuestas: no capta datos personales ni
  * escala a un asesor. El backend arma el prompt, llama a la IA y devuelve la respuesta validada.
  * Cuando el visitante pide inmuebles (parecidos al que ve o según lo que busca), el backend los
- * consulta en Domus y los devuelve como tarjetas en `inmuebles`.
+ * consulta en Domus y los devuelve como tarjetas en `inmuebles`. También responde por código de
+ * inmueble escrito en el mensaje ("inmueble 6945") y sobre los de "Mi recorrido" (`contexto.recorrido`).
+ * Ver docs/contrato-asistente.md.
  */
 
 /** Qué página estaba viendo el usuario al escribir. Le permite a la IA responder sobre ella. */
@@ -37,6 +39,11 @@ export interface ContextoAsistente {
   inmueblesVisibles?: number[];
   /** Cuando `pagina` es 'listado': número de esa página. */
   numeroPagina?: number;
+  /**
+   * Códigos (codpro) de "Mi recorrido", en el orden en que se agregaron, sin repetir y como máximo
+   * MAXIMO_RECORRIDO_ASISTENTE. Ausente si está vacío. Con ellos el backend responde "¿cuál de mi recorrido…?".
+   */
+  recorrido?: number[];
   /** Atribución de campaña que el sitio ya guarda en localStorage. */
   utm?: Partial<Record<'utm_source' | 'utm_medium' | 'utm_campaign' | 'utm_content' | 'utm_term', string>>;
 }
@@ -110,3 +117,5 @@ export interface MensajeChat {
 }
 
 export const LONGITUD_MAXIMA_MENSAJE = 1000;
+/** Códigos de "Mi recorrido" que se envían en el contexto (los mismos que acepta POST /recorridos). */
+export const MAXIMO_RECORRIDO_ASISTENTE = 20;

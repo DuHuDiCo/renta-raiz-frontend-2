@@ -5,10 +5,12 @@ import { Router } from '@angular/router';
 import { Observable, Subject, timeout } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { codigoDeFicha } from '../listados/listados';
+import { WishlistServiceService } from '../wishlist/wishlist-service.service';
 import {
   AsistenteMensajeRequest,
   AsistenteMensajeResponse,
   LONGITUD_MAXIMA_MENSAJE,
+  MAXIMO_RECORRIDO_ASISTENTE,
   ContextoAsistente,
   ListadoVisibleAsistente,
   MensajeChat,
@@ -45,6 +47,7 @@ export class AsistenteChatService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private favoritos = inject(WishlistServiceService);
 
   /** Pregunta mandada desde otra parte del sitio que el chat aún no ha enviado (puede no haber cargado). */
   private preguntaPendiente: string | null = null;
@@ -121,6 +124,9 @@ export class AsistenteChatService {
       }
     }
 
+    const recorrido = this.codigosRecorrido();
+    if (recorrido.length) contexto.recorrido = recorrido;
+
     const utm: ContextoAsistente['utm'] = {};
     for (const clave of PARAMETROS_CAMPANA) {
       const valor = this.leer(clave);
@@ -129,6 +135,24 @@ export class AsistenteChatService {
     if (Object.keys(utm).length) contexto.utm = utm;
 
     return contexto;
+  }
+
+  /** Códigos de "Mi recorrido": válidos, sin repetir, en el orden en que se agregaron y como máximo 20. */
+  codigosRecorrido(): number[] {
+    if (!this.enNavegador) return [];
+    let favoritos: any[] = [];
+    try {
+      favoritos = this.favoritos.cargarFavoritos() as any[];
+    } catch {
+      return []; // Favoritos dañados en localStorage: el chat sigue sin ellos.
+    }
+    const codigos: number[] = [];
+    for (const favorito of Array.isArray(favoritos) ? favoritos : []) {
+      const codigo = Number(favorito?.codpro);
+      if (Number.isInteger(codigo) && codigo > 0 && !codigos.includes(codigo)) codigos.push(codigo);
+      if (codigos.length === MAXIMO_RECORRIDO_ASISTENTE) break;
+    }
+    return codigos;
   }
 
   private paginaDe(segmentos: string[]): PaginaAsistente {
