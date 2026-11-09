@@ -63,6 +63,8 @@ export class ChatBusquedaIaComponent implements OnChanges, AfterViewChecked, OnD
   /** Códigos de los inmuebles de la página abierta, en orden, y su número de página. */
   @Input() inmueblesVisibles: number[] = [];
   @Input() pagina = 1;
+  /** false cuando quien lo usa ya pinta un encabezado propio. */
+  @Input() conEncabezado = true;
 
   @Output() resultado = new EventEmitter<ResultadoBusquedaIa>();
   @Output() filtrosManuales = new EventEmitter<void>();

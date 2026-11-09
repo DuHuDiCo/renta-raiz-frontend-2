@@ -7,12 +7,38 @@
     </div>
 
     <div id="modern-drawer"
-      class="fixed top-0 left-0 z-[999] h-full w-full md:w-[28rem] lg:w-[28rem] bg-white shadow-xl flex flex-col transition-transform duration-300 ease-in-out pb-[env(safe-area-inset-bottom)]"
-      [ngClass]="modoChatIa ? 'md:top-[72px] md:h-[calc(100vh-72px)] overflow-hidden' : 'md:top-48 md:max-h-[calc(100vh-4rem)] overflow-y-auto'"
+      class="fixed top-0 left-0 z-[999] md:z-[45] h-full w-full md:w-[28rem] lg:w-[28rem] md:top-[72px] md:h-[calc(100vh-72px)] overflow-hidden bg-white shadow-xl flex flex-col transition-transform duration-300 ease-in-out pb-[env(safe-area-inset-bottom)]"
       [class.translate-x-0]="isDrawerOpen" [class.-translate-x-full]="!isDrawerOpen" [attr.aria-hidden]="!isDrawerOpen"
       style="border: 1px solid #cdad60" tabindex="-1" (click)="$event.stopPropagation()">
+      <!-- Pestañas: se pasa entre la búsqueda con IA y los filtros manuales sin perder ninguna de las dos -->
+      <div class="panel-filtros-manual flex-none flex items-center gap-2 bg-white px-3 py-3 border-b border-[#ece6d6]">
+        <div *ngIf="chatIaDisponible; else soloFiltros" role="tablist" aria-label="Forma de buscar"
+          class="flex flex-1 rounded-full bg-[#080E36] p-1">
+          <button type="button" role="tab" [attr.aria-selected]="modoChatIa" (click)="!modoChatIa && cambiarPanelIa(true)"
+            class="flex flex-1 items-center justify-center gap-2 rounded-full py-2 text-sm font-semibold transition-colors"
+            [ngClass]="modoChatIa ? 'bg-[#CDAD60] text-[#080E36]' : 'text-[#CDAD60] hover:text-white'">
+            <i class="fas fa-wand-magic-sparkles text-xs"></i> Con IA
+          </button>
+          <button type="button" role="tab" [attr.aria-selected]="!modoChatIa" (click)="modoChatIa && cambiarPanelIa(false)"
+            class="flex flex-1 items-center justify-center gap-2 rounded-full py-2 text-sm font-semibold transition-colors"
+            [ngClass]="!modoChatIa ? 'bg-[#CDAD60] text-[#080E36]' : 'text-[#CDAD60] hover:text-white'">
+            <i class="fas fa-sliders text-xs"></i> Filtros
+          </button>
+        </div>
+        <ng-template #soloFiltros>
+          <h3 class="flex flex-1 items-center gap-2 px-1 text-base font-semibold text-[#080E36]">
+            <i class="fas fa-sliders text-sm text-[#CDAD60]"></i> Filtros
+          </h3>
+        </ng-template>
+        <button #closeButton type="button" (click)="toggleDrawer()" data-drawer-hide="modern-drawer"
+          aria-controls="modern-drawer" aria-label="Cerrar panel"
+          class="flex h-9 w-9 flex-none items-center justify-center rounded-full text-[#080E36]/60 transition-colors hover:bg-[#F8F6F1] hover:text-[#080E36]">
+          <i class="fas fa-xmark text-lg"></i>
+        </button>
+      </div>
+
       <!-- Búsqueda con IA: el panel se vuelve un chat que refina los resultados -->
-      <app-chat-busqueda-ia *ngIf="modoChatIa" class="grow basis-0 min-h-0 flex flex-col" [total]="paginacion?.total !== undefined ? totalDatos : null"
+      <app-chat-busqueda-ia *ngIf="modoChatIa" [conEncabezado]="false" class="grow basis-0 min-h-0 flex flex-col" [total]="paginacion?.total !== undefined ? totalDatos : null"
         [elementsPerPage]="elementsPerPage" [inmueblesVisibles]="codigosVisibles" [pagina]="paginaActual"
         (resultado)="aplicarResultadoIa($event)" (destacar)="destacarInmuebles($event)" (filtrosManuales)="cambiarPanelIa(false)"
         (cerrar)="toggleDrawer()"></app-chat-busqueda-ia>
@@ -40,41 +66,44 @@
         </div>
       </div>
 
-      <div *ngIf="!modoChatIa" class="panel-filtros-manual bg-blue-100/50 rounded-t-lg p-1 flex justify-between items-center mb-1 sticky top-0 z-10">
-        <h3 class="text-lg font-semibold text-gray-800">
-          <button *ngIf="chatIaDisponible" type="button" (click)="cambiarPanelIa(true)"
-            class="inline-flex items-center gap-2 rounded-full bg-[#080E36] text-[#CDAD60] text-sm font-medium px-3 py-1.5 hover:bg-[#CDAD60] hover:text-[#080E36] transition-colors">
-            <i class="fas fa-wand-magic-sparkles"></i> Volver al chat con IA
+      <!-- Filtros manuales: lo seleccionado arriba, las opciones en medio y los botones siempre abajo -->
+      <div *ngIf="!modoChatIa" class="panel-filtros-manual grow basis-0 min-h-0 flex flex-col">
+      <div class="flex-none border-b border-[#ece6d6] px-4 py-3">
+        <p class="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-[#8a7a52]">Seleccionados</p>
+        <div *ngIf="seleccionManual.length; else sinSeleccion" class="flex max-h-24 flex-wrap gap-1.5 overflow-y-auto">
+          <button *ngFor="let chip of seleccionManual; trackBy: textoChip" type="button" (click)="quitarSeleccion(chip)"
+            [disabled]="cargando" [attr.aria-label]="'Quitar ' + chip.texto"
+            class="group inline-flex items-center gap-1.5 rounded-full border border-[#e3d3a8] bg-[#F4EFE4] px-2.5 py-1 text-xs text-[#080E36] transition-colors hover:bg-[#ecdfc0] disabled:opacity-60">
+            {{ chip.texto }}
+            <i class="fas fa-xmark text-[10px] text-[#8a7a52] group-hover:text-[#080E36]"></i>
           </button>
-        </h3>
-        <button #closeButton type="button" (click)="toggleDrawer()" data-drawer-hide="modern-drawer"
-          aria-controls="modern-drawer"
-          class="text-gray-600 hover:text-black transition-colors duration-200 bg-white/80 rounded-full w-8 h-8 flex items-center justify-center shadow-sm hover:shadow-md">
-          <span class="text-xl leading-none">×</span>
-        </button>
+        </div>
+        <ng-template #sinSeleccion>
+          <p class="text-xs text-[#707172]">Ninguno: estás viendo todos los inmuebles.</p>
+        </ng-template>
       </div>
 
-      <form *ngIf="!modoChatIa" class="panel-filtros-manual" [formGroup]="formRangos">
-        <div class="flex-1 overflow-y-auto max-h-[calc(100vh-20rem)]">
-          <ul class="space-y-3 font-medium">
-            <li class="border-b border-[#d1d5db] pb-4 mb-4" *ngIf="
+      <form class="grow basis-0 min-h-0 overflow-y-auto" [formGroup]="formRangos">
+        <div>
+          <ul class="divide-y divide-[#ece6d6]">
+            <li class="px-4 py-5" *ngIf="
                 selectedProperty?.code === '3' || selectedProperty?.code === '1'
               ">
-              <a class="flex items-center p-3 hover:bg-gray-100 rounded-lg transition-colors">
-                <i class="fas fa-money-bill-wave text-xl text-[#000000] mr-3"></i>
-                <span class="font-semibold">Rango de precios de arriendo</span>
-              </a>
+              <div class="flex items-center gap-2.5">
+                <span class="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-[#CDAD60]/15"><i class="fas fa-money-bill-wave text-sm text-[#a8873a]"></i></span>
+                <span class="text-sm font-semibold text-[#080E36]">Rango de precios de arriendo</span>
+              </div>
 
-              <div class="mt-2 px-3">
-                <div class="flex gap-4">
+              <div class="mt-3">
+                <div class="flex gap-3">
                   <!-- Precio mínimo -->
-                  <div class="flex flex-col w-44 relative">
-                    <label for="min-price" class="text-sm font-medium text-gray-700 mb-1">Precio mínimo</label>
+                  <div class="relative flex min-w-0 flex-1 flex-col">
+                    <label for="min-price" class="mb-1 text-xs font-medium text-gray-500">Precio mínimo</label>
                     <input id="min-price" type="text" matInput placeholder="Desde $" [formControl]="precioMinimoCtrl"
                       [disabled]="selectedPriceRange !== null"
                       [matAutocomplete]="autoMin" (input)="formatCurrencyInput(precioMinimoCtrl, 'arriendo')"
                       #autoMinTrigger="matAutocompleteTrigger"
-                      class="w-full py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#CDAD60] disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60" />
+                      class="w-full rounded-lg border border-[#e3dccb] bg-white px-3 py-2.5 text-sm text-[#080E36] placeholder:text-gray-400 focus:border-[#CDAD60] focus:outline-none focus:ring-2 focus:ring-[#CDAD60]/40 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-60" />
                     <mat-autocomplete #autoMin="matAutocomplete" (optionSelected)="onMinSelected($event, autoMinTrigger, 'arriendo')">
                       <mat-option *ngFor="let option of filteredMin | async" [value]="option">
                         ${{ option | number : "1.0-0" }}
@@ -83,13 +112,13 @@
                   </div>
 
                   <!-- Precio máximo -->
-                  <div class="flex flex-col w-44 relative">
-                    <label for="max-price" class="text-sm font-medium text-gray-700 mb-1">Precio máximo</label>
+                  <div class="relative flex min-w-0 flex-1 flex-col">
+                    <label for="max-price" class="mb-1 text-xs font-medium text-gray-500">Precio máximo</label>
                     <input id="max-price" type="text" matInput placeholder="Hasta $" [formControl]="precioMaximoCtrl"
                       [disabled]="selectedPriceRange !== null"
                       [matAutocomplete]="autoMax" (input)="formatCurrencyInput(precioMaximoCtrl, 'arriendo')"
                       #autoMaxTrigger="matAutocompleteTrigger"
-                      class="w-full py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#CDAD60] disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60" />
+                      class="w-full rounded-lg border border-[#e3dccb] bg-white px-3 py-2.5 text-sm text-[#080E36] placeholder:text-gray-400 focus:border-[#CDAD60] focus:outline-none focus:ring-2 focus:ring-[#CDAD60]/40 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-60" />
                     <mat-autocomplete #autoMax="matAutocomplete" (optionSelected)="onMaxSelected($event, autoMaxTrigger, 'arriendo')">
                       <mat-option *ngFor="let option of filteredMax | async" [value]="option">
                         ${{ option | number : "1.0-0" }}
@@ -100,25 +129,25 @@
               </div>
             </li>
 
-            <li class="border-b border-[#d1d5db] pb-4 mb-4" *ngIf="
+            <li class="px-4 py-5" *ngIf="
                 selectedProperty?.code === '3' || selectedProperty?.code === '2'
               ">
-              <a class="flex items-center p-3 hover:bg-gray-100 rounded-lg transition-colors">
-                <i class="fas fa-money-bill-wave text-xl text-[#000000] mr-3"></i>
-                <span class="font-semibold">Rango de Precios de venta</span>
-              </a>
+              <div class="flex items-center gap-2.5">
+                <span class="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-[#CDAD60]/15"><i class="fas fa-money-bill-wave text-sm text-[#a8873a]"></i></span>
+                <span class="text-sm font-semibold text-[#080E36]">Rango de Precios de venta</span>
+              </div>
 
-              <div class="mt-2 px-3">
-                <div class="flex gap-4">
+              <div class="mt-3">
+                <div class="flex gap-3">
                   <!-- Precio mínimo venta -->
-                  <div class="flex flex-col w-44 relative">
-                    <label for="venta-min-price" class="text-sm font-medium text-gray-700 mb-1">Precio mínimo</label>
+                  <div class="relative flex min-w-0 flex-1 flex-col">
+                    <label for="venta-min-price" class="mb-1 text-xs font-medium text-gray-500">Precio mínimo</label>
                     <input id="venta-min-price" type="text" matInput placeholder="Desde $"
                       [formControl]="precioVentaMinimoCtrl" [matAutocomplete]="autoVentaMin"
                       [disabled]="selectedPriceRangeVentas !== null"
                       (input)="formatCurrencyInput(precioVentaMinimoCtrl, 'venta')"
                       #autoVentaMinTrigger="matAutocompleteTrigger"
-                      class="px-4 py-2 border border-gray-300 rounded-md disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60" />
+                      class="w-full rounded-lg border border-[#e3dccb] bg-white px-3 py-2.5 text-sm text-[#080E36] placeholder:text-gray-400 focus:border-[#CDAD60] focus:outline-none focus:ring-2 focus:ring-[#CDAD60]/40 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-60" />
                     <mat-autocomplete #autoVentaMin="matAutocomplete" (optionSelected)="onMinSelected($event, autoVentaMinTrigger, 'venta')">
                       <mat-option *ngFor="let option of filteredVentaMin | async" [value]="option">
                         ${{ option | number : "1.0-0" }}
@@ -127,14 +156,14 @@
                   </div>
 
                   <!-- Precio máximo venta -->
-                  <div class="flex flex-col w-44 relative">
-                    <label for="venta-max-price" class="text-sm font-medium text-gray-700 mb-1">Precio máximo</label>
+                  <div class="relative flex min-w-0 flex-1 flex-col">
+                    <label for="venta-max-price" class="mb-1 text-xs font-medium text-gray-500">Precio máximo</label>
                     <input id="venta-max-price" type="text" matInput placeholder="Hasta $"
                       [formControl]="precioVentaMaximoCtrl" [matAutocomplete]="autoVentaMax"
                       [disabled]="selectedPriceRangeVentas !== null"
                       #autoVentaMaxTrigger="matAutocompleteTrigger"
                       (input)="formatCurrencyInput(precioVentaMaximoCtrl, 'venta')"
-                      class="px-4 py-2 border border-gray-300 rounded-md disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60" />
+                      class="w-full rounded-lg border border-[#e3dccb] bg-white px-3 py-2.5 text-sm text-[#080E36] placeholder:text-gray-400 focus:border-[#CDAD60] focus:outline-none focus:ring-2 focus:ring-[#CDAD60]/40 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-60" />
                     <mat-autocomplete #autoVentaMax="matAutocomplete" (optionSelected)="onMaxSelected($event, autoVentaMaxTrigger, 'venta')">
                       <mat-option *ngFor="let option of filteredVentaMax | async" [value]="option">
                         ${{ option | number : "1.0-0" }}
@@ -145,15 +174,15 @@
               </div>
             </li>
 
-            <li class="border-b border-[#d1d5db] pb-4 mb-4" *ngIf="
+            <li class="px-4 py-5" *ngIf="
                 selectedProperty?.code === '1' || selectedProperty?.code === '3'
               ">
-              <a class="flex items-center p-3 hover:bg-gray-100 rounded-lg transition-colors">
-                <i class="fas fa-dollar-sign text-xl text-[#000000] mr-3"></i>
-                <span class="font-semibold">Rangos de precios predefinidos</span>
-              </a>
+              <div class="flex items-center gap-2.5">
+                <span class="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-[#CDAD60]/15"><i class="fas fa-dollar-sign text-sm text-[#a8873a]"></i></span>
+                <span class="text-sm font-semibold text-[#080E36]">Rangos de precios predefinidos</span>
+              </div>
 
-              <div class="mt-2">
+              <div class="mt-3">
                 <div class="flex flex-wrap gap-2">
                   <button title=" {{ range.displayName }}" *ngFor="let range of priceRangesArriendos"
                     [disabled]="hasManualArriendoPrice()"
@@ -167,36 +196,36 @@
                     <ng-container *ngIf="
                     (range.min > 15000000)  && (range.max === 0)
                   ">
-                      <i class="fas fa-gem text-blue-500 text-xl"> </i> &nbsp; Diamante
+                      <i class="fas fa-gem text-blue-500 text-sm"></i> &nbsp; Diamante
                     </ng-container>
 
                     <ng-container *ngIf="
                     (range.min >= 8000000 &&
                       range.max <= 15000000)  && (range.max !== 0)
                   ">
-                      <i class="fas fa-crown text-yellow-500 text-xl"> </i>&nbsp;Oro
+                      <i class="fas fa-crown text-yellow-500 text-sm"></i>&nbsp;Oro
                     </ng-container>
 
                     <ng-container *ngIf="
                     (range.min >= 2000000 &&
                       range.max <= 8000000) && (range.max !== 0)
                   ">
-                      <i class="fas fa-medal text-gray-400 text-xl"> </i>&nbsp;Plata
+                      <i class="fas fa-medal text-gray-400 text-sm"></i>&nbsp;Plata
                     </ng-container>
 
-                    <span *ngIf="selectedPriceRange?.min === range.min" class="ml-1">✔</span>
+                    <i *ngIf="selectedPriceRange?.min === range.min" class="fas fa-check text-[10px] text-[#CDAD60]"></i>
                   </button>
                 </div>
               </div>
             </li>
 
-            <li class="border-b border-[#d1d5db] pb-4 mb-4" *ngIf="selectedProperty?.code === '2' || selectedProperty?.code === '3'">
-              <a class="flex items-center p-3 hover:bg-gray-100 rounded-lg transition-colors">
-                <i class="fas fa-dollar-sign text-xl text-[#000000] mr-3"></i>
-                <span class="font-semibold">Rangos de precios predefinidos de venta</span>
-              </a>
+            <li class="px-4 py-5" *ngIf="selectedProperty?.code === '2' || selectedProperty?.code === '3'">
+              <div class="flex items-center gap-2.5">
+                <span class="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-[#CDAD60]/15"><i class="fas fa-dollar-sign text-sm text-[#a8873a]"></i></span>
+                <span class="text-sm font-semibold text-[#080E36]">Rangos de precios predefinidos de venta</span>
+              </div>
 
-              <div class="mt-2">
+              <div class="mt-3">
                 <div class="flex flex-wrap gap-2">
                   <button title=" {{ range.displayName }}" *ngFor="let range of priceRangesVentas"
                     [disabled]="hasManualVentaPrice()"
@@ -210,111 +239,111 @@
                     <ng-container *ngIf="
                     (range.min > 2000000000)  && (range.max === 0)
                   ">
-                      <i class="fas fa-gem text-blue-500 text-xl"> </i> &nbsp; Diamante
+                      <i class="fas fa-gem text-blue-500 text-sm"></i> &nbsp; Diamante
                     </ng-container>
 
                     <ng-container *ngIf="
                     (range.min >= 1000000001 &&
                       range.max <= 2000000000)  && (range.max !== 0)
                   ">
-                      <i class="fas fa-crown text-yellow-500 text-xl"> </i>&nbsp;Oro
+                      <i class="fas fa-crown text-yellow-500 text-sm"></i>&nbsp;Oro
                     </ng-container>
 
                     <ng-container *ngIf="
                     (range.min >= 100000000 &&
                       range.max <= 1000000000) && (range.max !== 0)
                   ">
-                      <i class="fas fa-medal text-gray-400 text-xl"> </i>&nbsp;Plata
+                      <i class="fas fa-medal text-gray-400 text-sm"></i>&nbsp;Plata
                     </ng-container>
 
-                    <span *ngIf="selectedPriceRangeVentas?.min === range.min" class="ml-1">✔</span>
+                    <i *ngIf="selectedPriceRangeVentas?.min === range.min" class="fas fa-check text-[10px] text-[#CDAD60]"></i>
                   </button>
                 </div>
               </div>
             </li>
 
-            <li class="border-b border-[#d1d5db] pb-4 mb-4">
-              <a class="flex items-center p-3 hover:bg-gray-100 rounded-lg transition-colors">
-                <i class="fas fa-tags text-xl text-[#000000] mr-3"></i>
-                <span class="font-semibold">Categoría</span>
-              </a>
+            <li class="px-4 py-5">
+              <div class="flex items-center gap-2.5">
+                <span class="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-[#CDAD60]/15"><i class="fas fa-tags text-sm text-[#a8873a]"></i></span>
+                <span class="text-sm font-semibold text-[#080E36]">Categoría</span>
+              </div>
 
-              <div class="mt-2">
+              <div class="mt-3">
                 <div class="flex flex-wrap gap-2">
                   <button *ngFor="let option of propertyOptions" (click)="selectOption('property', option)" [class]="
                       getButtonClass(selectedProperty?.code === option.code)
                     ">
-                    <i [class]="getIcon('property', option)" class="mr-2"></i>
+                    <i [class]="getIcon('property', option)" class="text-xs"></i>
                     {{ option.displayName || option.name | titlecase }}
-                    <span *ngIf="selectedProperty?.code === option.code" class="ml-1">✔</span>
+                    <i *ngIf="selectedProperty?.code === option.code" class="fas fa-check text-[10px] text-[#CDAD60]"></i>
                   </button>
                 </div>
               </div>
             </li>
 
-            <li class="border-b border-[#d1d5db] pb-4 mb-4">
-              <a class="flex items-center p-3 hover:bg-gray-100 rounded-lg transition-colors">
-                <i class="fas fa-home text-xl text-[#000000] mr-3"></i>
-                <span class="font-semibold">Tipo de inmueble</span>
-              </a>
+            <li class="px-4 py-5">
+              <div class="flex items-center gap-2.5">
+                <span class="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-[#CDAD60]/15"><i class="fas fa-home text-sm text-[#a8873a]"></i></span>
+                <span class="text-sm font-semibold text-[#080E36]">Tipo de inmueble</span>
+              </div>
 
-              <div class="mt-2">
-                <p class="text-gray-500 text-sm font-medium mb-2">
+              <div class="mt-3">
+                <p class="mb-2 text-xs text-gray-500">
                   Puedes seleccionar más de uno
                 </p>
 
                 <div class="flex flex-wrap gap-2">
                   <button *ngFor="let option of estateOptions" (click)="selectOption('estate', option)"
                     [class]="getButtonClass(isEstateSelected(option))">
-                    <i [class]="getIcon('estate', option)" class="mr-2"></i>
+                    <i [class]="getIcon('estate', option)" class="text-xs"></i>
                     {{ option.name || option.name | titlecase }}
-                    <span *ngIf="isEstateSelected(option)" class="ml-1">✔</span>
+                    <i *ngIf="isEstateSelected(option)" class="fas fa-check text-[10px] text-[#CDAD60]"></i>
                   </button>
                 </div>
               </div>
             </li>
 
-            <li class="border-b border-[#d1d5db] pb-4 mb-4">
-              <a class="flex items-center p-3 hover:bg-gray-100 rounded-lg transition-colors">
-                <i class="fas fa-ruler-combined text-xl text-[#000000] mr-3"></i>
-                <span>Área</span>
-              </a>
+            <li class="px-4 py-5">
+              <div class="flex items-center gap-2.5">
+                <span class="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-[#CDAD60]/15"><i class="fas fa-ruler-combined text-sm text-[#a8873a]"></i></span>
+                <span class="text-sm font-semibold text-[#080E36]">Área</span>
+              </div>
 
-              <div class="mt-2 px-3">
-                <div class="flex gap-4">
-                  <div class="flex flex-col w-44">
-                    <label for="min-price" class="text-sm font-medium text-gray-700 mb-1">Mínima</label>
+              <div class="mt-3">
+                <div class="flex gap-3">
+                  <div class="flex min-w-0 flex-1 flex-col">
+                    <label for="min-price" class="mb-1 text-xs font-medium text-gray-500">Mínima</label>
                     <input id="min-price" type="number" placeholder="Ej. 60 m2" min="10"
-                      class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#CDAD60]"
+                      class="w-full rounded-lg border border-[#e3dccb] bg-white px-3 py-2.5 text-sm text-[#080E36] placeholder:text-gray-400 focus:border-[#CDAD60] focus:outline-none focus:ring-2 focus:ring-[#CDAD60]/40 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-60"
                       id="AreaMinima" formControlName="AreaMinima" />
                   </div>
-                  <div class="flex flex-col w-44">
-                    <label for="max-price" class="text-sm font-medium text-gray-700 mb-1">Máxima</label>
+                  <div class="flex min-w-0 flex-1 flex-col">
+                    <label for="max-price" class="mb-1 text-xs font-medium text-gray-500">Máxima</label>
                     <input id="max-price" type="number" placeholder="Ej. 120 m2" min="10"
-                      class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#CDAD60]"
+                      class="w-full rounded-lg border border-[#e3dccb] bg-white px-3 py-2.5 text-sm text-[#080E36] placeholder:text-gray-400 focus:border-[#CDAD60] focus:outline-none focus:ring-2 focus:ring-[#CDAD60]/40 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-60"
                       id="AreaMaxima" formControlName="AreaMaxima" />
                   </div>
                 </div>
               </div>
             </li>
 
-            <li class="border-b border-[#d1d5db] pb-4 mb-4">
-              <div class="p-3">
-                <div class="flex items-center mb-4">
-                  <i class="fas fa-clipboard-list text-xl text-[#000000] mr-3"></i>
-                  <span class="font-semibold text-lg">Detalles del proyecto</span>
+            <li class="px-4 py-5">
+              <div>
+                <div class="flex items-center gap-2.5 mb-4">
+                  <span class="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-[#CDAD60]/15"><i class="fas fa-clipboard-list text-sm text-[#a8873a]"></i></span>
+                  <span class="text-sm font-semibold text-[#080E36]">Detalles del proyecto</span>
                 </div>
 
                 <div class="space-y-4">
                   <div>
-                    <p class="text-gray-700 font-medium mb-2">Habitaciones</p>
+                    <p class="mb-2 text-xs font-medium text-gray-500">Habitaciones</p>
                     <div class="flex gap-2 flex-wrap">
                       <button *ngFor="let hab of habitaciones" (click)="seleccionar('habitaciones', hab)" [ngClass]="{
-                          'bg-gray-700 text-white font-semibold':
+                          'border-[#080E36] bg-[#080E36] text-white':
                             seleccion.habitaciones.includes(hab),
-                          'bg-blue-100 text-blue-700':
+                          'border-[#e3dccb] bg-white text-[#080E36] hover:border-[#CDAD60] hover:bg-[#CDAD60]/10':
                             !seleccion.habitaciones.includes(hab)
-                        }" class="w-8 h-8 rounded-md">
+                        }" class="h-9 w-9 rounded-full border text-sm font-medium transition-colors">
                         {{ hab }}
                       </button>
                     </div>
@@ -322,14 +351,14 @@
 
                   <!-- Baños -->
                   <div>
-                    <p class="text-gray-700 font-medium mb-2">Baños</p>
+                    <p class="mb-2 text-xs font-medium text-gray-500">Baños</p>
                     <div class="flex gap-2 flex-wrap">
                       <button *ngFor="let bano of banos" (click)="seleccionar('banos', bano)" [ngClass]="{
-                          'bg-gray-700 text-white font-semibold':
+                          'border-[#080E36] bg-[#080E36] text-white':
                             seleccion.banos.includes(bano),
-                          'bg-blue-100 text-blue-700':
+                          'border-[#e3dccb] bg-white text-[#080E36] hover:border-[#CDAD60] hover:bg-[#CDAD60]/10':
                             !seleccion.banos.includes(bano)
-                        }" class="w-8 h-8 rounded-md">
+                        }" class="h-9 w-9 rounded-full border text-sm font-medium transition-colors">
                         {{ bano }}
                       </button>
                     </div>
@@ -337,14 +366,14 @@
 
                   <!-- Parqueadero -->
                   <div>
-                    <p class="text-gray-700 font-medium mb-2">Parqueadero</p>
+                    <p class="mb-2 text-xs font-medium text-gray-500">Parqueadero</p>
                     <div class="flex gap-2 flex-wrap">
                       <button *ngFor="let p of parqueadero" (click)="seleccionar('parqueadero', p)" [ngClass]="{
-                          'bg-gray-700 text-white font-semibold':
+                          'border-[#080E36] bg-[#080E36] text-white':
                             seleccion.parqueadero.includes(p),
-                          'bg-blue-100 text-blue-700':
+                          'border-[#e3dccb] bg-white text-[#080E36] hover:border-[#CDAD60] hover:bg-[#CDAD60]/10':
                             !seleccion.parqueadero.includes(p)
-                        }" class="w-8 h-8 rounded-md">
+                        }" class="h-9 w-9 rounded-full border text-sm font-medium transition-colors">
                         {{ p }}
                       </button>
                     </div>
@@ -352,14 +381,14 @@
 
                   <!-- Estrato -->
                   <div>
-                    <p class="text-gray-700 font-medium mb-2">Estrato</p>
+                    <p class="mb-2 text-xs font-medium text-gray-500">Estrato</p>
                     <div class="flex gap-2 flex-wrap">
                       <button *ngFor="let e of estrato" (click)="seleccionar('estrato', e)" [ngClass]="{
-                          'bg-gray-700 text-white font-semibold':
+                          'border-[#080E36] bg-[#080E36] text-white':
                             seleccion.estrato.includes(e),
-                          'bg-blue-100 text-blue-700':
+                          'border-[#e3dccb] bg-white text-[#080E36] hover:border-[#CDAD60] hover:bg-[#CDAD60]/10':
                             !seleccion.estrato.includes(e)
-                        }" class="w-8 h-8 rounded-md">
+                        }" class="h-9 w-9 rounded-full border text-sm font-medium transition-colors">
                         {{ e }}
                       </button>
                     </div>
@@ -371,62 +400,21 @@
         </div>
       </form>
 
-      <!-- ESCRITORIO -->
-      <div *ngIf="!modoChatIa" class="panel-filtros-manual hidden md:block sticky bg-white pt-2 mt-4 z-10 border-t border-gray-200 md:pb-4 pb-16">
-        <div class="flex justify-between gap-4 px-4">
-          <button (click)="borrarFiltros()"
-            class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-xl transition duration-200">
-            Borrar filtros
-          </button>
-          <button [disabled]="cargando" (click)="chatIaDisponible && terminarChatIa(); enviarFiltros(1)"
-            class="flex-1 text-white font-semibold py-2 px-4 rounded-xl transition duration-200" [ngClass]="{
-              'bg-[#CDAD60] hover:bg-[#b59a50]': !cargando,
-              'bg-gray-400 cursor-not-allowed': cargando
-            }">
-            <ng-container *ngIf="!cargando; else loadingFiltros">
-              Aplicar filtros
-            </ng-container>
-            <ng-template #loadingFiltros>
-              <div class="flex items-center justify-center">
-                <svg class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none"
-                  viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                </svg>
-                Cargando...
-              </div>
-            </ng-template>
-          </button>
-        </div>
+      <div class="flex-none flex items-center gap-3 border-t border-[#ece6d6] bg-white px-4 pt-3 pb-20 md:pb-4">
+        <button type="button" (click)="borrarFiltros()"
+          class="px-2 text-sm font-medium text-[#707172] underline underline-offset-2 hover:text-[#080E36]">
+          Borrar
+        </button>
+        <button type="button" [disabled]="cargando" (click)="chatIaDisponible && terminarChatIa(); enviarFiltros(1)"
+          class="flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-semibold transition-colors"
+          [ngClass]="cargando ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#080E36] text-white hover:bg-[#CDAD60] hover:text-[#080E36]'">
+          <svg *ngIf="cargando" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          {{ cargando ? 'Buscando…' : 'Aplicar filtros' }}
+        </button>
       </div>
-
-      <!-- MOVIL -->
-      <div *ngIf="!modoChatIa" class="panel-filtros-manual block md:hidden bg-white pt-2 mt-4 z-10 border-t border-gray-200 md:pb-4 pb-20">
-        <div class="flex justify-between gap-4 px-4">
-          <button (click)="borrarFiltros()"
-            class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-xl transition duration-200">
-            Borrar filtros
-          </button>
-          <button [disabled]="cargando" (click)="chatIaDisponible && terminarChatIa(); enviarFiltros(1)"
-            class="flex-1 text-white font-semibold py-2 px-4 rounded-xl transition duration-200" [ngClass]="{
-              'bg-[#CDAD60] hover:bg-[#b59a50]': !cargando,
-              'bg-gray-400 cursor-not-allowed': cargando
-            }">
-            <ng-container *ngIf="!cargando; else loadingFiltros">
-              Aplicar filtros
-            </ng-container>
-            <ng-template #loadingFiltros>
-              <div class="flex items-center justify-center">
-                <svg class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none"
-                  viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                </svg>
-                Cargando...
-              </div>
-            </ng-template>
-          </button>
-        </div>
       </div>
     </div>
   </div>

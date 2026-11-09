@@ -3,6 +3,7 @@ import {
   afterNextRender,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   ElementRef,
   HostListener,
   inject,
@@ -30,7 +31,7 @@ import { OffcanvasWishlistComponent } from '../offcanvas-wishlist/offcanvas-wish
 import { BotonesFlotantesComponent } from '../../../../shared/botones-flotantes/botones-flotantes.component';
 import { EnlacesListadosComponent } from '../../../../shared/enlaces-listados/enlaces-listados.component';
 import { DatosListado } from '../../../../core/resolvers/listado.resolver';
-import { BIZ_DE_NEGOCIO, MINIMO_BARRIO, Negocio, encabezadoListado, rutaFicha, rutaListado, slugListado } from '../../../../core/listados/listados';
+import { BIZ_DE_NEGOCIO, MINIMO_BARRIO, Negocio, encabezadoListado, rutaFicha, rutaListado, slugListado, tipoPorCodigo } from '../../../../core/listados/listados';
 import { SEO_DOMINIO, SEO_POR_DEFECTO, SEO_SUFIJO, seoMigas, SeoService } from '../../../../core/seo/seo.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AsistenteChatService } from '../../../../core/asistente/asistente-chat.service';
@@ -194,9 +195,38 @@ export class FiltrosComponent implements OnInit, OnDestroy {
   private location = inject(Location);
   conversacionIa = inject(BusquedaIaConversacionService);
 
-  /** Se llegó desde la búsqueda con IA: el panel lateral muestra el chat en vez de los filtros. */
+  /**
+   * En computador el footer empuja el panel lateral hacia arriba en vez de quedar tapado. Se recalcula en cada
+   * evento de scroll y se escribe directo en el estilo, fuera de Angular: esperar a que termine el
+   * scroll (o pasar por la detección de cambios) hacía que el panel bajara sobre el footer y luego saltara.
+   */
+  private panelSobreFooter = afterNextRender(() => {
+    const panel = document.getElementById('modern-drawer');
+    if (!panel) return;
+    // El navegador lanza el evento de scroll una vez por cuadro: ajustar ahí mismo evita ir un cuadro atrasado.
+    const ajustar = () => {
+      if (window.innerWidth < 768) {
+        panel.style.top = '';
+        return;
+      }
+      const footer = document.querySelector('app-footer');
+      const visible = footer ? Math.max(0, window.innerHeight - footer.getBoundingClientRect().top) : 0;
+      panel.style.top = `${72 - Math.round(visible)}px`;
+    };
+    this.zonaAngular.runOutsideAngular(() => {
+      window.addEventListener('scroll', ajustar, { passive: true });
+      window.addEventListener('resize', ajustar, { passive: true });
+    });
+    ajustar();
+    this.destruir.onDestroy(() => {
+      window.removeEventListener('scroll', ajustar);
+      window.removeEventListener('resize', ajustar);
+    });
+  });
+
+  /** El panel lateral muestra el chat de la búsqueda con IA en vez de los filtros manuales. */
   modoChatIa = false;
-  /** El chat sigue disponible aunque el usuario cambie a los filtros manuales. */
+  /** Se puede pasar al chat con IA desde los filtros manuales; solo en el navegador, después de hidratar. */
   chatIaDisponible = false;
 
   /**
@@ -205,17 +235,25 @@ export class FiltrosComponent implements OnInit, OnDestroy {
    * del chat hasta que terminaran de cargar los datos.
    */
   private zonaAngular = inject(NgZone);
+  private destruir = inject(DestroyRef);
   private activarChatIa = afterNextRender(() => {
     // El esqueleto del chat (index.html) ya no hace falta: desde aquí manda el estado del componente.
     document.documentElement.classList.remove('cargando-chat-ia');
     const estado = this.estadoHistorial();
-    if (!this.conversacionIa.activa || !estado?.busquedaIa) return;
+    const listado: DatosListado | undefined = this.activatedRoute.snapshot.data['listado'];
     // afterNextRender corre fuera de la zona de Angular: si el chat se creara aquí, sus eventos (el Enter del
     // formulario) también quedarían fuera y la pantalla no se actualizaría hasta el siguiente evento.
     this.zonaAngular.run(() => {
+      // Desde cualquier búsqueda se puede pasar a la IA, también desde los filtros manuales.
       this.chatIaDisponible = true;
-      // Al recargar se abre el mismo panel que había: el chat o los filtros manuales.
-      this.modoChatIa = estado.panelIa !== 'manual';
+      if (listado) {
+        // Los listados (/venta, /arriendo/apartamentos…) abren con el chat, que parte de ese listado.
+        this.empezarChatDesdeListado(listado);
+        this.modoChatIa = estado?.panelIa !== 'manual';
+      } else if (this.conversacionIa.activa && estado?.busquedaIa) {
+        // Al recargar se abre el mismo panel que había: el chat o los filtros manuales.
+        this.modoChatIa = estado.panelIa !== 'manual';
+      }
       this.cdRef.detectChanges();
     });
   });
@@ -618,6 +656,27 @@ export class FiltrosComponent implements OnInit, OnDestroy {
     this.paginasListado = visibles.flatMap((pagina, i) => (i > 0 && pagina - visibles[i - 1] > 1 ? [null, pagina] : [pagina]));
 
     this.actualizarSeoListado(listado);
+    // Al pasar de un listado a otro, el chat se pone al día con el nuevo (la primera vez lo hace activarChatIa).
+    if (this.chatIaDisponible) this.empezarChatDesdeListado(listado);
+  }
+
+  /** El chat con IA parte de los filtros del listado, con sus nombres para los chips. */
+  private empezarChatDesdeListado(listado: DatosListado) {
+    this.conversacionIa.empezarDesde(listado.filtros, {
+      ...(listado.tipo ? { type: listado.tipo.plural } : {}),
+      ...(listado.ciudad ? { city: listado.ciudad.nombre } : {}),
+      ...(listado.barrio ? { neighborhood_code: listado.barrio.nombre } : {}),
+    });
+  }
+
+  /** El chat con IA parte de lo que haya aplicado en los filtros manuales. */
+  private empezarChatDesdeFiltros() {
+    const filtros = Object.fromEntries(this.filtrosSeleccionados);
+    const tipos = String(filtros['type'] ?? '')
+      .split(',')
+      .map((codigo) => tipoPorCodigo(codigo.trim())?.plural)
+      .filter(Boolean);
+    this.conversacionIa.empezarDesde(filtros, tipos.length ? { type: tipos.join(', ') } : {});
   }
 
   /** Título, descripción, canonical y datos estructurados del listado. */
@@ -844,14 +903,22 @@ export class FiltrosComponent implements OnInit, OnDestroy {
 
   /** Cambia entre el chat y los filtros manuales y lo recuerda en el historial para la próxima recarga. */
   cambiarPanelIa(chat: boolean) {
+    // Sin conversación (se buscó con los filtros manuales), el chat parte de la búsqueda que se está viendo.
+    if (chat && !this.conversacionIa.activa) {
+      if (this.listado) this.empezarChatDesdeListado(this.listado);
+      else this.empezarChatDesdeFiltros();
+    }
     this.modoChatIa = chat;
     this.location.replaceState(this.location.path(), '', { ...this.estadoHistorial(), panelIa: chat ? 'chat' : 'manual' });
   }
 
-  /** Con filtros manuales la conversación deja de describir la búsqueda. */
+  /**
+   * Con filtros manuales la conversación deja de describir la búsqueda. El botón para volver a la IA sigue:
+   * el próximo chat parte de los filtros nuevos.
+   */
   terminarChatIa() {
     this.conversacionIa.terminar();
-    this.modoChatIa = this.chatIaDisponible = false;
+    this.modoChatIa = false;
   }
 
   toggleDrawer() {
@@ -1731,6 +1798,99 @@ export class FiltrosComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Lo elegido en los filtros manuales, como chips que se quitan con un clic (y se vuelve a buscar). */
+  get seleccionManual(): { texto: string; quitar: () => void }[] {
+    const chips: { texto: string; quitar: () => void }[] = [];
+    const precio = (valor: number) =>
+      valor >= 1_000_000 ? `$${(valor / 1_000_000).toLocaleString('es-CO', { maximumFractionDigits: 1 })} M` : `$${valor.toLocaleString('es-CO')}`;
+    /** "ARRIENDO/VENTA" → "Arriendo/venta". */
+    const nombre = (texto: string) => String(texto || '').charAt(0).toUpperCase() + String(texto || '').slice(1).toLowerCase();
+    const rango = (min: number, max: number, nombre: string) =>
+      min && max ? `${nombre} ${precio(min)} a ${precio(max)}` : min ? `${nombre} desde ${precio(min)}` : `${nombre} hasta ${precio(max)}`;
+
+    if (this.ubicacion) chips.push({ texto: this.ubicacion, quitar: () => (this.ubicacion = this.searchTerm = '') });
+    if (this.selectedProperty) {
+      chips.push({
+        texto: nombre(this.selectedProperty.displayName || this.selectedProperty.name),
+        quitar: () => (this.selectedProperty = null),
+      });
+    }
+    this.selectedEstates.forEach((tipo) =>
+      chips.push({ texto: nombre(tipo.name), quitar: () => (this.selectedEstates = this.selectedEstates.filter((t) => t.code !== tipo.code)) })
+    );
+
+    const codigo = this.selectedProperty?.code;
+    if (codigo === '1' || codigo === '3') {
+      if (this.selectedPriceRange) {
+        const nivel = this.selectedPriceRange.min > 15_000_000 ? 'Diamante' : this.selectedPriceRange.min >= 8_000_000 ? 'Oro' : 'Plata';
+        chips.push({ texto: `Arriendo ${nivel}`, quitar: () => (this.selectedPriceRange = null) });
+      } else {
+        const min = this.getNumericValue(this.precioMinimoCtrl);
+        const max = this.getNumericValue(this.precioMaximoCtrl);
+        if (min || max) {
+          chips.push({
+            texto: rango(min, max, 'Arriendo'),
+            quitar: () => {
+              this.precioMinimoCtrl.setValue('');
+              this.precioMaximoCtrl.setValue('');
+            },
+          });
+        }
+      }
+    }
+    if (codigo === '2' || codigo === '3') {
+      if (this.selectedPriceRangeVentas) {
+        const nivel = this.selectedPriceRangeVentas.min > 2_000_000_000 ? 'Diamante' : this.selectedPriceRangeVentas.min > 1_000_000_000 ? 'Oro' : 'Plata';
+        chips.push({ texto: `Venta ${nivel}`, quitar: () => (this.selectedPriceRangeVentas = null) });
+      } else {
+        const min = this.getNumericValue(this.precioVentaMinimoCtrl);
+        const max = this.getNumericValue(this.precioVentaMaximoCtrl);
+        if (min || max) {
+          chips.push({
+            texto: rango(min, max, 'Venta'),
+            quitar: () => {
+              this.precioVentaMinimoCtrl.setValue('');
+              this.precioVentaMaximoCtrl.setValue('');
+            },
+          });
+        }
+      }
+    }
+
+    const grupos: [keyof typeof this.seleccion, string][] = [
+      ['habitaciones', 'hab.'],
+      ['banos', 'baños'],
+      ['parqueadero', 'parq.'],
+      ['estrato', 'estrato'],
+    ];
+    grupos.forEach(([clave, nombre]) => {
+      const valores = this.seleccion[clave];
+      if (valores.length) {
+        const texto = clave === 'estrato' ? `Estrato ${valores.join(', ')}` : `${valores.join(', ')} ${nombre}`;
+        chips.push({ texto, quitar: () => (this.seleccion = { ...this.seleccion, [clave]: [] }) });
+      }
+    });
+
+    const { AreaMinima, AreaMaxima } = this.formRangos.value;
+    if (AreaMinima || AreaMaxima) {
+      chips.push({
+        texto: AreaMinima && AreaMaxima ? `${AreaMinima} a ${AreaMaxima} m²` : AreaMinima ? `Desde ${AreaMinima} m²` : `Hasta ${AreaMaxima} m²`,
+        quitar: () => this.formRangos.patchValue({ AreaMinima: null, AreaMaxima: null }),
+      });
+    }
+    return chips;
+  }
+
+  textoChip(_: number, chip: { texto: string }): string {
+    return chip.texto;
+  }
+
+  quitarSeleccion(chip: { quitar: () => void }) {
+    chip.quitar();
+    if (this.chatIaDisponible) this.terminarChatIa();
+    this.enviarFiltros(1);
+  }
+
   borrarFiltros() {
     this.filtrosSeleccionados.clear();
     this.selectedPriceRange = null;
@@ -1785,10 +1945,10 @@ export class FiltrosComponent implements OnInit, OnDestroy {
   }
 
   getButtonClass(condition: boolean): string {
-    const base = 'flex items-center px-3 py-2 text-sm rounded-md';
+    const base = 'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors';
     return condition
-      ? `${base} bg-[#080E36] text-white`
-      : `${base} bg-blue-100 text-blue-700`;
+      ? `${base} border-[#080E36] bg-[#080E36] text-white`
+      : `${base} border-[#e3dccb] bg-white text-[#080E36] hover:border-[#CDAD60] hover:bg-[#CDAD60]/10`;
   }
 
   getIcon(type: 'property' | 'estate', option: any): string {

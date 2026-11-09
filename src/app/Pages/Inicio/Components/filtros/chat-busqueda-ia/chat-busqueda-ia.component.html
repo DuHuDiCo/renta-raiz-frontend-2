@@ -1,6 +1,7 @@
 <div class="flex flex-col grow basis-0 min-h-0 bg-[#F8F6F1]">
 
-  <!-- Encabezado -->
+  <!-- Encabezado (la página de resultados pone el suyo, con las pestañas IA / Filtros) -->
+  @if (conEncabezado) {
   <div class="flex-none flex items-center gap-3 px-4 py-3 bg-[#080E36] text-white">
     <span class="w-9 h-9 rounded-full bg-[#CDAD60]/15 text-[#CDAD60] flex items-center justify-center flex-none">
       <i class="fas fa-wand-magic-sparkles"></i>
@@ -17,6 +18,7 @@
       &times;
     </button>
   </div>
+  }
 
   <!-- Filtros activos: siempre a la vista aunque la conversación avance; se pueden plegar -->
   <div class="flex-none border-b border-[#ece6d6] bg-white px-4 py-2.5">

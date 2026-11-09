@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { TitleCasePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { RutaFichaPipe } from '../pipes/ruta-ficha.pipe';
+import { WishlistServiceService } from '../../core/wishlist/wishlist-service.service';
 
 /** Nivel de la propiedad según su precio, para el distintivo de la tarjeta. */
 interface NivelInmueble {
@@ -33,6 +35,15 @@ export class TarjetaInmuebleComponent {
   @Input() nuevaPestana = false;
 
   @Output() agregarCarrito = new EventEmitter<any>();
+
+  /** Inmuebles del recorrido; al ser una señal, la tarjeta (OnPush) se repinta cuando cambia. */
+  private recorrido = toSignal(inject(WishlistServiceService).favoritos$, { initialValue: [] as any[] });
+
+  /** Ya está en el recorrido: el carrito no se muestra. */
+  enRecorrido(): boolean {
+    const codigo = String(this.inmueble?.codpro ?? '');
+    return !!codigo && this.recorrido().some((favorito) => String(favorito?.codpro) === codigo);
+  }
 
   get nivel(): NivelInmueble | null {
     const venta = Number(this.inmueble?.saleprice) || 0;

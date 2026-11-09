@@ -65,6 +65,15 @@ interface Conversacion {
 
 const NEGOCIOS: Record<string, string> = { '1': 'Arriendo', '2': 'Venta', '3': 'Arriendo y venta' };
 
+/** Filtros que entiende la búsqueda con IA; el resto de claves de la página (page, sort…) no se le pasan. */
+const CLAVES_FILTRO_IA: ClaveFiltroIa[] = [
+  'biz', 'type', 'city', 'neighborhood_code', 'pcmin', 'pcmax', 'pvmin', 'pvmax', 'minarea', 'maxarea',
+  'minbed', 'maxbed', 'minbath', 'maxbath', 'minparking', 'stratum', 'amenities',
+];
+
+const TEXTO_INICIO_DESDE_PAGINA =
+  'Puedo afinar estos resultados por ti. Dime qué quieres cambiar: la zona, el precio, las habitaciones o lo que necesites.';
+
 /**
  * Conversación de la búsqueda con IA en la página de resultados. La barra de búsqueda la inicia con la
  * primera frase; desde el chat cada mensaje refina los filtros actuales (el backend recibe `filtrosActuales`)
@@ -120,6 +129,26 @@ export class BusquedaIaConversacionService {
   /** Filtros aplicados por la conversación; la paginación los necesita para lo que el panel manual no tiene. */
   get filtros(): FiltrosIa {
     return this.conversacion.filtros;
+  }
+
+  /**
+   * Abre el chat sobre la búsqueda que ya muestra la página (un listado como /venta o los filtros manuales),
+   * para refinarla con frases. Si la conversación ya describe esos mismos filtros, se continúa tal cual.
+   */
+  empezarDesde(filtros: Record<string, unknown>, etiquetas: InterpretarBusquedaResponse['etiquetas'] = {}): void {
+    const deLaPagina = this.sinVacios(
+      Object.fromEntries(
+        CLAVES_FILTRO_IA.filter((clave) => filtros[clave] !== undefined && filtros[clave] !== null).map((clave) => [
+          clave,
+          String(filtros[clave]),
+        ])
+      ) as FiltrosIa
+    );
+    if (this.activa && this.mismosFiltros(deLaPagina, this.conversacion.filtros)) return;
+
+    this.conversacion = { mensajes: [], filtros: deLaPagina, etiquetas: { ...etiquetas } };
+    this.conversacion.mensajes.push({ rol: 'ia', texto: TEXTO_INICIO_DESDE_PAGINA, etiquetas: this.etiquetas() });
+    this.guardar();
   }
 
   /** Primera frase, buscada desde la barra de filtros. La respuesta se completa al conocer el total. */
