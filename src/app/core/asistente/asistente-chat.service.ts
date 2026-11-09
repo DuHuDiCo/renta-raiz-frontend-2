@@ -5,10 +5,12 @@ import { Router } from '@angular/router';
 import { Observable, Subject, timeout } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { codigoDeFicha } from '../listados/listados';
+import { busquedasSimilares } from '../similares/similares';
 import { WishlistServiceService } from '../wishlist/wishlist-service.service';
 import {
   AsistenteMensajeRequest,
   AsistenteMensajeResponse,
+  BusquedaAsistente,
   LONGITUD_MAXIMA_MENSAJE,
   MAXIMO_RECORRIDO_ASISTENTE,
   ContextoAsistente,
@@ -76,6 +78,37 @@ export class AsistenteChatService {
     };
   }
   private leerListado: (() => ListadoVisibleAsistente) | null = null;
+
+  /**
+   * La ficha registra cómo leer el inmueble que muestra (el objeto de Domus, con city_code y type_code).
+   * Con él se arma "Ver todos en el listado" cuando el asistente muestra parecidos sin decir qué búsqueda usó.
+   * Devuelve la función para quitar el registro.
+   */
+  registrarFicha(leer: () => any): () => void {
+    this.leerFicha = leer;
+    return () => {
+      if (this.leerFicha === leer) this.leerFicha = null;
+    };
+  }
+  private leerFicha: (() => any) | null = null;
+
+  /**
+   * Búsqueda de inmuebles parecidos al de la ficha abierta: misma ciudad, negocio y tipo, y precio ±50 %
+   * (la más amplia de las de "Inmuebles similares" que aún filtra por precio). null fuera de una ficha.
+   */
+  busquedaParecidosFicha(): BusquedaAsistente | null {
+    const inmueble = this.leerFicha?.();
+    const busquedas = busquedasSimilares(inmueble);
+    if (!busquedas.length) return null;
+    const conPrecio = busquedas.filter((b) => 'pcmin' in b || 'pvmin' in b);
+    const elegida = conPrecio[conPrecio.length - 1] ?? busquedas[0];
+
+    const filtros = Object.fromEntries(Object.entries(elegida).map(([clave, valor]) => [clave, String(valor)]));
+    const etiquetas: Record<string, string> = { biz: filtros['biz'] === '2' ? 'Venta' : 'Arriendo' };
+    if (filtros['type'] && inmueble.type) etiquetas['type'] = capitalizar(inmueble.type);
+    if (inmueble.city) etiquetas['city'] = capitalizar(inmueble.city);
+    return { filtros, etiquetas };
+  }
 
   tomarPreguntaPendiente(): string | null {
     const pregunta = this.preguntaPendiente;
@@ -233,4 +266,10 @@ export class AsistenteChatService {
       // Navegación privada o cuota llena: el chat sigue funcionando sin persistencia.
     }
   }
+}
+
+/** "CASA CAMPESTRE" → "Casa campestre". */
+function capitalizar(texto: string): string {
+  const limpio = String(texto ?? '').trim().toLowerCase();
+  return limpio.charAt(0).toUpperCase() + limpio.slice(1);
 }

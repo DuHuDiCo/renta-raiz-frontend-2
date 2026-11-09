@@ -29,6 +29,7 @@ import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
 import { busquedasSimilares, CANDIDATOS_SIMILARES, CANTIDAD_SIMILARES, mejoresSimilares } from '../../../../core/similares/similares';
 import { TarjetaFichaComponent } from './tarjeta-ficha/tarjeta-ficha.component';
 import { TarjetaInmuebleComponent } from '../../../../shared/tarjeta-inmueble/tarjeta-inmueble.component';
+import { AsistenteChatService } from '../../../../core/asistente/asistente-chat.service';
 
 
 @Component({
@@ -87,6 +88,9 @@ export class VerPropiedadComponent implements OnInit {
   inmueblesService = inject(InmueblesService);
   dataasesoresService = inject(DataasesoresService);
   seo = inject(SeoService);
+  private asistente = inject(AsistenteChatService);
+  /** El chat lee el inmueble de la ficha para ofrecer "Ver todos en el listado" con sus parecidos. */
+  private quitarFichaAsistente = this.asistente.registrarFicha(() => this.propiedad);
   /** Encabezado principal (h1) de la ficha; es el mismo texto del título SEO. */
   tituloPagina = '';
   /** Dirección pública de la ficha para compartir: sin parámetros de campaña ni de seguimiento. */
@@ -289,6 +293,7 @@ export class VerPropiedadComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
+    this.quitarFichaAsistente();
     this.similaresSub?.unsubscribe();
     this.destroyZoom();
   }

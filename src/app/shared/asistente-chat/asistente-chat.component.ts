@@ -13,6 +13,7 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { AsistenteChatService } from '../../core/asistente/asistente-chat.service';
+import { codigosEnMensaje } from '../../core/asistente/asistente-codigos';
 import { BusquedaIaConversacionService } from '../../core/busqueda-ia/busqueda-ia-conversacion.service';
 import { BusquedaAsistente,
   AsistenteMensajeRequest,
@@ -289,6 +290,17 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * En una ficha, si el backend muestra inmuebles sin decir qué búsqueda usó (los "parecidos"), se ofrece verlos
+   * todos con la búsqueda de parecidos del inmueble que se está viendo. No si la pregunta era por códigos: esas
+   * tarjetas son los inmuebles pedidos, no una muestra de un listado.
+   */
+  private busquedaParecidos(): BusquedaAsistente | undefined {
+    if (this.ultimaPeticion?.contexto.pagina !== 'propiedad') return undefined;
+    if (codigosEnMensaje(this.ultimaPeticion.mensaje).length) return undefined;
+    return this.asistente.busquedaParecidosFicha() ?? undefined;
+  }
+
   /** Muestra los globos uno a uno, con el indicador de "escribiendo" entre ellos. */
   private mostrarRespuesta(respuesta: AsistenteMensajeResponse): void {
     const globos = (respuesta.mensajes ?? []).filter((m) => m?.trim());
@@ -296,7 +308,7 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
 
     const inmuebles = respuesta.inmuebles?.length ? respuesta.inmuebles : undefined;
     // "Ver todos en el listado" solo tiene sentido con tarjetas que salieron de una búsqueda por filtros.
-    const busqueda = inmuebles && respuesta.busqueda?.filtros ? respuesta.busqueda : undefined;
+    const busqueda = inmuebles ? (respuesta.busqueda?.filtros ? respuesta.busqueda : this.busquedaParecidos()) : undefined;
 
     globos.forEach((texto, i) => {
       this.programar(() => {

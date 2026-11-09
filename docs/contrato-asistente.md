@@ -54,7 +54,11 @@ Chat de servicio al cliente del portal: solo preguntas y respuestas, no capta da
 - `mensajes`: uno o varios globos, en orden.
 - `sugerencias`: respuestas rápidas para el siguiente turno (opcional).
 - `inmuebles`: tarjetas debajo del último globo, con los nombres de Domus; `null` o ausente si no hay.
-- `busqueda`: solo cuando las tarjetas salen de una búsqueda por filtros (`filtros` y `etiquetas`); muestra "Ver todos en el listado". `null` para inmuebles consultados por código o del recorrido.
+- `busqueda`: cuando las tarjetas salen de una búsqueda por filtros (`filtros` con las claves de `GET /properties/` y `etiquetas` para los chips); muestra "Ver todos en el listado". **También para los inmuebles parecidos** al de la ficha: enviar los filtros con los que se buscaron (p. ej. `{ "city": "5266", "biz": "1", "type": "2", "pcmin": "7500000", "pcmax": "22500000" }`), para que el listado muestre todos y no solo las tarjetas. `null` para inmuebles consultados por código o del recorrido.
+
+### "Ver todos en el listado" para los parecidos (respaldo en el front)
+
+Mientras el backend no envíe `busqueda` con los parecidos, el front la arma cuando se cumplen las tres: la página es una ficha (`contexto.pagina = 'propiedad'`), la respuesta trae `inmuebles` sin `busqueda`, y el mensaje no pedía códigos. Usa los filtros de "Inmuebles similares" de la ficha (`core/similares/similares.ts`): misma ciudad, negocio y tipo, y precio ±50 %. Si el backend envía `busqueda`, se usa la del backend.
 
 ## Inmuebles por código y "Mi recorrido" (lo nuevo que debe hacer el backend)
 
