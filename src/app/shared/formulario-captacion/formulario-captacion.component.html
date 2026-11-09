@@ -17,7 +17,7 @@
     }
     <button type="button" (click)="consignarOtro()"
       class="mt-8 rounded-lg bg-[#080E36] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#CDAD60] hover:text-[#080E36]">
-      Consignar otro inmueble
+      {{ conservarDatos ? 'Volver al formulario' : 'Consignar otro inmueble' }}
     </button>
   </div>
 } @else {
@@ -26,6 +26,14 @@
       <h2 class="text-2xl font-bold text-[#080E36]">Cuéntanos de tu inmueble</h2>
       <p class="mt-1 text-sm text-gray-500">Te toma unos minutos. Un asesor te escribirá por WhatsApp para continuar.</p>
     </div>
+
+    @if (conservarDatos) {
+      <!-- Solo con environment.captacionConservarDatos (pruebas); en producción no aparece. -->
+      <div class="flex items-center justify-between gap-3 rounded-lg border border-dashed border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+        <span><i class="fas fa-flask mr-1"></i> Modo pruebas: lo escrito se conserva al recargar y después de enviar.</span>
+        <button type="button" (click)="borrarDatosPruebas()" class="flex-none font-semibold underline underline-offset-2 hover:text-red-700">Borrar datos</button>
+      </div>
+    }
 
     <!-- Propietario -->
     <fieldset class="space-y-4">

@@ -29,6 +29,10 @@ import {
   TIPOS_CAPTACION,
 } from '../../core/captaciones/captaciones.models';
 import { FotoNoLegibleError, reducirFoto } from './reducir-foto';
+import { environment } from '../../../environments/environment';
+
+/** Donde se guarda lo escrito mientras environment.captacionConservarDatos está activo (solo pruebas). */
+const CLAVE_DATOS_PRUEBAS = 'captacion-datos-pruebas';
 
 type Estado = 'formulario' | 'enviando' | 'exito' | 'error';
 
@@ -172,9 +176,47 @@ export class FormularioCaptacionComponent implements OnInit, OnDestroy {
     aceptaPolitica: [false, Validators.requiredTrue],
   });
 
+  /** Pruebas: lo escrito se conserva al recargar y después de enviar. Las fotos solo mientras no se recargue. */
+  readonly conservarDatos = environment.captacionConservarDatos;
+
   ngOnInit(): void {
     // El precio obligatorio depende del negocio: arriendo, venta o ambos.
     this.form.controls.negocio.valueChanges.subscribe((negocio) => this.ajustarPrecios(negocio));
+    if (this.conservarDatos && typeof window !== 'undefined') {
+      this.restaurarDatosPruebas();
+      this.form.valueChanges.subscribe(() => this.guardarDatosPruebas());
+    }
+  }
+
+  private restaurarDatosPruebas(): void {
+    try {
+      const guardado = localStorage.getItem(CLAVE_DATOS_PRUEBAS);
+      if (guardado) this.form.patchValue(JSON.parse(guardado));
+    } catch {
+      // Sin almacenamiento o con datos dañados: se empieza en blanco.
+    }
+  }
+
+  private guardarDatosPruebas(): void {
+    try {
+      localStorage.setItem(CLAVE_DATOS_PRUEBAS, JSON.stringify(this.form.getRawValue()));
+    } catch {
+      // Sin almacenamiento (navegación privada): no se conserva, pero el formulario funciona igual.
+    }
+  }
+
+  /** Pruebas: deja el formulario en blanco y olvida lo guardado. */
+  borrarDatosPruebas(): void {
+    this.fotos.forEach((foto) => URL.revokeObjectURL(foto.url));
+    this.fotos = [];
+    this.avisosFotos = [];
+    this.form.reset();
+    try {
+      localStorage.removeItem(CLAVE_DATOS_PRUEBAS);
+    } catch {
+      // Nada que borrar.
+    }
+    this.estado = 'formulario';
   }
 
   ngOnDestroy(): void {
@@ -423,6 +465,13 @@ export class FormularioCaptacionComponent implements OnInit, OnDestroy {
 
   /** Después del éxito: otro inmueble del mismo propietario, sin volver a pedir sus datos. */
   consignarOtro(): void {
+    if (this.conservarDatos) {
+      // Pruebas: vuelve al formulario con todo lo escrito y las fotos, listo para reenviar.
+      this.idCaptacion = '';
+      this.estado = 'formulario';
+      setTimeout(() => this.elemento.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      return;
+    }
     this.fotos.forEach((foto) => URL.revokeObjectURL(foto.url));
     this.fotos = [];
     this.avisosFotos = [];
