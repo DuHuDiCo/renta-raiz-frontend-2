@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { ESTADO_HTTP } from './estado-http';
+import { environment } from '../../../environments/environment';
 
 export interface DatosSeo {
   titulo: string;
@@ -36,7 +37,8 @@ export interface PrecargaImagen {
   media?: string;
 }
 
-export const SEO_DOMINIO = 'https://rentaraiz.co';
+/** Dirección pública del sitio según el entorno: producción (rentaraiz.co) o la copia de pruebas. */
+export const SEO_DOMINIO = environment.dominio;
 export const SEO_SUFIJO = ' | Renta Raíz';
 const IMAGEN_POR_DEFECTO = `${SEO_DOMINIO}/assets/images/vistaInicial-slider-redimensiando.png`;
 
@@ -143,7 +145,7 @@ export class SeoService {
 
     this.title.setTitle(datos.titulo);
     this.meta.updateTag({ name: 'description', content: descripcion });
-    this.meta.updateTag({ name: 'robots', content: datos.noindex ? 'noindex, follow' : 'index, follow' });
+    this.meta.updateTag({ name: 'robots', content: datos.noindex || !environment.indexable ? 'noindex, follow' : 'index, follow' });
 
     this.meta.updateTag({ property: 'og:type', content: datos.tipo || 'website' });
     this.meta.updateTag({ property: 'og:url', content: url });

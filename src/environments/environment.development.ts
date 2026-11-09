@@ -3,6 +3,10 @@ export const token =
 
 export const environment = {
   production: false,
+  /** Dirección pública del sitio, sin "/" final: la copia de pruebas que corre con esta configuración. */
+  dominio: 'https://frontrenta.duckdns.org',
+  /** Copia de pruebas: todas las páginas salen con noindex para que Google no las indexe. */
+  indexable: false,
   baseUrl: 'https://portalrenta.duckdns.org/api/v1',
   baserUrlTest: 'https://rentaraizbackend.duckdns.org/api/v1',
   /** Chat del asistente con respuestas de prueba, sin llamar al backend. */

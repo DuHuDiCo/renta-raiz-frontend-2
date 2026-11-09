@@ -3,6 +3,10 @@ export const token =
 
 export const environment = {
   production: false,
+  /** Dirección pública del sitio, sin "/" final: enlaces para compartir, canonical, Open Graph y sitemap. */
+  dominio: 'https://rentaraiz.co',
+  /** false en copias de prueba: todas las páginas salen con noindex para que Google no las indexe. */
+  indexable: true,
   baseUrl: 'https://rentaraiz.co/api/v1',
   baserUrlTest: 'https://rentaraizbackend.duckdns.org/api/v1',
   /** Chat del asistente con respuestas de prueba, sin llamar al backend. */
