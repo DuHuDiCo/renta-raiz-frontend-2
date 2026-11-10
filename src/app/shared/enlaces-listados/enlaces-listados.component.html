@@ -6,7 +6,7 @@
       <ul class="space-y-1 text-sm">
         <li *ngFor="let enlace of grupo.enlaces">
           <a [routerLink]="enlace.ruta" class="text-gray-700 hover:text-[#CDAD60]">
-            {{ enlace.texto }} <span class="text-gray-400">({{ enlace.total }})</span>
+            {{ enlace.texto }} <span class="text-gray-500">({{ enlace.total }})</span>
           </a>
         </li>
       </ul>
