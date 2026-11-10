@@ -13,13 +13,8 @@
       <h1 class="mt-6 font-serif text-3xl lg:text-4xl text-[#CDAD60] text-center">{{ asesor.nombre }}</h1>
       <p class="mt-1 text-sm text-[#aab0c6] text-center">{{ asesor.cargo }}</p>
 
+      <!-- Solo redes sociales: el contacto directo del asesor no se publica -->
       <div class="mt-6 flex items-center justify-center gap-6 text-2xl text-[#CDAD60]">
-        <a [href]="'tel:+' + telefono" aria-label="Llamar" (click)="registrar('llamar')" class="hover:text-white transition-colors">
-          <i class="fas fa-phone"></i>
-        </a>
-        <a [href]="'mailto:' + asesor.email" aria-label="Enviar correo" (click)="registrar('correo')" class="hover:text-white transition-colors">
-          <i class="fas fa-envelope"></i>
-        </a>
         @if (asesor.facebook) {
           <a [href]="asesor.facebook" target="_blank" rel="noopener" aria-label="Facebook" (click)="registrar('facebook')" class="hover:text-white transition-colors">
             <i class="fab fa-facebook"></i>
@@ -54,10 +49,6 @@
       </div>
 
       <nav class="grid grid-cols-1 sm:grid-cols-2 gap-3" aria-label="Accesos del asesor">
-        <a [href]="enlaceWhatsapp" target="_blank" rel="noopener" (click)="registrar('whatsapp')"
-          class="sm:col-span-2 flex items-center justify-center gap-2 rounded-full bg-[#CDAD60] text-[#060F29] font-semibold py-3.5 hover:bg-[#d9bd78] transition-colors">
-          <i class="fab fa-whatsapp text-lg"></i> Escríbeme por WhatsApp
-        </a>
         <a [routerLink]="['/portafolio', asesor.id]" (click)="registrar('portafolio')"
           class="flex items-center justify-center gap-2 rounded-full border border-[#CDAD60] text-[#CDAD60] font-medium py-3.5 hover:bg-[#CDAD60]/10 transition-colors">
           <i class="fas fa-building"></i> Portafolio de inmuebles
@@ -66,12 +57,10 @@
           class="flex items-center justify-center gap-2 rounded-full border border-[#CDAD60] text-[#CDAD60] font-medium py-3.5 hover:bg-[#CDAD60]/10 transition-colors">
           <i class="fas fa-key"></i> Consigna tu propiedad
         </a>
-        <button type="button" (click)="guardarContacto()"
-          class="self-start flex items-center justify-center gap-2 rounded-full border border-[#1f2a4d] text-white font-medium py-3.5 hover:border-[#CDAD60] transition-colors">
-          <i class="fas fa-address-book"></i> Guardar contacto
-        </button>
-        <app-compartir-inmueble [url]="url" [titulo]="asesor.nombre" etiqueta="Compartir perfil"
-          [mensaje]="mensajeCompartir" evento="compartir_asesor" variante="oscuro"></app-compartir-inmueble>
+        <div class="sm:col-span-2">
+          <app-compartir-inmueble [url]="url" [titulo]="asesor.nombre" etiqueta="Compartir perfil"
+            [mensaje]="mensajeCompartir" evento="compartir_asesor" variante="oscuro"></app-compartir-inmueble>
+        </div>
       </nav>
     </section>
   </div>

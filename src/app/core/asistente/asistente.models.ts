@@ -2,11 +2,13 @@
  * Contrato entre el chat del asistente y el backend del portal:
  * POST {environment.baseUrl}/asistente/mensajes
  *
- * Chat de servicio al cliente, solo preguntas y respuestas: no capta datos personales ni
- * escala a un asesor. El backend arma el prompt, llama a la IA y devuelve la respuesta validada.
+ * Chat de servicio al cliente, solo preguntas y respuestas: no capta datos personales. El backend arma
+ * el prompt, llama a la IA y devuelve la respuesta validada.
  * Cuando el visitante pide inmuebles (parecidos al que ve o según lo que busca), el backend los
  * consulta en Domus y los devuelve como tarjetas en `inmuebles`. También responde por código de
  * inmueble escrito en el mensaje ("inmueble 6945") y sobre los de "Mi recorrido" (`contexto.recorrido`).
+ * Recuerda de qué inmuebles habló (`enFoco`) para entender "ese" o "el segundo", y ante el interés en un
+ * inmueble en venta ya identificado ofrece escribirle al asesor (`contactoAsesor`) en vez de dar sus datos.
  * Ver docs/contrato-asistente.md.
  */
 
@@ -35,7 +37,11 @@ export interface ContextoAsistente {
    * "Filtros activos"). Si la página de resultados no los publica, los de la URL (sin utm_* ni fbclid).
    */
   filtros?: Record<string, string>;
-  /** Cuando `pagina` es 'listado': códigos (codpro) de la página de resultados abierta, en orden. */
+  /**
+   * Códigos (codpro) de los inmuebles que el usuario tiene en pantalla, en orden: en 'listado', los de la página de
+   * resultados abierta; en las demás páginas, los de las tarjetas de inmuebles (destacados, portafolio, similares…).
+   * Como máximo MAXIMO_VISIBLES_ASISTENTE. Ausente si no hay.
+   */
   inmueblesVisibles?: number[];
   /** Cuando `pagina` es 'listado': número de esa página. */
   numeroPagina?: number;
@@ -44,6 +50,11 @@ export interface ContextoAsistente {
    * MAXIMO_RECORRIDO_ASISTENTE. Ausente si está vacío. Con ellos el backend responde "¿cuál de mi recorrido…?".
    */
   recorrido?: number[];
+  /**
+   * Inmuebles de los que habló el asistente en su respuesta anterior (su `enFoco`), en el orden en que los nombró;
+   * como máximo MAXIMO_EN_FOCO. Con ellos entiende "ese", "esa" o "el segundo" sin pedir el código. Ausente si no hay.
+   */
+  enFoco?: number[];
   /** Atribución de campaña que el sitio ya guarda en localStorage. */
   utm?: Partial<Record<'utm_source' | 'utm_medium' | 'utm_campaign' | 'utm_content' | 'utm_term', string>>;
 }
@@ -93,6 +104,18 @@ export interface AsistenteMensajeResponse {
   inmuebles?: InmuebleChat[] | null;
   /** Solo cuando las tarjetas salen de una búsqueda por filtros: permite verlas todas en el listado. */
   busqueda?: BusquedaAsistente | null;
+  /** Códigos de los inmuebles de los que trata esta respuesta, en el orden en que los nombró; vacío o ausente si ninguno. */
+  enFoco?: number[] | null;
+  /**
+   * Interés en un inmueble en venta ya identificado: el chat muestra el botón para escribirle al asesor por WhatsApp.
+   * El backend solo lo envía si Domus confirma que ese código está en venta. Ausente o null: sin botón.
+   */
+  contactoAsesor?: ContactoAsesor | null;
+}
+
+/** Inmueble por el que se le escribe al asesor; el número de WhatsApp lo pone el front, nunca la IA. */
+export interface ContactoAsesor {
+  codpro: number;
 }
 
 /** Búsqueda con la que el asistente sacó las tarjetas, con las claves de GET /properties/. */
@@ -114,8 +137,16 @@ export interface MensajeChat {
   inmuebles?: InmuebleChat[];
   /** Búsqueda de esas tarjetas: muestra "Ver todos en el listado". */
   busqueda?: BusquedaAsistente;
+  /** Inmuebles de los que trata este globo (último de su respuesta); de aquí sale `contexto.enFoco` al recargar. */
+  enFoco?: number[];
+  /** Muestra el botón "Escribir al asesor" por este inmueble en venta. */
+  contactoAsesor?: ContactoAsesor;
 }
 
 export const LONGITUD_MAXIMA_MENSAJE = 1000;
 /** Códigos de "Mi recorrido" que se envían en el contexto (los mismos que acepta POST /recorridos). */
 export const MAXIMO_RECORRIDO_ASISTENTE = 20;
+/** Inmuebles en foco que se envían en el contexto. */
+export const MAXIMO_EN_FOCO = 10;
+/** Inmuebles en pantalla que se envían en el contexto. */
+export const MAXIMO_VISIBLES_ASISTENTE = 30;

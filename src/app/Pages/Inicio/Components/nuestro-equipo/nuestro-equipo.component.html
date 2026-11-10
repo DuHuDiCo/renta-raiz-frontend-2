@@ -55,23 +55,8 @@
             </div>
           </dl>
 
-          <!-- Contacto directo -->
+          <!-- Solo compartir: el contacto directo con el asesor no se muestra en el listado -->
           <div class="mt-5 flex items-center justify-center gap-2.5">
-            <a [href]="enlaceWhatsapp(asesor)" target="_blank" rel="noopener" (click)="registrarContacto('whatsapp', asesor)"
-              [attr.aria-label]="'Escribir por WhatsApp a ' + asesor.nombre" title="WhatsApp"
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-[#1f9d55] text-white transition-opacity hover:opacity-90">
-              <i class="fab fa-whatsapp text-lg"></i>
-            </a>
-            <a [href]="enlaceLlamada(asesor)" (click)="registrarContacto('llamada', asesor)"
-              [attr.aria-label]="'Llamar a ' + asesor.nombre + ' al ' + asesor.telefono" [title]="asesor.telefono"
-              class="flex h-10 w-10 items-center justify-center rounded-full border border-[#e6dfcf] bg-white text-[#080E36] transition-colors hover:border-[#CDAD60] hover:bg-[#CDAD60] hover:text-white">
-              <i class="fas fa-phone"></i>
-            </a>
-            <a [href]="'mailto:' + asesor.email" (click)="registrarContacto('correo', asesor)"
-              [attr.aria-label]="'Escribir un correo a ' + asesor.nombre" [title]="asesor.email"
-              class="flex h-10 w-10 items-center justify-center rounded-full border border-[#e6dfcf] bg-white text-[#080E36] transition-colors hover:border-[#CDAD60] hover:bg-[#CDAD60] hover:text-white">
-              <i class="fas fa-envelope"></i>
-            </a>
             <app-compartir-inmueble variante="icono" [url]="urlPerfil(asesor)" [titulo]="asesor.nombre" etiqueta="Compartir asesor"
               [mensaje]="'Te comparto el contacto de ' + asesor.nombre + ', ' + asesor.cargo + ' de Renta Raíz:'"
               evento="compartir_asesor"></app-compartir-inmueble>

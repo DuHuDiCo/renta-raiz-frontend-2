@@ -12,13 +12,16 @@ import {
   AsistenteMensajeResponse,
   BusquedaAsistente,
   LONGITUD_MAXIMA_MENSAJE,
+  MAXIMO_EN_FOCO,
   MAXIMO_RECORRIDO_ASISTENTE,
+  MAXIMO_VISIBLES_ASISTENTE,
   ContextoAsistente,
   ListadoVisibleAsistente,
   MensajeChat,
   PaginaAsistente,
 } from './asistente.models';
 import { responderSimulado } from './asistente-chat.mock';
+import { InmueblesEnPantallaService } from './inmuebles-en-pantalla.service';
 
 const CLAVE_CONVERSACION = 'asistente_conversacion';
 /** Pasado este tiempo sin escribir, el chat arranca una conversación nueva. */
@@ -50,6 +53,24 @@ export class AsistenteChatService {
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
   private favoritos = inject(WishlistServiceService);
+  private enPantalla = inject(InmueblesEnPantallaService);
+
+  /** Inmuebles de los que habló el asistente en su última respuesta; viajan en `contexto.enFoco`. */
+  private foco: number[] = [];
+
+  /** El chat lo actualiza con cada respuesta, al cargar el historial y al empezar una conversación nueva. */
+  establecerFoco(codigos: readonly unknown[] | null | undefined): void {
+    const validos = (codigos ?? []).map(Number).filter((c) => Number.isInteger(c) && c > 0);
+    this.foco = [...new Set(validos)].slice(0, MAXIMO_EN_FOCO);
+  }
+
+  /**
+   * Foco recuperado del historial al cargar el chat. El chat carga tarde (@defer): si mientras tanto otra parte
+   * del sitio ya fijó un foco más reciente (la búsqueda con IA), ese gana.
+   */
+  restaurarFoco(codigos: readonly unknown[] | null | undefined): void {
+    if (!this.foco.length) this.establecerFoco(codigos);
+  }
 
   /** Pregunta mandada desde otra parte del sitio que el chat aún no ha enviado (puede no haber cargado). */
   private preguntaPendiente: string | null = null;
@@ -157,8 +178,16 @@ export class AsistenteChatService {
       }
     }
 
+    // En las demás páginas, los inmuebles en pantalla salen de las tarjetas (destacados, portafolio, similares…).
+    if (!contexto.inmueblesVisibles?.length) {
+      const visibles = this.enPantalla.codigos(MAXIMO_VISIBLES_ASISTENTE);
+      if (visibles.length) contexto.inmueblesVisibles = visibles;
+    }
+
     const recorrido = this.codigosRecorrido();
     if (recorrido.length) contexto.recorrido = recorrido;
+
+    if (this.foco.length) contexto.enFoco = [...this.foco];
 
     const utm: ContextoAsistente['utm'] = {};
     for (const clave of PARAMETROS_CAMPANA) {

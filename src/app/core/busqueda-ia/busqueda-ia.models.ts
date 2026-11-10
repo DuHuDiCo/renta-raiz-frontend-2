@@ -41,12 +41,20 @@ export interface InterpretarBusquedaRequest {
   inmueblesVisibles: number[];
   /** Número de esa página. */
   pagina?: number;
+  /**
+   * Inmuebles que la búsqueda con IA destacó en su última respuesta a una pregunta sobre la página
+   * (`inmueblesDestacados`), mientras no haya cambiado la búsqueda. Con ellos entiende "esa", "la que me
+   * mostraste" o "dame más información" sin pedir el código. Ausente si no hay.
+   */
+  enFoco?: number[];
 }
 
 /** Lo que el visitante tiene en pantalla, para las preguntas sobre esos inmuebles. */
 export interface PaginaVisibleIa {
   inmueblesVisibles: number[];
   pagina?: number;
+  /** Ver `InterpretarBusquedaRequest.enFoco`. */
+  enFoco?: number[];
 }
 
 /** El backend acepta hasta 24 inmuebles por página. */

@@ -46,28 +46,6 @@ export class NuestroEquipoComponent implements OnInit {
     }
   }));
 
-  /** "350 223 9363" → "573502239363", el formato que piden WhatsApp y tel:. */
-  private telefonoInternacional(asesor: any): string {
-    const digitos = String(asesor.telefono || '').replace(/\D/g, '');
-    return digitos.startsWith('57') && digitos.length > 10 ? digitos : `57${digitos}`;
-  }
-
-  enlaceWhatsapp(asesor: any): string {
-    const nombre = String(asesor.nombre || '').split(' ')[0];
-    const texto = `Hola ${nombre}, vi tu perfil en Renta Raíz y quiero información sobre un inmueble.`;
-    return `https://wa.me/${this.telefonoInternacional(asesor)}?text=${encodeURIComponent(texto)}`;
-  }
-
-  enlaceLlamada(asesor: any): string {
-    return `tel:+${this.telefonoInternacional(asesor)}`;
-  }
-
-  /** Evento para Google Tag Manager. */
-  registrarContacto(medio: string, asesor: any): void {
-    const capa = ((window as any).dataLayer = (window as any).dataLayer || []);
-    capa.push({ event: 'contacto_asesor', medio, asesor: asesor.slug });
-  }
-
   mostrarModalRecorrido = false
 
   mostrarOffcanvas: boolean = false;

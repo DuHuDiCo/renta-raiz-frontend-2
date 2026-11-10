@@ -1,9 +1,13 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TitleCasePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { RutaFichaPipe } from '../pipes/ruta-ficha.pipe';
 import { WishlistServiceService } from '../../core/wishlist/wishlist-service.service';
+import { resumenInmueble } from '../../core/listados/listados';
+import { SEO_DOMINIO } from '../../core/seo/seo.service';
+import { CompartirInmuebleComponent } from '../compartir-inmueble/compartir-inmueble.component';
+import { InmueblesEnPantallaService } from '../../core/asistente/inmuebles-en-pantalla.service';
 
 /** Nivel de la propiedad según su precio, para el distintivo de la tarjeta. */
 interface NivelInmueble {
@@ -14,17 +18,31 @@ interface NivelInmueble {
 /**
  * Tarjeta de un inmueble en los listados (resultados, destacados del inicio): foto, precio, barrio,
  * descripción y características. Toda la tarjeta lleva a la ficha; el carrito lo maneja quien la usa.
+ * Sobre la foto lleva el botón para compartir la ficha.
  */
 @Component({
   selector: 'app-tarjeta-inmueble',
   standalone: true,
-  imports: [RouterLink, TitleCasePipe, RutaFichaPipe],
+  imports: [RouterLink, TitleCasePipe, RutaFichaPipe, CompartirInmuebleComponent],
   templateUrl: './tarjeta-inmueble.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block h-full' },
 })
-export class TarjetaInmuebleComponent {
+export class TarjetaInmuebleComponent implements OnInit, OnDestroy {
   @Input({ required: true }) inmueble: any;
+
+  /** Avisa al asistente qué inmuebles hay en pantalla ("¿cuál de estos es el más barato?"). */
+  private enPantalla = inject(InmueblesEnPantallaService);
+  private codigoRegistrado: unknown = null;
+
+  ngOnInit(): void {
+    this.codigoRegistrado = this.inmueble?.codpro;
+    this.enPantalla.registrar(this.codigoRegistrado);
+  }
+
+  ngOnDestroy(): void {
+    this.enPantalla.quitar(this.codigoRegistrado);
+  }
   /** Marca la tarjeta con un borde dorado (p. ej., la respuesta del chat con IA). */
   @Input() resaltado = false;
   /** Muestra la cinta "Destacado" junto al tipo de negocio. */
@@ -64,6 +82,12 @@ export class TarjetaInmuebleComponent {
     if (formateado) return formateado.startsWith('$') ? formateado : `$${formateado}`;
     const valor = Number(this.inmueble?.price);
     return valor ? `$${valor.toLocaleString('es-CO')}` : null;
+  }
+
+  /** Título y dirección pública de la ficha para compartir: los mismos que usa el botón de la ficha. */
+  get compartir(): { titulo: string; url: string } {
+    const resumen = resumenInmueble(this.inmueble, SEO_DOMINIO);
+    return { titulo: resumen.titulo, url: resumen.url };
   }
 
   /** El botón del carrito solo aparece si quien usa la tarjeta escucha `agregarCarrito`. */

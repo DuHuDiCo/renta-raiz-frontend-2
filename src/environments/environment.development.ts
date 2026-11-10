@@ -7,7 +7,8 @@ export const environment = {
   dominio: 'https://frontrenta.duckdns.org',
   /** Copia de pruebas: todas las páginas salen con noindex para que Google no las indexe. */
   indexable: false,
-  baseUrl: 'https://portalrenta.duckdns.org/api/v1',
+  /** Desarrollo usa el backend de producción (el mismo de environment.ts). */
+  baseUrl: 'https://rentaraiz.co/api/v1',
   baserUrlTest: 'https://rentaraizbackend.duckdns.org/api/v1',
   /** Chat del asistente con respuestas de prueba, sin llamar al backend. */
   asistenteMock: false,

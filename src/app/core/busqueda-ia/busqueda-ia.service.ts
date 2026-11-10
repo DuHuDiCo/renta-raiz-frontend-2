@@ -53,6 +53,7 @@ export class BusquedaIaService {
       filtrosActuales,
       inmueblesVisibles: paginaVisible.inmueblesVisibles.slice(0, MAXIMO_INMUEBLES_VISIBLES),
       ...(paginaVisible.pagina ? { pagina: paginaVisible.pagina } : {}),
+      ...(paginaVisible.enFoco?.length ? { enFoco: paginaVisible.enFoco } : {}),
     };
     if (environment.busquedaIaMock) {
       return forkJoin({ ciudades: this.inmuebles.getCiudades(), barrios: this.inmuebles.getBarrios() }).pipe(

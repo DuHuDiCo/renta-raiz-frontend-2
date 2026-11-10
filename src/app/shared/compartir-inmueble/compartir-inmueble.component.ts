@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, Input } from '@angular/core';
 
 /**
  * Botón para compartir la ficha de un inmueble o el perfil de un asesor. En celulares y tabletas abre el menú nativo del sistema
@@ -8,7 +8,7 @@ import { Component, Input } from '@angular/core';
   selector: 'app-compartir-inmueble',
   standalone: true,
   templateUrl: './compartir-inmueble.component.html',
-  host: { '[class.relative]': 'flotante', '[class.inline-block]': "variante === 'icono'" },
+  host: { '[class.relative]': 'flotante', '[class.inline-block]': "variante === 'icono' || variante === 'mini'" },
 })
 export class CompartirInmuebleComponent {
   /** Dirección pública y limpia de la ficha (sin parámetros de campaña). */
@@ -21,16 +21,35 @@ export class CompartirInmuebleComponent {
   @Input() mensaje = '';
   /** Nombre del evento en Google Tag Manager. */
   @Input() evento = 'compartir_inmueble';
-  /** 'oscuro' para fondos azul marino (perfil del asesor); 'icono' es un botón redondo sin texto (tarjetas del equipo). */
-  @Input() variante: 'claro' | 'oscuro' | 'icono' | 'contorno' = 'claro';
+  /**
+   * 'oscuro' para fondos azul marino (perfil del asesor); 'icono' es un botón redondo sin texto (tarjetas del equipo);
+   * 'mini' es el botón pequeño sobre la foto de las tarjetas de inmuebles, junto al carrito.
+   */
+  @Input() variante: 'claro' | 'oscuro' | 'icono' | 'contorno' | 'mini' = 'claro';
 
-  /** 'icono' y 'contorno' abren las opciones en un menú flotante, sin empujar lo que hay debajo. */
+  /** 'icono', 'contorno' y 'mini' abren las opciones en un menú flotante, sin empujar lo que hay debajo. */
   get flotante(): boolean {
-    return this.variante === 'icono' || this.variante === 'contorno';
+    return this.variante === 'icono' || this.variante === 'contorno' || this.variante === 'mini';
   }
 
   opcionesAbiertas = false;
   copiado = false;
+
+  private elemento = inject(ElementRef<HTMLElement>);
+
+  /** Un clic fuera del botón y sus opciones las cierra. */
+  @HostListener('document:click', ['$event'])
+  alClicFuera(evento: MouseEvent): void {
+    if (this.opcionesAbiertas && !this.elemento.nativeElement.contains(evento.target as Node)) {
+      this.opcionesAbiertas = false;
+    }
+  }
+
+  /** Escape también las cierra. */
+  @HostListener('document:keydown.escape')
+  alEscape(): void {
+    this.opcionesAbiertas = false;
+  }
 
   get textoMensaje(): string {
     return this.mensaje || `Mira este inmueble de Renta Raíz: ${this.titulo}`.trim();

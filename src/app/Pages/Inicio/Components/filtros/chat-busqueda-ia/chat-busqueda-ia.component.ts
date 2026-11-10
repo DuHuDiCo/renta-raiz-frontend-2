@@ -130,8 +130,13 @@ export class ChatBusquedaIaComponent implements OnChanges, AfterViewChecked, OnD
     }
   }
 
-  /** Manda la frase al Asistente Renta Raíz; en celular cierra este chat para que se vea el del asistente. */
+  /**
+   * Manda la frase al Asistente Renta Raíz; en celular cierra este chat para que se vea el del asistente.
+   * Le pasa también los inmuebles en foco, para que "dame más información" se entienda sobre el que se destacó.
+   */
   preguntarAlAsistente(pregunta: string): void {
+    const enFoco = this.conversacion.enFoco();
+    if (enFoco.length) this.asistente.establecerFoco(enFoco);
     this.asistente.preguntar(pregunta);
     if (window.matchMedia('(max-width: 767px)').matches) this.cerrar.emit();
   }
@@ -172,7 +177,12 @@ export class ChatBusquedaIaComponent implements OnChanges, AfterViewChecked, OnD
       .subscribe({
       next: (resultado) => {
         if (resultado) this.resultado.emit(resultado);
-        else if (puedeDestacar) this.destacar.emit(this.conversacion.destacadosRecientes());
+        else if (puedeDestacar) {
+          const destacados = this.conversacion.destacadosRecientes();
+          this.destacar.emit(destacados);
+          // El asistente también queda sabiendo de cuáles se habla, por si le preguntan después.
+          if (destacados.length) this.asistente.establecerFoco(destacados);
+        }
       },
       error: () => {},
     });

@@ -3,6 +3,11 @@
     class="flex h-10 w-10 items-center justify-center rounded-full border border-[#e6dfcf] bg-white text-[#080E36] transition-colors hover:border-[#CDAD60] hover:bg-[#CDAD60] hover:text-white">
     <i class="fas fa-share-nodes"></i>
   </button>
+} @else if (variante === 'mini') {
+  <button type="button" (click)="compartir()" [attr.aria-expanded]="opcionesAbiertas" [attr.aria-label]="etiqueta" [title]="etiqueta"
+    class="flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-[#080E36] shadow-sm transition-colors hover:bg-[#CDAD60] hover:text-white">
+    <i class="fas fa-share-nodes text-sm"></i>
+  </button>
 } @else if (variante === 'contorno') {
   <button type="button" (click)="compartir()" [attr.aria-expanded]="opcionesAbiertas"
     class="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-medium text-[#080E36] transition-colors hover:border-[#CDAD60] hover:bg-[#FBF7EE]">
@@ -21,7 +26,7 @@
 @if (opcionesAbiertas) {
   <div class="mt-2 grid grid-cols-3 gap-2 text-xs" [class.bg-white]="variante !== 'claro'" [class.rounded-xl]="variante !== 'claro'" [class.p-2]="variante !== 'claro'"
     [class.absolute]="flotante" [class.right-0]="flotante" [class.top-full]="flotante" [class.z-20]="flotante"
-    [class.w-64]="flotante" [class.shadow-xl]="flotante" [class.ring-1]="flotante" [class.ring-gray-200]="flotante">
+    [class.w-64]="flotante && variante !== 'mini'" [class.w-56]="variante === 'mini'" [class.shadow-xl]="flotante" [class.ring-1]="flotante" [class.ring-gray-200]="flotante">
     <a [href]="enlaceWhatsapp" target="_blank" rel="noopener" (click)="registrar('whatsapp')"
       class="flex flex-col items-center gap-1 rounded-lg border border-gray-200 py-2 text-gray-700 hover:border-green-600 hover:text-green-700">
       <i class="fab fa-whatsapp text-lg"></i> WhatsApp

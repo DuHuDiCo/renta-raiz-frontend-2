@@ -6,7 +6,8 @@ import { CompartirInmuebleComponent } from '../../../../shared/compartir-inmuebl
 
 /**
  * Tarjeta digital del asesor (/asesor/:slug): la página que se comparte por WhatsApp o redes,
- * con accesos directos para escribirle, ver su portafolio, consignar y guardar su contacto.
+ * con sus redes sociales y accesos para ver su portafolio, consignar y compartir el perfil.
+ * No publica su teléfono ni su correo.
  */
 @Component({
   selector: 'app-perfil-asesor',
@@ -24,16 +25,6 @@ export class PerfilAsesorComponent implements OnInit {
 
   get url(): string {
     return `${SEO_DOMINIO}/asesor/${this.asesor.slug}`;
-  }
-
-  /** Teléfono con indicativo de Colombia y sin espacios: 573012050207. */
-  get telefono(): string {
-    return `57${this.asesor.telefono.replace(/\D/g, '')}`;
-  }
-
-  get enlaceWhatsapp(): string {
-    const saludo = `Hola ${this.asesor.nombre.split(' ')[0]}, vi tu perfil en Renta Raíz y quiero más información.`;
-    return `https://wa.me/${this.telefono}?text=${encodeURIComponent(saludo)}`;
   }
 
   get mensajeCompartir(): string {
@@ -55,8 +46,6 @@ export class PerfilAsesorComponent implements OnInit {
           '@type': 'Person',
           name: nombre,
           jobTitle: cargo,
-          telephone: `+${this.telefono}`,
-          email: this.asesor.email,
           image: `${SEO_DOMINIO}/${imagen}`,
           url: this.url,
           worksFor: SEO_REF_AGENCIA,
@@ -71,30 +60,6 @@ export class PerfilAsesorComponent implements OnInit {
       // Sin el dato, la cifra simplemente no se muestra.
       error: () => (this.totalInmuebles = null),
     });
-  }
-
-  /** Descarga una tarjeta de contacto (vCard) que el celular agrega a la agenda. */
-  guardarContacto(): void {
-    const [nombre, ...apellidos] = this.asesor.nombre.split(' ');
-    const vcard = [
-      'BEGIN:VCARD',
-      'VERSION:3.0',
-      `N:${apellidos.join(' ')};${nombre};;;`,
-      `FN:${this.asesor.nombre}`,
-      'ORG:Renta Raíz',
-      `TITLE:${this.asesor.cargo}`,
-      `TEL;TYPE=CELL:+${this.telefono}`,
-      `EMAIL:${this.asesor.email}`,
-      `URL:${this.url}`,
-      'END:VCARD',
-    ].join('\r\n');
-
-    const enlace = document.createElement('a');
-    enlace.href = URL.createObjectURL(new Blob([vcard], { type: 'text/vcard;charset=utf-8' }));
-    enlace.download = `${this.asesor.slug}.vcf`;
-    enlace.click();
-    setTimeout(() => URL.revokeObjectURL(enlace.href), 1000);
-    this.registrar('guardar_contacto');
   }
 
   /** Evento para Google Tag Manager. */

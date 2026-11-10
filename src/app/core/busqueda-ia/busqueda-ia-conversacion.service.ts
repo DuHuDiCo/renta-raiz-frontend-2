@@ -196,7 +196,10 @@ export class BusquedaIaConversacionService {
     this.conversacion.mensajes.push({ rol: 'usuario', texto: consulta });
     this.guardar();
 
-    return this.busquedaIa.interpretar(consulta, this.conversacion.filtros, paginaVisible).pipe(
+    const enFoco = this.enFoco();
+    return this.busquedaIa
+      .interpretar(consulta, this.conversacion.filtros, { ...paginaVisible, ...(enFoco.length ? { enFoco } : {}) })
+      .pipe(
       switchMap((respuesta) => {
         // En estos casos los filtros actuales no se tocan.
         if (respuesta.reintentarEn !== undefined) return this.responderSinBuscar({ texto: textoEspera(respuesta.reintentarEn) });
@@ -288,6 +291,22 @@ export class BusquedaIaConversacionService {
   /** Inmuebles que destacó la última respuesta, si fue a una pregunta sobre la página. */
   destacadosRecientes(): number[] {
     return this.conversacion.mensajes.at(-1)?.inmueblesDestacados ?? [];
+  }
+
+  /**
+   * De qué inmuebles se viene hablando: los que destacó la última respuesta a una pregunta sobre la página,
+   * aunque después haya habido otros mensajes ("dame más información"). Se pierde cuando la búsqueda cambia,
+   * porque esos inmuebles ya pueden no estar en pantalla.
+   */
+  enFoco(): number[] {
+    for (let i = this.conversacion.mensajes.length - 1; i >= 0; i--) {
+      const mensaje = this.conversacion.mensajes[i];
+      if (mensaje.rol !== 'ia') continue;
+      if (mensaje.inmueblesDestacados?.length) return mensaje.inmueblesDestacados;
+      // Una respuesta que buscó (trae los filtros con que buscó) es una búsqueda nueva: corta el foco.
+      if (mensaje.etiquetas) return [];
+    }
+    return [];
   }
 
   /** El orden y la página los pone el front: cada búsqueda nueva vuelve a la página 1. */

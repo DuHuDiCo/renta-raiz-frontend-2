@@ -1,6 +1,6 @@
 import { Component, ElementRef, HostListener, inject, OnInit, ViewChild } from '@angular/core';
 
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { InmueblesService } from '../../../../core/Inmuebles/inmuebles.service';
 import { NavbarComponent2 } from '../../../../shared/navbar-2/navbar-2.component';
@@ -79,15 +79,20 @@ export class PortafolioAsesoresComponent implements OnInit {
     return `${SEO_DOMINIO}/asesor/${this.asesor.slug}`;
   }
 
-  /** Teléfono con indicativo de Colombia y sin espacios: 573012050207. */
-  get telefonoAsesor(): string {
-    return `57${this.asesor.telefono.replace(/\D/g, '')}`;
+  private location = inject(Location);
+
+  /**
+   * Vuelve a la página anterior del portal (Nuestro equipo, la tarjeta digital…).
+   * Si el portafolio se abrió directo desde un enlace compartido, no hay a dónde volver: lleva al inicio.
+   */
+  volver(): void {
+    if (this.router.lastSuccessfulNavigation?.previousNavigation) {
+      this.location.back();
+    } else {
+      this.router.navigate(['/']);
+    }
   }
 
-  get enlaceWhatsappAsesor(): string {
-    const saludo = `Hola ${this.asesor.nombre.split(' ')[0]}, vi tu portafolio en Renta Raíz y quiero más información.`;
-    return `https://wa.me/${this.telefonoAsesor}?text=${encodeURIComponent(saludo)}`;
-  }
 
 
 

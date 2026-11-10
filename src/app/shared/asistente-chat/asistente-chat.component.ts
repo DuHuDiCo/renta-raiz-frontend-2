@@ -18,14 +18,19 @@ import { BusquedaIaConversacionService } from '../../core/busqueda-ia/busqueda-i
 import { BusquedaAsistente,
   AsistenteMensajeRequest,
   AsistenteMensajeResponse,
+  ContactoAsesor,
   InmuebleChat,
   LONGITUD_MAXIMA_MENSAJE,
   MensajeChat,
 } from '../../core/asistente/asistente.models';
+import { SEO_DOMINIO } from '../../core/seo/seo.service';
 import { RutaFichaPipe } from '../pipes/ruta-ficha.pipe';
 
 const NOMBRE_ASISTENTE = 'Asistente Renta Raíz';
-/** Línea general de WhatsApp (la misma del botón flotante); respaldo cuando el asistente falla. */
+/**
+ * Línea general de WhatsApp (la misma del botón flotante): respaldo cuando el asistente falla y contacto del asesor
+ * comercial para los inmuebles en venta. La pone el front; la IA nunca escribe números ni enlaces.
+ */
 const WHATSAPP_GENERAL = '573145438665';
 /** Pausa entre globos cuando la respuesta trae varios, para que se lean como una conversación. */
 const PAUSA_ENTRE_GLOBOS_MS = 650;
@@ -100,6 +105,8 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
     const conversacion = this.asistente.cargarConversacion();
     this.sesionId = conversacion.sesionId;
     this.mensajes = conversacion.mensajes;
+    // Al recargar, el asistente sigue sabiendo de qué inmuebles venía hablando.
+    this.asistente.restaurarFoco([...this.mensajes].reverse().find((m) => m.enFoco?.length)?.enFoco);
 
     this.actualizarMargen(this.router.url);
     this.suscripciones.add(
@@ -175,6 +182,7 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
     this.mensajes = [];
     this.esperando = false;
     this.ultimaPeticion = undefined;
+    this.asistente.establecerFoco([]);
     this.saludar();
     this.asistente.registrarEvento('asistente_nueva_conversacion');
   }
@@ -219,6 +227,18 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
 
   alContactarWhatsapp(): void {
     this.asistente.registrarEvento('asistente_whatsapp_click');
+  }
+
+  /** WhatsApp del asesor comercial con el mensaje ya escrito: el código del inmueble y el enlace a su ficha. */
+  enlaceAsesor(contacto: ContactoAsesor): string {
+    const texto =
+      `Hola, vi en rentaraiz.co el inmueble código ${contacto.codpro} en venta y quiero más información: ` +
+      `${SEO_DOMINIO}/inmueble/${contacto.codpro}`;
+    return `https://wa.me/${WHATSAPP_GENERAL}?text=${encodeURIComponent(texto)}`;
+  }
+
+  alContactarAsesor(contacto: ContactoAsesor): void {
+    this.asistente.registrarEvento('asistente_asesor_click', { codpro: contacto.codpro });
   }
 
   /** Precio de la tarjeta: el canon si está en arriendo y, si no, el precio de venta. */
@@ -310,15 +330,31 @@ export class AsistenteChatComponent implements OnInit, OnDestroy {
     // "Ver todos en el listado" solo tiene sentido con tarjetas que salieron de una búsqueda por filtros.
     const busqueda = inmuebles ? (respuesta.busqueda?.filtros ? respuesta.busqueda : this.busquedaParecidos()) : undefined;
 
+    // Botón del asesor: solo con un código válido (el backend ya confirmó que el inmueble está en venta).
+    const codigoAsesor = Number(respuesta.contactoAsesor?.codpro);
+    const contactoAsesor: ContactoAsesor | undefined =
+      Number.isInteger(codigoAsesor) && codigoAsesor > 0 ? { codpro: codigoAsesor } : undefined;
+
+    // De qué inmuebles habló: lo que diga el backend; si no lo dice, el del asesor o los de las tarjetas.
+    const enFoco = respuesta.enFoco?.length
+      ? respuesta.enFoco
+      : contactoAsesor
+        ? [contactoAsesor.codpro]
+        : (inmuebles ?? []).map((i) => i.codpro);
+    // Una respuesta sin inmuebles concretos (p. ej. "¿cómo pago el canon?") no borra el foco anterior.
+    if (enFoco.length) this.asistente.establecerFoco(enFoco);
+
     globos.forEach((texto, i) => {
       this.programar(() => {
         const ultimo = i === globos.length - 1;
-        // Las tarjetas van con el último globo, después del texto que las presenta.
+        // Las tarjetas y el botón del asesor van con el último globo, después del texto que los presenta.
         this.agregar({
           autor: 'asistente',
           texto,
           ...(ultimo && inmuebles ? { inmuebles } : {}),
           ...(ultimo && busqueda ? { busqueda } : {}),
+          ...(ultimo && enFoco.length ? { enFoco } : {}),
+          ...(ultimo && contactoAsesor ? { contactoAsesor } : {}),
         });
         if (!ultimo) return;
 

@@ -118,6 +118,15 @@
               </div>
             }
           }
+          <!-- Inmueble en venta: el asesor comercial da la información (el número lo pone la página, no la IA) -->
+          @if (mensaje.contactoAsesor; as contacto) {
+            <div class="pl-9">
+              <a [href]="enlaceAsesor(contacto)" target="_blank" rel="noopener" (click)="alContactarAsesor(contacto)"
+                class="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#128C7E]">
+                <i class="fa-brands fa-whatsapp text-base"></i> Escribir al asesor
+              </a>
+            </div>
+          }
         }
       }
 

@@ -1,3 +1,4 @@
+import { TarjetaInmuebleComponent } from '../../../../shared/tarjeta-inmueble/tarjeta-inmueble.component';
 import {
   Component,
   ElementRef,
@@ -6,7 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { NavbarComponent } from '../../../../shared/navbar/navbar.component';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InmueblesService } from '../../../../core/Inmuebles/inmuebles.service';
 import { CommonModule } from '@angular/common';
@@ -15,14 +16,11 @@ import { BotonesFlotantesComponent } from '../../../../shared/botones-flotantes/
 import { log } from 'console';
 import { BarraFiltrosComponent } from '../../../../shared/barra-filtros/barra-filtros.component';
 import { VolverComponent } from '../../../../shared/volver/volver.component';
-import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
 
 @Component({
   selector: 'app-avaluos-comerciales',
   standalone: true,
   imports: [
-    RutaFichaPipe,
-    RouterLink,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -31,6 +29,7 @@ import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
     BotonesFlotantesComponent,
     BarraFiltrosComponent,
     VolverComponent,
+    TarjetaInmuebleComponent,
   ],
   templateUrl: './avaluos-comerciales.component.html',
   styleUrl: './avaluos-comerciales.component.scss',

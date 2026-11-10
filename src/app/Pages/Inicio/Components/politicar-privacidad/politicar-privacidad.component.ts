@@ -1,3 +1,4 @@
+import { TarjetaInmuebleComponent } from '../../../../shared/tarjeta-inmueble/tarjeta-inmueble.component';
 import { Component, inject, OnInit } from '@angular/core';
 import { NavbarComponent } from '../../../../shared/navbar/navbar.component';
 import { BotonesFlotantesComponent } from '../../../../shared/botones-flotantes/botones-flotantes.component';
@@ -8,13 +9,11 @@ import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { VolverComponent } from '../../../../shared/volver/volver.component';
-import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
 
 @Component({
   selector: 'app-politicar-privacidad',
   standalone: true,
   imports: [
-    RutaFichaPipe,
     RouterLink,
     CommonModule,
     ReactiveFormsModule,
@@ -24,6 +23,7 @@ import { RutaFichaPipe } from '../../../../shared/pipes/ruta-ficha.pipe';
     FooterComponent,
     BarraFiltrosComponent,
     VolverComponent,
+    TarjetaInmuebleComponent,
   ],
   templateUrl: './politicar-privacidad.component.html',
   styleUrl: './politicar-privacidad.component.scss',
