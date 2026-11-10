@@ -161,8 +161,7 @@ export class ModalCrearContactoComponent {
 
   /**
    * Lee el UTM de la URL actual y, si no está, del que se guardó en localStorage al llegar al sitio
-   * (app.component). No se usa ActivatedRoute porque app.component agrega los UTM con history.replaceState
-   * y el router no ve ese cambio.
+   * (core/config/campana.ts: vence a los 30 días y ya no se pega en la dirección de cada página).
    */
   private leerUtm(param: string): string | null {
     const enUrl = new URL(window.location.href).searchParams.get(param);

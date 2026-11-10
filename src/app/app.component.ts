@@ -1,4 +1,5 @@
   import { isPlatformBrowser } from '@angular/common';
+  import { registrarCampana } from './core/config/campana';
   import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
   import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, ResolveEnd, Router, RouterOutlet } from '@angular/router';
   // Solo los dos componentes de Flowbite que usa el sitio (data-carousel y data-drawer):
@@ -94,39 +95,10 @@
         });
 
 
-      this.router.events.subscribe(event => {
-        if (event instanceof NavigationEnd) {
-          const url = new URL(window.location.href);
-
-          // Paso 1: guardar en localStorage si están en la URL
-          const utmParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'utm_id', 'fbclid'];
-
-          let updated = false;
-
-          utmParams.forEach(param => {
-            const value = url.searchParams.get(param);
-            if (value) {
-              localStorage.setItem(param, value);
-            }
-          });
-
-          // Paso 2: agregar desde localStorage si faltan en la URL
-          utmParams.forEach(param => {
-            const localValue = localStorage.getItem(param);
-            if (localValue && !url.searchParams.has(param)) {
-              url.searchParams.set(param, localValue);
-              updated = true;
-            }
-          });
-
-          if (updated) {
-            window.history.replaceState(
-              window.history.state,
-              '',
-              url.toString()
-            );
-          }
-        }
-      });
+      // Atribución de campaña: se guarda al llegar con utm_*/fbclid y vence a los 30 días. Ya no se vuelve a
+      // pegar en la dirección de cada página (ver core/config/campana.ts).
+      this.router.events
+        .pipe(filter((event: any) => event instanceof NavigationEnd))
+        .subscribe(() => registrarCampana(new URL(window.location.href), localStorage));
     }
   }

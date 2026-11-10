@@ -154,7 +154,7 @@ export class NavbarComponent2 implements OnInit {
             paginacion: response,
             filtros: obj,
           },
-          queryParams: { tipo: tipo , utm_source: this.urlParamService.obtenerParamLocalStorage('utm_source') }
+          queryParams: { tipo: tipo }
         });
       },
       (error: any) => {
