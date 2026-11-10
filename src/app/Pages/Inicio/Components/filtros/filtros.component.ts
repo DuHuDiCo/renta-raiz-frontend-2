@@ -97,7 +97,26 @@ export class FiltrosComponent implements OnInit, OnDestroy {
   ubicacion: string = '';
   niveles: any = ['diamante', 'oro', 'plata'];
   cargando = false;
-  isDrawerOpen: boolean = false;
+  /**
+   * Panel de filtros (Con IA o manual). En celular tapa la página: mientras está abierto, la página de atrás no se
+   * desplaza. Se hace aquí para cubrir todos los lugares que lo abren o cierran.
+   */
+  get isDrawerOpen(): boolean {
+    return this._isDrawerOpen;
+  }
+  set isDrawerOpen(valor: boolean) {
+    this._isDrawerOpen = valor;
+    this.bloquearScrollPagina(valor && !this.isDesktopView);
+  }
+  private _isDrawerOpen = false;
+
+  private bloquearScrollPagina(bloquear: boolean): void {
+    if (typeof document === 'undefined') return;
+    for (const el of [document.documentElement, document.body]) {
+      el.style.overflow = bloquear ? 'hidden' : '';
+      el.style.overscrollBehavior = bloquear ? 'none' : '';
+    }
+  }
   drawerMapAbierto: boolean = false;
   loadingResultados: boolean = false;
 
@@ -732,10 +751,15 @@ export class FiltrosComponent implements OnInit, OnDestroy {
 
   @HostListener('window:resize', ['$event'])
   onResize(event: Event) {
+    const eraEscritorio = this.isDesktopView;
     this.isDesktopView = window.innerWidth >= 768;
 
-    if (!this.isDesktopView) {
+    // Solo al pasar de computador a celular. En celular el teclado o la barra del navegador también disparan
+    // resize, y eso no debe cerrar el panel mientras se escribe.
+    if (eraEscritorio && !this.isDesktopView) {
       this.isDrawerOpen = false;
+    } else {
+      this.isDrawerOpen = this.isDrawerOpen; // reaplica o quita el bloqueo del scroll según el tamaño nuevo
     }
   }
 
@@ -839,6 +863,7 @@ export class FiltrosComponent implements OnInit, OnDestroy {
   }));
 
   ngOnDestroy(): void {
+    this.bloquearScrollPagina(false);
     this.quitarListadoAsistente();
   }
 
