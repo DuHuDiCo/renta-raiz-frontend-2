@@ -92,7 +92,7 @@
                   </div>
                 </div>
                 <!-- Controles -->
-                <button type="button"
+                <button aria-label="Foto anterior" type="button"
                   class="absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
                   (click)="prevImage()">
                   <span
@@ -102,7 +102,7 @@
                     </svg>
                   </span>
                 </button>
-                <button type="button"
+                <button aria-label="Foto siguiente" type="button"
                   class="absolute top-0 right-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
                   (click)="nextImage()">
                   <span
@@ -174,14 +174,14 @@
                   </div>
 
                   <!-- Flechas de navegación -->
-                  <button type="button" (click)="prevImageM()"
+                  <button aria-label="Foto anterior" type="button" (click)="prevImageM()"
                     class="absolute top-1/2 left-4 z-40 flex items-center justify-center h-10 w-10 bg-gray-800/50 hover:bg-gray-700/70 rounded-full group focus:outline-none">
                     <svg class="w-4 h-4 text-white group-hover:text-gray-300" fill="none" stroke="currentColor"
                       viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
-                  <button type="button" (click)="nextImageM()"
+                  <button aria-label="Foto siguiente" type="button" (click)="nextImageM()"
                     class="absolute top-1/2 right-4 z-40 flex items-center justify-center h-10 w-10 bg-gray-800/50 hover:bg-gray-700/70 rounded-full group focus:outline-none">
                     <svg class="w-4 h-4 text-white group-hover:text-gray-300" fill="none" stroke="currentColor"
                       viewBox="0 0 24 24">
@@ -201,20 +201,20 @@
                 <!-- Controles de zoom -->
                 <div
                   class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-50 flex space-x-3 bg-gray-800/50 rounded-full p-1">
-                  <button (click)="zoomIn()"
+                  <button aria-label="Acercar" (click)="zoomIn()"
                     class="p-2 text-white hover:text-gray-300 rounded-full hover:bg-gray-700/70">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                   </button>
-                  <button (click)="zoomOut()"
+                  <button aria-label="Alejar" (click)="zoomOut()"
                     class="p-2 text-white hover:text-gray-300 rounded-full hover:bg-gray-700/70">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
                     </svg>
                   </button>
-                  <button (click)="resetZoom()"
+                  <button aria-label="Restablecer zoom" (click)="resetZoom()"
                     class="p-2 text-white hover:text-gray-300 rounded-full hover:bg-gray-700/70">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

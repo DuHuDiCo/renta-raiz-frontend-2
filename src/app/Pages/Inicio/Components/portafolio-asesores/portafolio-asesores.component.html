@@ -60,7 +60,7 @@
       <!-- CARRUSEL DE INMUEBLES EN VENTA -->
       <div class="relative block md:hidden   z-10  ">
         <!-- Botones de navegación -->
-        <button (click)="scrollCarrusel('venta', 'left')"
+        <button aria-label="Ver inmuebles anteriores" (click)="scrollCarrusel('venta', 'left')"
           class="hidden md:flex absolute left-0 top-1/2 transform -translate-y-1/2 bg-[#080E36] text-white p-2 rounded-full shadow hover:bg-[#CDAD60] z-20">
           <i class="fas fa-chevron-left"></i>
         </button>
@@ -71,7 +71,7 @@
             class="snap-center flex-none w-72 sm:w-80 md:w-96" [nuevaPestana]="true" (agregarCarrito)="agregarFavorito($event)"></app-tarjeta-inmueble>
         </div>
 
-        <button (click)="scrollCarrusel('venta', 'right')"
+        <button aria-label="Ver más inmuebles" (click)="scrollCarrusel('venta', 'right')"
           class="hidden md:flex absolute right-0 top-1/2 transform -translate-y-1/2 bg-[#080E36] text-white p-2 rounded-full shadow hover:bg-[#CDAD60] z-20">
           <i class="fas fa-chevron-right"></i>
         </button>
@@ -198,7 +198,7 @@
       <!-- CARRUSEL DE INMUEBLES EN ARRIENDO -->
       <div class="relative block md:hidden   z-10 border-t border-gray-200 ">
         <!-- Botones de navegación -->
-        <button (click)="scrollCarrusel('arriendo', 'left')"
+        <button aria-label="Ver inmuebles anteriores" (click)="scrollCarrusel('arriendo', 'left')"
           class="hidden md:flex absolute left-0 top-1/2 transform -translate-y-1/2 bg-[#080E36] text-white p-2 rounded-full shadow hover:bg-[#CDAD60] z-20">
           <i class="fas fa-chevron-left"></i>
         </button>
@@ -207,7 +207,7 @@
           <app-tarjeta-inmueble *ngFor="let inmueble of resultadosArriendo" [inmueble]="inmueble"
             class="snap-center flex-none w-72 sm:w-80 md:w-96" [nuevaPestana]="true" (agregarCarrito)="agregarFavorito($event)"></app-tarjeta-inmueble>
         </div>
-        <button (click)="scrollCarrusel('arriendo', 'right')"
+        <button aria-label="Ver más inmuebles" (click)="scrollCarrusel('arriendo', 'right')"
           class="hidden md:flex absolute right-0 top-1/2 transform -translate-y-1/2 bg-[#080E36] text-white p-2 rounded-full shadow hover:bg-[#CDAD60] z-20">
           <i class="fas fa-chevron-right"></i>
         </button>

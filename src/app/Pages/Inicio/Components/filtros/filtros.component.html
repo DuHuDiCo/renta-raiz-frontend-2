@@ -8,7 +8,7 @@
 
     <div id="modern-drawer"
       class="fixed top-0 left-0 z-[999] md:z-[45] h-full w-full md:w-[28rem] lg:w-[28rem] md:top-[72px] md:h-[calc(100vh-72px)] overflow-hidden bg-white shadow-xl flex flex-col transition-transform duration-300 ease-in-out pb-[env(safe-area-inset-bottom)]"
-      [class.translate-x-0]="isDrawerOpen" [class.-translate-x-full]="!isDrawerOpen" [attr.aria-hidden]="!isDrawerOpen"
+      [class.translate-x-0]="isDrawerOpen" [class.-translate-x-full]="!isDrawerOpen" [attr.aria-hidden]="!isDrawerOpen" [attr.inert]="isDrawerOpen ? null : ''"
       style="border: 1px solid #cdad60" tabindex="-1" (click)="$event.stopPropagation()">
       <!-- Pestañas: se pasa entre la búsqueda con IA y los filtros manuales sin perder ninguna de las dos -->
       <div class="panel-filtros-manual flex-none flex items-center gap-2 bg-white px-3 py-3 border-b border-[#ece6d6]">
@@ -443,7 +443,7 @@
             </svg>
           </div>
 
-          <button *ngIf="searchTerm" type="button" (click)="clearSearch()"
+          <button aria-label="Borrar búsqueda" *ngIf="searchTerm" type="button" (click)="clearSearch()"
             class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">

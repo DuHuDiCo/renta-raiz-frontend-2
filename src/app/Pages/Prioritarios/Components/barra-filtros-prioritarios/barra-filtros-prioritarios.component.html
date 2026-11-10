@@ -33,7 +33,7 @@
             <i class="fas fa-search text-1xl text-gray-400"></i>
           </div>
 
-          <button *ngIf="searchTerm" type="button" (click)="clearSearch()"
+          <button aria-label="Borrar búsqueda" *ngIf="searchTerm" type="button" (click)="clearSearch()"
             class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
             <i class="fas fa-times"></i>
           </button>
@@ -123,7 +123,7 @@
           class="dropdown-container absolute z-10 mt-2 w-[350px] bg-white rounded-lg shadow-lg border border-gray-200 p-4">
 
           <!-- Botón X -->
-          <button (click)="isPreciosOpen = false" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+          <button aria-label="Cerrar rangos de precios" (click)="isPreciosOpen = false" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
             ✕
           </button>
           <p class="text-gray-500 text-sm font-medium mb-2">

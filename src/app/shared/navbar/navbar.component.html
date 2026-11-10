@@ -12,7 +12,8 @@
         }" class="transition-all duration-300" alt="Logo" />
     </a>
 
-    <button (click)="toggleMobileMenu()" class="md:hidden text-white focus:outline-none">
+    <button (click)="toggleMobileMenu()" class="md:hidden text-white focus:outline-none"
+      [attr.aria-label]="isMobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'" [attr.aria-expanded]="isMobileMenuOpen">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path *ngIf="!isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M4 6h16M4 12h16M4 18h16"></path>
@@ -115,7 +116,7 @@
 
           <ng-container *ngIf="(favService.favoritos$ | async) as favoritos">
 
-            <button (click)="abrirOffcanvas();"
+            <button aria-label="Ver mi recorrido" (click)="abrirOffcanvas();"
               class="relative text-white text-lg hover:text-[#cdad60] transition-colors">
 
               <i class="fas fa-cart-shopping text-2xl"></i>

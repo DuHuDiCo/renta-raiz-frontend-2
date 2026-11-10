@@ -6,7 +6,7 @@
          lg:left-auto lg:right-20 lg:h-auto lg:translate-x-0 lg:origin-bottom-right lg:border lg:border-[#CDAD60]/40
          lg:transition-[transform,opacity,right] lg:[.asistente-abierto_&]:right-[484px]"
   [ngClass]="panelAbierto ? 'scale-100 opacity-100' : 'pointer-events-none scale-[0.15] opacity-0'"
-  [attr.aria-hidden]="!panelAbierto">
+  [attr.aria-hidden]="!panelAbierto" [attr.inert]="panelAbierto ? null : ''">
 
   <!-- Encabezado: en computador despliega o retrae el panel -->
   <div class="flex-none flex items-center gap-3 px-4 py-2.5 bg-[#080E36] text-white cursor-pointer select-none"
