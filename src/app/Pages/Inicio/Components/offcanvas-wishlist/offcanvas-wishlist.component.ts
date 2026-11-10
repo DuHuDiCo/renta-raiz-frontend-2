@@ -71,12 +71,14 @@ export class OffcanvasWishlistComponent {
   ngOnInit(): void {
     let cantidadAnterior: number | null = null;
     this.favService.favoritos$.subscribe(favs => {
-      // Al agregar un inmueble se despliega para mostrarlo; al cargar la página se respeta lo guardado.
+      // Al agregar un inmueble, en computador se despliega para mostrarlo; en celular el panel taparía la
+      // pantalla, así que solo reaparece la píldora. Al cargar la página se respeta lo guardado.
       const agregoUno = cantidadAnterior !== null && favs.length > cantidadAnterior;
       if (favs.length > 0) this.visibleInterno = true;
       if (agregoUno) {
         this.oculto = false;
-        this.cambiarMinimizado(false);
+        if (!this.esCelular()) this.cambiarMinimizado(false);
+        else if (!this.panelAbierto) this.cambiarMinimizado(true);
       }
       cantidadAnterior = favs.length;
       this.favoritos = favs;
@@ -108,9 +110,12 @@ export class OffcanvasWishlistComponent {
 
   /** En celular el panel tapa toda la pantalla: al abrir un inmueble se retrae para que se vea la ficha. */
   alAbrirInmueble(): void {
-    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 1023.98px)').matches) {
-      this.cambiarMinimizado(true);
-    }
+    if (this.esCelular()) this.cambiarMinimizado(true);
+  }
+
+  /** Pantallas donde el panel abierto ocupa toda la pantalla. */
+  private esCelular(): boolean {
+    return typeof window !== 'undefined' && window.matchMedia('(max-width: 1023.98px)').matches;
   }
 
   cerrar(): void {

@@ -153,7 +153,6 @@ export class PrioritariosComponent implements OnInit {
 
 
     this.favService.agregar(propiedad);
-    this.toggleOffcanvas()
 
   }
 

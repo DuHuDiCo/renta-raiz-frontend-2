@@ -377,12 +377,27 @@ export class FiltrosComponent implements OnInit, OnDestroy {
 
   }
 
+  @ViewChild('barraSticky') barraSticky?: ElementRef<HTMLElement>;
+
+  /**
+   * Oculta el contador y el título al bajar. Ocultarlos acorta la página y el navegador sube el scroll lo mismo
+   * para no mover el contenido; con un solo umbral eso lo devolvía por debajo y el título parpadeaba. Por eso se
+   * oculta solo después de bajar más que la altura de la barra (tras el ajuste sigue lejos del umbral) y reaparece
+   * al volver arriba.
+   */
   @HostListener('window:scroll', [])
   onWindowScroll() {
     clearTimeout(this.scrollTimeout);
     this.scrollTimeout = setTimeout(() => {
-      this.isSticky = window.scrollY > 45;
-      this.cdRef.detectChanges();
+      const y = window.scrollY;
+      const umbral = 45;
+      const sticky = this.isSticky
+        ? y >= umbral
+        : y > umbral + (this.barraSticky?.nativeElement.offsetHeight ?? 0);
+      if (sticky !== this.isSticky) {
+        this.isSticky = sticky;
+        this.cdRef.detectChanges();
+      }
     }, 16);
   }
 
@@ -2024,13 +2039,6 @@ export class FiltrosComponent implements OnInit, OnDestroy {
     );
   }
 
-
-  scrollToTop() {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  }
 
   private initAutoComplete(ctrl: FormControl): Observable<number[]> {
     return ctrl.valueChanges.pipe(

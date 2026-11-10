@@ -7,7 +7,7 @@
     </div>
 
     <div id="modern-drawer"
-      class="fixed top-0 left-0 z-[999] md:z-[45] h-full w-full md:w-[28rem] lg:w-[28rem] md:top-[72px] md:h-[calc(100vh-72px)] overflow-hidden bg-white shadow-xl flex flex-col transition-transform duration-300 ease-in-out pb-[env(safe-area-inset-bottom)]"
+      class="fixed top-0 left-0 z-[999] md:z-[45] h-full w-full md:w-[28rem] lg:w-[28rem] md:top-[72px] md:h-[calc(100vh-72px)] md:h-[calc(100dvh-72px)] overflow-hidden bg-white shadow-xl flex flex-col transition-transform duration-300 ease-in-out pb-[env(safe-area-inset-bottom)]"
       [class.translate-x-0]="isDrawerOpen" [class.-translate-x-full]="!isDrawerOpen" [attr.aria-hidden]="!isDrawerOpen" [attr.inert]="isDrawerOpen ? null : ''"
       style="border: 1px solid #cdad60" tabindex="-1" (click)="$event.stopPropagation()">
       <!-- Pestañas: se pasa entre la búsqueda con IA y los filtros manuales sin perder ninguna de las dos -->
@@ -423,7 +423,7 @@
       'md:ml-[28rem] md:px-6': isDrawerOpen,
       'md:ml-0 md:px-32': !isDrawerOpen
     }">
-    <div
+    <div #barraSticky
       class="sticky-element transform-gpu will-change-transform bg-white shadow-sm sticky md:top-[72px] top-[48px] mt-1 z-40 mb-4 md:p-4 px-4 py-1 rounded-md transition-all duration-200">
       <!-- Barra de búsqueda y filtros -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 mt-8 sm:mt-0">
@@ -648,17 +648,6 @@
     </div>
 
     <app-enlaces-listados *ngIf="listado" [actual]="listado" class="block mt-10"></app-enlaces-listados>
-  </div>
-
-  <div class="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
-    <button (click)="scrollToTop()"
-      class="cursor-pointer w-14 h-14 rounded-full shadow-lg hover:bg-[#CDAD60] transition-all duration-300 bg-[#080E36] flex items-center justify-center"
-      aria-label="Volver arriba">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24"
-        stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-      </svg>
-    </button>
   </div>
 </div>
 

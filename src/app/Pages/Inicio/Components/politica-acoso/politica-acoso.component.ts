@@ -49,8 +49,6 @@ export class PoliticaAcosoComponent implements OnInit {
 
 
     this.favService.agregar(propiedad);
-
-    this.toggleOffcanvas()
   }
 
   sincronizarCierre() {

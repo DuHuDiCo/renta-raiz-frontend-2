@@ -55,8 +55,6 @@ export class ContactanosComponent implements OnInit {
 
 
     this.favService.agregar(propiedad);
-
-    this.toggleOffcanvas()
   }
 
   sincronizarCierre() {

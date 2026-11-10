@@ -65,7 +65,6 @@ export class PublicarInmuebleComponent implements OnInit {
 
 
     this.favService.agregar(propiedad);
-    this.toggleOffcanvas()
 
   }
 

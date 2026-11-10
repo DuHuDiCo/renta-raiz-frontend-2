@@ -38,14 +38,19 @@
 @media (max-width: 767px) {
   #modern-drawer {
     top: 0;
+    /* 100vh en celular incluye lo que tapa la barra del navegador y el campo de escribir quedaba debajo;
+       dvh es el alto visible de verdad (100vh queda de respaldo para navegadores viejos). */
     height: 100vh;
+    height: 100dvh;
     max-height: 100vh !important;
+    max-height: 100dvh !important;
     width: 90%;
     border-right: 1px solid #cdad60;
   }
 
   #modern-drawer .flex-1 {
     max-height: calc(100vh - 120px) !important;
+    max-height: calc(100dvh - 120px) !important;
   }
 
   #modern-drawer .sticky.bottom-0 {
