@@ -357,10 +357,6 @@ export class VistaInicialComponent implements OnInit {
     console.log(this.aliadosPorGrupo);
   }
 
-  redirigirContactanos() {
-    this.router.navigate(['/contacto']);
-  }
-
 
   abrirBrochure() {
     const url = 'https://oferta.rentaraiz.co/flipbook/brochure-renta-raiz/';
