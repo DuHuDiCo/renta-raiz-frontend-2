@@ -93,4 +93,4 @@ Reemplaza el iframe de LeadConnector de `/publicar-inmueble`, cuyos datos no lle
 
 - `environment.captacionPropia`: `true` muestra el formulario propio; `false`, el iframe de LeadConnector, que sigue como alternativa.
 - `environment.captacionMock`: `true` simula la subida y la respuesta sin llamar al backend. Escribe en la consola `[captación simulada]` y deja el `FormData` en `window.__ultimaCaptacionSimulada`.
-- Producción (`environment.ts`): `captacionPropia: false`, `captacionMock: false`. Desarrollo (`environment.development.ts`): `true`, `true`.
+- Producción (`environment.ts`): `captacionPropia: true`, `captacionMock: false`. Desarrollo (`environment.development.ts`): `captacionPropia: true`, `captacionMock: false` (backend real) y `captacionConservarDatos: true` (pruebas).

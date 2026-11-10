@@ -76,5 +76,5 @@ Recorridos de **lunes a viernes de 8:00 a 17:00** y **sábados de 9:00 a 11:00**
 
 ## Activación en el front
 
-- `environment.recorridoPropio`: `true` muestra el formulario propio; `false`, el widget de LeadConnector (producción mientras no exista el endpoint).
+- `environment.recorridoPropio`: `true` muestra el formulario propio; `false`, el widget de LeadConnector. Encendido en producción y en desarrollo.
 - `environment.recorridoMock`: `true` simula la respuesta sin llamar al backend.
