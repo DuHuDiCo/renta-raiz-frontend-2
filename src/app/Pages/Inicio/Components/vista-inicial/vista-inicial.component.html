@@ -502,10 +502,12 @@
           </div>
 
           <!-- Indicadores -->
-          <div class="absolute z-30 flex -translate-x-1/2 bottom-2 left-1/2 space-x-2 sm:space-x-3">
+          <!-- Cada botón mide 24 px o más para tocarlo con el dedo; el padding es transparente (bg-clip-content)
+               y solo se pinta el punto del centro, así Flowbite puede seguir cambiando su color. -->
+          <div class="absolute z-30 flex -translate-x-1/2 bottom-0 left-1/2 sm:space-x-1">
             <ng-container *ngFor="let _ of aliadosPorGrupo; let i = index">
-              <button type="button" class="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-gray-400"
-                [attr.data-carousel-slide-to]="i" aria-label="Slide"></button>
+              <button type="button" class="box-content w-2 h-2 p-2 sm:w-3 sm:h-3 rounded-full bg-clip-content bg-gray-400"
+                [attr.data-carousel-slide-to]="i" [attr.aria-label]="'Ver aliados, grupo ' + (i + 1)"></button>
             </ng-container>
           </div>
         </div>
