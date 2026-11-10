@@ -366,11 +366,7 @@
               <p class="text-xs text-gray-600 mb-3 line-clamp-2">
                 Una de las dudas más frecuentes dentro del sector inmobiliario surge cuando se presenta una diferencia durante un contrato de arrendamiento...
               </p>
-              <a (click)="
-                  redirigirVerBlog(
-                    'quien-toma-realmente-las-decisiones-sobre-un-inmueble-rentado-el-propietario-o-la-inmobiliaria'
-                  )
-                " class="cursor-pointer text-xs text-[#CDAD60] font-semibold hover:underline inline-flex items-center">
+              <a [routerLink]="['/ver-blog', 'quien-toma-realmente-las-decisiones-sobre-un-inmueble-rentado-el-propietario-o-la-inmobiliaria']" target="_blank" (click)="$event.stopPropagation()" class="cursor-pointer text-xs text-[#CDAD60] font-semibold hover:underline inline-flex items-center">
                 Ver más
                 <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg">
@@ -400,12 +396,7 @@
               <p class="text-xs text-gray-600 mb-3 line-clamp-2">
                 Medellín ha sido nominada a los Stella Awards 2025, conocidos como los "Óscar del turismo de reuniones", por su liderazgo en la industria MICE.
               </p>
-              <a (click)="
-                  redirigirVerBlog(
-                    'medellin-brilla-en-los-stella-awards-2025-la-ciudad-que-enamora-al-mundo-y-se-vuelve-epicentro-de-inversion-inmobiliaria'
-                  );
-                  $event.preventDefault()
-                " class="cursor-pointer text-xs text-[#CDAD60] font-semibold hover:underline inline-flex items-center">
+              <a [routerLink]="['/ver-blog', 'medellin-brilla-en-los-stella-awards-2025-la-ciudad-que-enamora-al-mundo-y-se-vuelve-epicentro-de-inversion-inmobiliaria']" target="_blank" (click)="$event.stopPropagation()" class="cursor-pointer text-xs text-[#CDAD60] font-semibold hover:underline inline-flex items-center">
                 Ver más
                 <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg">
@@ -435,12 +426,7 @@
               <p class="text-xs text-gray-600 mb-3 line-clamp-2">
                 En los últimos años, Medellín ha dejado de ser solo la "Ciudad de la Eterna Primavera" para convertirse en uno de los destinos más deseados para vivir con estilo.
               </p>
-              <a (click)="
-                  redirigirVerBlog(
-                    'medellin-el-nuevo-epicentro-del-lujo-en-america-latina-para-invertir-rentar-o-comprar-propiedades-exclusivas'
-                  );
-                  $event.preventDefault()
-                " class="cursor-pointer text-xs text-[#CDAD60] font-semibold hover:underline inline-flex items-center">
+              <a [routerLink]="['/ver-blog', 'medellin-el-nuevo-epicentro-del-lujo-en-america-latina-para-invertir-rentar-o-comprar-propiedades-exclusivas']" target="_blank" (click)="$event.stopPropagation()" class="cursor-pointer text-xs text-[#CDAD60] font-semibold hover:underline inline-flex items-center">
                 Ver más
                 <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg">

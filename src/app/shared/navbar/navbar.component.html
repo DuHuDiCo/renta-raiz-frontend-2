@@ -35,19 +35,19 @@
             class="absolute top-full left-0 mt-2 bg-white text-black rounded shadow-lg z-[60] w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
             <li>
               <a class="cursor-pointer flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
-                (click)="enviarFiltroArriendo('diamante')">
+                href="/filtros?tipo=diamante" (click)="$event.preventDefault(); enviarFiltroArriendo('diamante')">
                 <i class="fas fa-gem text-blue-500"></i> Diamante
               </a>
             </li>
             <li>
               <a class="cursor-pointer flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
-                (click)="enviarFiltroArriendo('oro')">
+                href="/filtros?tipo=oro" (click)="$event.preventDefault(); enviarFiltroArriendo('oro')">
                 <i class="fas fa-crown text-yellow-500"></i> Oro
               </a>
             </li>
             <li>
               <a class="cursor-pointer flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
-                (click)="enviarFiltroArriendo('plata')">
+                href="/filtros?tipo=plata" (click)="$event.preventDefault(); enviarFiltroArriendo('plata')">
                 <i class="fas fa-medal text-gray-400"></i> Plata
               </a>
             </li>
@@ -55,7 +55,7 @@
         </li>
 
         <li class="relative group">
-          <a class="cursor-pointer hover:text-gray-300 block py-2">Nosotros</a>
+          <span class="cursor-default hover:text-gray-300 block py-2">Nosotros</span>
 
           <!-- Submenú -->
           <ul
@@ -73,7 +73,7 @@
               </a>
             </li>
             <li>
-              <a class="cursor-pointer flex items-center gap-2 px-4 py-2 hover:bg-gray-100" (click)="abrirBrochure()">
+              <a class="cursor-pointer flex items-center gap-2 px-4 py-2 hover:bg-gray-100" href="https://oferta.rentaraiz.co/flipbook/brochure-renta-raiz/" target="_blank" rel="noopener">
                 <i class="fas fa-file-pdf" style="color: #CDAD60 !important;"></i> Brochure
               </a>
             </li>
@@ -81,20 +81,20 @@
         </li>
 
         <li class="relative group">
-          <a class="cursor-pointer hover:text-gray-300 block py-2">Clientes</a>
+          <span class="cursor-default hover:text-gray-300 block py-2">Clientes</span>
 
           <!-- Submenú -->
           <ul
             class="absolute top-full left-0 mt-2 bg-white text-black rounded shadow-lg z-50 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
             <li>
               <a class="cursor-pointer flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
-                onclick="window.open('https://simidocs.siminmobiliarias.com/base/simired/simidocsapi1.0/index.php?inmo=1127&tipo=1')">
+                href="https://simidocs.siminmobiliarias.com/base/simired/simidocsapi1.0/index.php?inmo=1127&amp;tipo=1" target="_blank" rel="noopener">
                 <i class="fas fa-key text-amber-600"></i> Propietarios
               </a>
             </li>
             <li>
               <a class="cursor-pointer flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
-                onclick="window.open('https://simidocs.siminmobiliarias.com/base/simired/simidocsapi1.0/index.php?inmo=1127&tipo=2')">
+                href="https://simidocs.siminmobiliarias.com/base/simired/simidocsapi1.0/index.php?inmo=1127&amp;tipo=2" target="_blank" rel="noopener">
                 <i class="fas fa-file-signature text-emerald-600"></i>
                 Arrendatarios
               </a>
@@ -139,8 +139,7 @@
         </li>
         <!-- Botón PSE  -->
         <li class="hidden md:block ml-4">
-          <a target="_blank"
-            onclick="window.open('https://gateway2.tucompra.com.co/sitesgo/RentaRaiz')"
+          <a href="https://gateway2.tucompra.com.co/sitesgo/RentaRaiz" target="_blank" rel="noopener"
             class="cursor-pointer w-14 h-14 rounded-full shadow-lg hover:brightness-110 transition duration-200 relative overflow-hidden bg-[#003366] flex items-center justify-center">
             <img src="assets/images/pse-findo.png" alt="PSE"
               class="absolute inset-0 w-full h-full object-contain scale-150" />
@@ -176,17 +175,17 @@
               </a>
             </li>
             <li>
-              <a class="block py-1 hover:text-gray-300 cursor-pointer" (click)="enviarFiltroArriendo('diamante')">
+              <a class="block py-1 hover:text-gray-300 cursor-pointer" href="/filtros?tipo=diamante" (click)="$event.preventDefault(); enviarFiltroArriendo('diamante')">
                 <i class="fas fa-gem text-blue-500"></i> Diamante
               </a>
             </li>
             <li>
-              <a class="block py-1 hover:text-gray-300 cursor-pointer" (click)="enviarFiltroArriendo('oro')">
+              <a class="block py-1 hover:text-gray-300 cursor-pointer" href="/filtros?tipo=oro" (click)="$event.preventDefault(); enviarFiltroArriendo('oro')">
                 <i class="fas fa-crown text-yellow-500"></i> Oro
               </a>
             </li>
             <li>
-              <a class="block py-1 hover:text-gray-300 cursor-pointer" (click)="enviarFiltroArriendo('plata')">
+              <a class="block py-1 hover:text-gray-300 cursor-pointer" href="/filtros?tipo=plata" (click)="$event.preventDefault(); enviarFiltroArriendo('plata')">
                 <i class="fas fa-medal text-gray-400"></i> Plata
               </a>
             </li>
@@ -218,7 +217,7 @@
             </li>
             <li>
               <a class="block py-1 hover:text-gray-300"
-                onclick="window.open('https://oferta.rentaraiz.co/flipbook/brochure-renta-raiz/')">
+                href="https://oferta.rentaraiz.co/flipbook/brochure-renta-raiz/" target="_blank" rel="noopener">
                 <i class="fas fa-file-pdf"></i> Brochure
               </a>
             </li>
@@ -239,13 +238,13 @@
           <ul *ngIf="showClientesDropdown" class="pl-4 mt-2 space-y-1 text-sm">
             <li>
               <a class="block py-1 hover:text-gray-300 cursor-pointer"
-                onclick="window.open('https://simidocs.siminmobiliarias.com/base/simired/simidocsapi1.0/index.php?inmo=1127&tipo=1')">
+                href="https://simidocs.siminmobiliarias.com/base/simired/simidocsapi1.0/index.php?inmo=1127&amp;tipo=1" target="_blank" rel="noopener">
                 <i class="fas fa-key text-amber-600"></i>
                 Propietarios</a>
             </li>
             <li>
               <a class="block py-1 hover:text-gray-300 cursor-pointer"
-                onclick="window.open('https://simidocs.siminmobiliarias.com/base/simired/simidocsapi1.0/index.php?inmo=1127&tipo=2')">
+                href="https://simidocs.siminmobiliarias.com/base/simired/simidocsapi1.0/index.php?inmo=1127&amp;tipo=2" target="_blank" rel="noopener">
                 <i class="fas fa-file-signature text-emerald-600"></i>
                 Arrendatarios</a>
             </li>

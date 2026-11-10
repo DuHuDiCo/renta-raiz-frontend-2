@@ -8,14 +8,14 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { InmueblesService } from '../../core/Inmuebles/inmuebles.service';
 import { UrlParamService } from '../../core/configs/url-param.service';
 
 @Component({
   selector: 'app-navbar-2',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './navbar-2.component.html',
   styleUrl: './navbar-2.component.scss',
 })
