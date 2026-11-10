@@ -46,7 +46,7 @@
             <div class="w-12 h-12 border-4 border-[#CDAD60] border-t-transparent rounded-full animate-spin"></div>
           </div>
         </div>
-        <div *ngIf="inmueblesDestacadosArray"
+        <div *ngIf="inmueblesDestacadosArray; else esqueletoTarjetas"
           class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-10 max-w-6xl w-full pb-10">
           <app-tarjeta-inmueble *ngFor="let inmueble of inmueblesDestacadosArray.slice(0, 3)" [inmueble]="inmueble"
             [destacado]="true" [grande]="true" (agregarCarrito)="agregarFavorito($event)"></app-tarjeta-inmueble>
@@ -117,7 +117,7 @@
       </div>
 
       <!-- Cards de propiedades -->
-      <div *ngIf="inmueblesVentasArray" class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-10 max-w-6xl w-full pb-10">
+      <div *ngIf="inmueblesVentasArray; else esqueletoTarjetas" class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-10 max-w-6xl w-full pb-10">
         <app-tarjeta-inmueble *ngFor="let inmueble of inmueblesVentasArray" [inmueble]="inmueble"
           [grande]="true" (agregarCarrito)="agregarFavorito($event)"></app-tarjeta-inmueble>
       </div>
@@ -185,7 +185,7 @@
             <div class="w-12 h-12 border-4 border-[#CDAD60] border-t-transparent rounded-full animate-spin"></div>
           </div>
         </div>
-        <div *ngIf="inmueblesArriendosArray" class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-10 max-w-6xl w-full pb-10">
+        <div *ngIf="inmueblesArriendosArray; else esqueletoTarjetas" class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-10 max-w-6xl w-full pb-10">
           <app-tarjeta-inmueble *ngFor="let inmueble of inmueblesArriendosArray" [inmueble]="inmueble"
             [grande]="true" (agregarCarrito)="agregarFavorito($event)"></app-tarjeta-inmueble>
         </div>
@@ -518,3 +518,17 @@
 
 
 <app-modal-wishlist *ngIf="mostrarModalRecorrido" [mostrarModalRecorrido]="mostrarModalRecorrido" (cerrar)="mostrarModalRecorrido = false"></app-modal-wishlist>
+<!-- Mientras llegan los inmuebles (al entrar al inicio desde otra página no hay SSR): reserva el mismo espacio
+     que las tres tarjetas para que, al aparecer, no empujen lo de abajo (CLS). -->
+<ng-template #esqueletoTarjetas>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-10 max-w-6xl w-full pb-10" aria-hidden="true">
+    <div *ngFor="let _ of [1, 2, 3]" class="overflow-hidden rounded-xl border border-[#ece6d6] bg-white">
+      <div class="aspect-[16/11] animate-pulse bg-[#F4EFE4]"></div>
+      <div class="h-[200px] space-y-3 p-4">
+        <div class="h-5 w-1/2 rounded bg-gray-200"></div>
+        <div class="h-4 w-2/3 rounded bg-gray-100"></div>
+        <div class="h-4 w-full rounded bg-gray-100"></div>
+      </div>
+    </div>
+  </div>
+</ng-template>
