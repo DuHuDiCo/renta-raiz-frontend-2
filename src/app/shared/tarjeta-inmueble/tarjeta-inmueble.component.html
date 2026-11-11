@@ -32,7 +32,7 @@
       @if (compartir; as datos) {
         <app-compartir-inmueble variante="mini" etiqueta="Compartir inmueble" [url]="datos.url" [titulo]="datos.titulo" />
       }
-      @if (conCarrito && !enRecorrido()) {
+      @if (recorridoActivo && conCarrito && !enRecorrido()) {
         <button type="button" (click)="carrito($event)" aria-label="Agregar al carrito" title="Agregar al carrito"
           class="flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-[#080E36] shadow-sm transition-colors hover:bg-[#CDAD60] hover:text-white">
           <i class="fas fa-cart-shopping text-sm"></i>

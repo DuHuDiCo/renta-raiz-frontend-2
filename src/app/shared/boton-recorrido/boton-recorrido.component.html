@@ -1,3 +1,4 @@
+@if (recorridoActivo) {
 @if (!enRecorrido) {
   <button type="button" (click)="agregar()"
     class="group flex w-full items-center justify-center gap-2.5 rounded-lg bg-[#CDAD60] px-5 py-3 text-sm font-semibold text-[#080E36] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#080E36] hover:text-white hover:shadow-md">
@@ -25,4 +26,5 @@
       Agendar visita{{ cantidad > 1 ? ' a ' + cantidad + ' inmuebles' : '' }}
     </button>
   </div>
+}
 }

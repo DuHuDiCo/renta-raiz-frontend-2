@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { ChangeDetectionStrategy, Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TitleCasePipe } from '@angular/common';
@@ -29,6 +30,8 @@ interface NivelInmueble {
   host: { class: 'block h-full' },
 })
 export class TarjetaInmuebleComponent implements OnInit, OnDestroy {
+  /** false: "Mi recorrido" desactivado temporalmente (environment.recorridoActivo). */
+  readonly recorridoActivo = environment.recorridoActivo;
   @Input({ required: true }) inmueble: any;
 
   /** Avisa al asistente qué inmuebles hay en pantalla ("¿cuál de estos es el más barato?"). */

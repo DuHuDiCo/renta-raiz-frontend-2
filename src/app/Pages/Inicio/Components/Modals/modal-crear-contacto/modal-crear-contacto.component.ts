@@ -8,6 +8,22 @@ import {
 import { InmueblesService } from '../../../../../core/Inmuebles/inmuebles.service';
 import { ResumenInmueble, resumenInmueble } from '../../../../../core/listados/listados';
 import { SEO_DOMINIO } from '../../../../../core/seo/seo.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
+import { environment } from '../../../../../../environments/environment';
+
+/** Formulario de LeadConnector por defecto y el de las visitas que llegan de Meta Ads (como era antes del propio). */
+const FORMULARIO_EXTERNO = 'https://api.leadconnectorhq.com/widget/form/9SRYMPh2FynzdxY045gg';
+const FORMULARIO_EXTERNO_META = 'https://api.leadconnectorhq.com/widget/form/LArCYkvLIbfXbvaQMJ4Q';
+/** Inmuebles que tenían un formulario de LeadConnector propio. */
+const FORMULARIOS_POR_INMUEBLE: Record<number, { formId: string; nombre: string; alto: number }> = {
+  5975: { formId: 'DBQBxa2NZQgSAYMiukLJ', nombre: 'Propiedad código 5975', alto: 401 },
+  2531: { formId: 'M1injuZo8jl0AFnLbjzu', nombre: 'Propiedad código 2531', alto: 401 },
+  5970: { formId: 'XeOz8uDX43OxILBxg74S', nombre: 'Propiedad código 5970', alto: 401 },
+  2411: { formId: '5CmVcLxMiLpUTEImetKC', nombre: 'Propiedad código 2411', alto: 401 },
+  5689: { formId: 'tanbgyswwkJ82IjFdrwz', nombre: 'Lote en las Palmas (Yeferson Cossio)', alto: 402 },
+  5024: { formId: '1H6XwJGDZfAL1YuEcp0d', nombre: 'Propiedad código 5024', alto: 401 },
+};
 
 type Accion = 'whatsapp' | 'email';
 type TipoNegocio = 'arriendo' | 'compra';
@@ -26,6 +42,15 @@ const WHATSAPP_COMERCIAL = '15556503779';
 export class ModalCrearContactoComponent {
   private fb = inject(NonNullableFormBuilder);
   private inmuebleService = inject(InmueblesService);
+  private sanitizer = inject(DomSanitizer);
+  private route = inject(ActivatedRoute);
+
+  /** false: se muestra el formulario externo de LeadConnector en lugar del propio (environment.contactoPropio). */
+  readonly contactoPropio = environment.contactoPropio;
+  iframeSrc: SafeResourceUrl | null = null;
+  iframeId = '';
+  iframeTitulo = '';
+  iframeAlto = 600;
 
   readonly indicativos = [
     { codigo: '57', pais: 'Colombia', iso: 'CO' },
@@ -67,6 +92,13 @@ export class ModalCrearContactoComponent {
   }
 
   abrirModal(codPro: number, accion: Accion, bizCode?: number | string, inmueble?: any) {
+    if (!this.contactoPropio) {
+      this.codPro = codPro;
+      this.prepararFormularioExterno(codPro);
+      this.visible = true;
+      return;
+    }
+
     const codProPrevio = this.codPro;
     this.codPro = codPro;
     this.resumen = inmueble?.codpro ? resumenInmueble(inmueble, SEO_DOMINIO) : null;
@@ -88,6 +120,23 @@ export class ModalCrearContactoComponent {
 
   cerrarModal() {
     this.visible = false;
+  }
+
+  /** Iframe de LeadConnector como era antes del formulario propio: con la URL de la ficha para saber el inmueble. */
+  private prepararFormularioExterno(codPro: number): void {
+    const propio = FORMULARIOS_POR_INMUEBLE[codPro];
+    const base = propio
+      ? `https://api.leadconnectorhq.com/widget/form/${propio.formId}`
+      : this.route.snapshot.queryParams['utm_source'] === 'meta ads'
+        ? FORMULARIO_EXTERNO_META
+        : FORMULARIO_EXTERNO;
+    const formId = base.split('/').pop() || '';
+    this.iframeId = `inline-${formId}`;
+    this.iframeTitulo = propio?.nombre ?? `Propiedad código ${codPro}`;
+    this.iframeAlto = propio?.alto ?? 600;
+    const urlActual = window.location.href;
+    const url = `${base}?urlInmueble=${btoa(urlActual)}&historial_web=${encodeURIComponent(urlActual)}`;
+    this.iframeSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
   @HostListener('document:keydown.escape')

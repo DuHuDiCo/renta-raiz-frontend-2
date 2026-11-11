@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { Component, DestroyRef, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WishlistServiceService } from '../../core/wishlist/wishlist-service.service';
@@ -13,6 +14,8 @@ import { WishlistServiceService } from '../../core/wishlist/wishlist-service.ser
   host: { class: 'block' },
 })
 export class BotonRecorridoComponent implements OnInit {
+  /** false: "Mi recorrido" desactivado temporalmente (environment.recorridoActivo). */
+  readonly recorridoActivo = environment.recorridoActivo;
   private favoritos = inject(WishlistServiceService);
   private destruir = inject(DestroyRef);
 

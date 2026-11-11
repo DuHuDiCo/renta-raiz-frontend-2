@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -24,6 +25,8 @@ import { WishlistServiceService } from '../../core/wishlist/wishlist-service.ser
   styleUrl: './navbar.component.scss',
 })
 export class NavbarComponent implements OnInit {
+  /** false: "Mi recorrido" desactivado temporalmente (environment.recorridoActivo). */
+  readonly recorridoActivo = environment.recorridoActivo;
   @ViewChild('nosotrosDropdown') nosotrosDropdownRef: ElementRef | undefined;
   @ViewChild('arriendosDropdown') arriendosDropdownRef: ElementRef | undefined;
   @ViewChild('clientesDropdown') clientesDropdownRef: ElementRef | undefined;

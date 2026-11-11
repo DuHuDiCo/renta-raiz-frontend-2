@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -11,6 +12,8 @@ import { WishlistServiceService } from '../../core/wishlist/wishlist-service.ser
   styleUrl: './botones-flotantes.component.scss'
 })
 export class BotonesFlotantesComponent implements OnInit {
+  /** false: "Mi recorrido" desactivado temporalmente (environment.recorridoActivo). */
+  readonly recorridoActivo = environment.recorridoActivo;
 
   @Input() hideWhatsApp: boolean = false;
 

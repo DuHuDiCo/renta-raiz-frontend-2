@@ -1,3 +1,4 @@
+import { environment } from '../../../../../environments/environment';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { WishlistServiceService } from '../../../../core/wishlist/wishlist-service.service';
 import { CommonModule } from '@angular/common';
@@ -15,6 +16,8 @@ const CLAVE_MINIMIZADO = 'recorrido_minimizado';
   styleUrl: './offcanvas-wishlist.component.scss'
 })
 export class OffcanvasWishlistComponent {
+  /** false: "Mi recorrido" desactivado temporalmente (environment.recorridoActivo). */
+  readonly recorridoActivo = environment.recorridoActivo;
 
   favoritos: any[] = [];
 

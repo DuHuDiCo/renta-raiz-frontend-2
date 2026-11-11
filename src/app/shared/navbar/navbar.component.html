@@ -112,7 +112,7 @@
         <li class="hidden">
           <a class="cursor-pointer hover:text-gray-300 block py-2" routerLink="/contacto">Contáctanos</a>
         </li>
-        <li class="hidden md:block ml-4 relative group">
+        <li *ngIf="recorridoActivo" class="hidden md:block ml-4 relative group">
 
           <ng-container *ngIf="(favService.favoritos$ | async) as favoritos">
 

@@ -201,7 +201,8 @@ export class AsistenteChatService {
 
   /** Códigos de "Mi recorrido": válidos, sin repetir, en el orden en que se agregaron y como máximo 20. */
   codigosRecorrido(): number[] {
-    if (!this.enNavegador) return [];
+    // Con el recorrido desactivado no se menciona ni se envía, aunque haya favoritos guardados de antes.
+    if (!this.enNavegador || !environment.recorridoActivo) return [];
     let favoritos: any[] = [];
     try {
       favoritos = this.favoritos.cargarFavoritos() as any[];
