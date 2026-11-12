@@ -15,6 +15,7 @@ const RUTAS_FIJAS = [
   '/quienes-somos',
   '/nuestro-equipo',
   '/contacto',
+  '/pagos-pse',
   '/blogs',
   '/publicar-inmueble',
   '/avaluos-comerciales',

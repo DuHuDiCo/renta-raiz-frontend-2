@@ -6,6 +6,7 @@ import { blogsResolver } from '../../core/resolvers/blogs.resolver';
 import { listadoMatcher, listadoResolver } from '../../core/resolvers/listado.resolver';
 import { asesorResolver } from '../../core/resolvers/asesor.resolver';
 import { asesorPerfilResolver } from '../../core/resolvers/asesor-perfil.resolver';
+import { SEO_DOMINIO } from '../../core/seo/seo.service';
 
 export const routes: Routes = [
 
@@ -48,6 +49,20 @@ export const routes: Routes = [
         data: { seoDinamico: true },
         resolve: { listado: listadoResolver },
         runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+      },
+      {
+        // Instrucciones para pagar el canon por PSE (la página que el equipo comparte por WhatsApp).
+        path: 'pagos-pse',
+        loadComponent: () =>
+          import('./Components/pagos-pse/pagos-pse.component').then((m) => m.PagosPseComponent),
+        data: {
+          seo: {
+            titulo: 'Paga tu canon de arrendamiento por PSE | Renta Raíz',
+            descripcion:
+              'Paga el canon de arrendamiento por PSE desde rentaraiz.co en cuatro pasos: botón PSE, tu documento, el valor y listo. Fácil y rápido.',
+            imagen: `${SEO_DOMINIO}/assets/images/og-pse.jpg`,
+          },
+        },
       },
       {
         path: 'contacto',

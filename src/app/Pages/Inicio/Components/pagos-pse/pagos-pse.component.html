@@ -1,0 +1,63 @@
+<app-navbar [alwaysScrolled]="true"></app-navbar>
+
+<main class="bg-[#F8F6F1]">
+  <!-- Encabezado -->
+  <section class="bg-[#080E36] px-4 pb-24 pt-32 text-white sm:pt-36">
+    <div class="mx-auto flex max-w-5xl flex-col items-center gap-10 md:flex-row md:justify-between">
+      <div class="text-center md:text-left">
+        <p class="text-sm font-semibold uppercase tracking-wider text-[#CDAD60]">Pagos en línea</p>
+        <h1 class="mt-2 text-3xl font-bold leading-tight sm:text-5xl">
+          ¿Cómo pagar el <span class="text-[#CDAD60]">canon de arrendamiento</span>?
+        </h1>
+        <p class="mt-4 max-w-xl text-lg text-white/80">Paga por PSE desde nuestro sitio web en cuatro pasos. Es fácil y rápido.</p>
+        <a [href]="pasarela" target="_blank" rel="noopener"
+          class="mt-8 inline-flex items-center gap-3 rounded-full bg-[#CDAD60] py-2 pl-2 pr-6 text-lg font-semibold text-[#080E36] shadow-lg transition-colors hover:bg-white">
+          <span class="relative h-11 w-11 overflow-hidden rounded-full bg-[#003366]">
+            <img src="assets/images/pse-findo.png" alt="" class="absolute inset-0 h-full w-full scale-150 object-contain" />
+          </span>
+          Pagar con PSE
+        </a>
+      </div>
+      <div class="relative hidden h-56 w-56 flex-none overflow-hidden rounded-full bg-[#003366] shadow-[0_0_0_10px_rgba(205,173,96,0.35)] md:block">
+        <img src="assets/images/pse-findo.png" alt="PSE" class="absolute inset-0 h-full w-full scale-125 object-contain" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Pasos -->
+  <section class="-mt-14 px-4 pb-16">
+    <ol class="mx-auto grid max-w-5xl gap-4 sm:grid-cols-2">
+      @for (paso of pasos; track paso.titulo; let i = $index) {
+        <li class="flex items-center gap-4 rounded-3xl bg-white p-6 shadow-md">
+          <span class="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-[#080E36] text-lg font-bold text-[#CDAD60]">{{ i + 1 }}</span>
+          <div>
+            <h2 class="text-lg font-bold text-[#080E36]">{{ paso.titulo }}</h2>
+            @if (paso.texto) { <p class="mt-1 text-gray-600">{{ paso.texto }}</p> }
+          </div>
+        </li>
+      }
+    </ol>
+
+    <div class="mx-auto mt-6 flex max-w-5xl items-start gap-3 rounded-2xl border border-[#ecdfc0] bg-[#FBF7EE] p-5 text-[#5c4a1e]">
+      <i class="fas fa-circle-info mt-1 text-[#CDAD60]" aria-hidden="true"></i>
+      <p>
+        Ten en cuenta que PSE, como pasarela de pagos, aplica un <strong>costo adicional de $5.000 por transacción</strong>,
+        independiente de Renta Raíz.
+      </p>
+    </div>
+
+    <div class="mx-auto mt-10 flex max-w-5xl flex-col items-center gap-4 text-center">
+      <a [href]="pasarela" target="_blank" rel="noopener"
+        class="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-[#080E36] px-6 py-4 text-lg font-semibold text-white shadow-lg transition-colors hover:bg-[#CDAD60] hover:text-[#080E36] sm:w-auto sm:min-w-[320px]">
+        <i class="fas fa-lock" aria-hidden="true"></i> Ir a pagar con PSE
+      </a>
+      <p class="text-sm text-gray-500">Se abre la pasarela de pagos segura en una pestaña nueva.</p>
+      <a [href]="whatsappAyuda" target="_blank" rel="noopener"
+        class="mt-2 inline-flex items-center gap-2 font-medium text-[#1f9d55] underline-offset-4 hover:underline">
+        <i class="fab fa-whatsapp text-xl" aria-hidden="true"></i> ¿Tienes problemas para pagar? Escríbenos
+      </a>
+    </div>
+  </section>
+</main>
+
+<app-footer></app-footer>
