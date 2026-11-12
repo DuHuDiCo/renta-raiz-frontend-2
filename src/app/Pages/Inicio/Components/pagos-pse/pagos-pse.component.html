@@ -2,7 +2,7 @@
 
 <main class="bg-[#F8F6F1]">
   <!-- Encabezado -->
-  <section class="bg-[#080E36] px-4 pb-24 pt-32 text-white sm:pt-36">
+  <section class="bg-[#080E36] px-4 pb-20 pt-24 text-white sm:pt-28">
     <div class="mx-auto flex max-w-5xl flex-col items-center gap-10 md:flex-row md:justify-between">
       <div class="text-center md:text-left">
         <p class="text-sm font-semibold uppercase tracking-wider text-[#CDAD60]">Pagos en línea</p>
@@ -22,9 +22,17 @@
     </div>
   </section>
 
-  <!-- Pasos -->
-  <section class="-mt-14 px-4 pb-16">
-    <ol class="mx-auto grid max-w-5xl gap-4 sm:grid-cols-2">
+  <!-- Aviso del costo y pasos -->
+  <section class="-mt-12 px-4 pb-16">
+    <div class="mx-auto flex max-w-5xl items-start gap-3 rounded-2xl border border-[#ecdfc0] bg-[#FBF7EE] p-5 text-[#5c4a1e] shadow-md">
+      <i class="fas fa-circle-info mt-1 text-[#CDAD60]" aria-hidden="true"></i>
+      <p>
+        Ten en cuenta que PSE, como pasarela de pagos, aplica un <strong>costo adicional de $5.000 por transacción</strong>,
+        independiente de Renta Raíz.
+      </p>
+    </div>
+
+    <ol class="mx-auto mt-4 grid max-w-5xl gap-4 sm:grid-cols-2">
       @for (paso of pasos; track paso.titulo; let i = $index) {
         <li class="flex items-center gap-4 rounded-3xl bg-white p-6 shadow-md">
           <span class="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-[#080E36] text-lg font-bold text-[#CDAD60]">{{ i + 1 }}</span>
@@ -35,14 +43,6 @@
         </li>
       }
     </ol>
-
-    <div class="mx-auto mt-6 flex max-w-5xl items-start gap-3 rounded-2xl border border-[#ecdfc0] bg-[#FBF7EE] p-5 text-[#5c4a1e]">
-      <i class="fas fa-circle-info mt-1 text-[#CDAD60]" aria-hidden="true"></i>
-      <p>
-        Ten en cuenta que PSE, como pasarela de pagos, aplica un <strong>costo adicional de $5.000 por transacción</strong>,
-        independiente de Renta Raíz.
-      </p>
-    </div>
 
     <div class="mx-auto mt-10 flex max-w-5xl flex-col items-center gap-4 text-center">
       <a [href]="pasarela" target="_blank" rel="noopener"
