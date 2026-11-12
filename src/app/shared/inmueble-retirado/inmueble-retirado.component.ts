@@ -46,7 +46,7 @@ export function seoInmuebleRetirado(slug: string, params: Record<string, string>
     titulo: `${que}: ya no está disponible | Renta Raíz`,
     descripcion: `Este inmueble ya no está disponible. En Renta Raíz te mostramos las opciones más parecidas que tenemos ahora.`,
     ruta: `/inmueble/${slug}`,
-    imagen: `${SEO_DOMINIO}/assets/images/og-inmueble-no-disponible.jpg`,
+    imagen: `${SEO_DOMINIO}/assets/images/og-inmueble-no-disponible.jpg?v=2`,
     noindex: true,
   };
 }

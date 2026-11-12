@@ -60,7 +60,7 @@ export const routes: Routes = [
             titulo: 'Paga tu canon de arrendamiento por PSE | Renta Raíz',
             descripcion:
               'Paga el canon de arrendamiento por PSE desde rentaraiz.co: ingresa tu documento, verifica la información, selecciona el valor y paga. Fácil y rápido.',
-            imagen: `${SEO_DOMINIO}/assets/images/og-pse.jpg`,
+            imagen: `${SEO_DOMINIO}/assets/images/og-pse.jpg?v=2`,
           },
         },
       },
