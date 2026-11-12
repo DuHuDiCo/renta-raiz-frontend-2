@@ -22,8 +22,6 @@ export class PagosPseComponent {
   )}`;
 
   readonly pasos = [
-    { titulo: 'Ingresa a rentaraiz.co', texto: 'Ya estás aquí. También lo encuentras en cualquier página del sitio.' },
-    { titulo: 'Selecciona el botón azul PSE', texto: 'Está arriba a la derecha en el menú; en el celular, abajo a la izquierda. O usa el botón de esta página.' },
     { titulo: 'Ingresa tu documento de identificación', texto: '' },
     { titulo: 'Verifica y paga', texto: 'Revisa que la información sea correcta, selecciona el valor a pagar y haz clic en Pagar.' },
   ];
