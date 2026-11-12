@@ -17,7 +17,7 @@ export const PASARELA_PSE = 'https://gateway2.tucompra.com.co/sitesgo/RentaRaiz'
 })
 export class PagosPseComponent {
   readonly pasarela = PASARELA_PSE;
-  readonly whatsappAyuda = `https://wa.me/573145438665?text=${encodeURIComponent(
+  readonly whatsappAyuda = `https://wa.me/573045411001?text=${encodeURIComponent(
     'Hola, necesito ayuda para pagar el canon de arrendamiento por PSE.'
   )}`;
 
