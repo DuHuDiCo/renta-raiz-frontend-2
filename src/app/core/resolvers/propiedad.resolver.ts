@@ -22,10 +22,12 @@ export const propiedadResolver: ResolveFn<any> = (route) => {
   const vistaReducida = slug === null && Number(route.paramMap.get('ocultarContenido')) === 1;
   const rutaActual = `/${route.url.map((segmento) => segmento.path).join('/')}`;
 
-  // Muestra la página "no encontrada" sin cambiar la dirección del navegador.
-  const noDisponible = (codigo: number) => {
+  // Muestra la página "no encontrada" sin cambiar la dirección del navegador. Si es una ficha que ya no existe en
+  // Domus, se le pasa su dirección para que muestre los inmuebles más parecidos (InmuebleRetiradoComponent).
+  const noDisponible = (codigo: number, retirado = false) => {
     seo.responderCon(codigo);
-    router.navigate(['/no-encontrado'], { skipLocationChange: true, state: { codigo } });
+    const state = retirado && slug ? { codigo, retirado: { slug, params: { ...route.queryParams } } } : { codigo };
+    router.navigate(['/no-encontrado'], { skipLocationChange: true, state });
     return EMPTY;
   };
 
@@ -50,7 +52,8 @@ export const propiedadResolver: ResolveFn<any> = (route) => {
       if (!(error instanceof HttpErrorResponse)) return throwError(() => error);
       // 400/404: el inmueble no existe. Cualquier otro fallo (API caída, 5xx) se trata como temporal
       // para que los buscadores no eliminen fichas válidas por una caída del backend.
-      return noDisponible(error.status === 404 || error.status === 400 ? 404 : 503);
+      if (error.status === 404) return noDisponible(404, true);
+      return noDisponible(error.status === 400 ? 404 : 503);
     })
   );
 };

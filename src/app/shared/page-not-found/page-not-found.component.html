@@ -1,4 +1,6 @@
-@if (temporal) {
+@if (retirado) {
+  <app-inmueble-retirado [slug]="retirado.slug" [params]="retirado.params"></app-inmueble-retirado>
+} @else if (temporal) {
   <div class="flex min-h-screen flex-col items-center justify-center bg-gray-900 px-6 text-center text-white">
     <i class="fas fa-plug-circle-exclamation text-5xl text-yellow-500" aria-hidden="true"></i>
     <h1 class="mt-6 text-2xl font-bold sm:text-3xl">No pudimos cargar esta página</h1>

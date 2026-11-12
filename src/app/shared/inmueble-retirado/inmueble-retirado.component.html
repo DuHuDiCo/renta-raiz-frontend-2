@@ -1,0 +1,53 @@
+<app-navbar [alwaysScrolled]="true"></app-navbar>
+
+<main class="min-h-screen bg-[#F8F6F1] px-4 pb-16 pt-28 sm:pt-32">
+  <section class="mx-auto max-w-6xl">
+    <div class="rounded-3xl bg-white px-6 py-8 text-center shadow-md sm:px-10">
+      <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#F4EFE4] text-2xl text-[#CDAD60]">
+        <i class="fas fa-house-circle-xmark" aria-hidden="true"></i>
+      </span>
+      <h1 class="mt-4 text-2xl font-bold text-[#080E36] sm:text-3xl">{{ descripcion }} ya no está disponible</h1>
+      <p class="mx-auto mt-2 max-w-2xl text-gray-600">
+        Es probable que ya se haya {{ datos?.negocio === 'venta' ? 'vendido' : 'arrendado' }} o que se haya retirado.
+        Estos son los inmuebles más parecidos que tenemos ahora.
+      </p>
+      @if (datos) {
+        <p class="mt-3 text-xs text-gray-400">Código del inmueble: {{ datos.codpro }}</p>
+      }
+    </div>
+
+    @if (cargando) {
+      <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3" aria-busy="true" aria-label="Buscando inmuebles parecidos">
+        @for (n of [1, 2, 3]; track n) {
+          <div class="h-80 animate-pulse rounded-2xl bg-white shadow-sm"></div>
+        }
+      </div>
+    } @else if (parecidos.length) {
+      <h2 class="mt-10 text-xl font-bold text-[#080E36]">Inmuebles parecidos</h2>
+      <div class="mt-4 grid grid-cols-1 gap-6 md:grid-cols-3">
+        @for (inmueble of parecidos; track inmueble.codpro) {
+          <app-tarjeta-inmueble [inmueble]="inmueble" (agregarCarrito)="agregarFavorito($event)"></app-tarjeta-inmueble>
+        }
+      </div>
+    } @else {
+      <p class="mt-10 text-center text-gray-600">Por ahora no encontramos inmuebles parecidos.</p>
+    }
+
+    @if (!cargando) {
+      <div class="mt-10 flex flex-wrap justify-center gap-3">
+        @if (rutaTodos) {
+          <a [routerLink]="rutaTodos"
+            class="rounded-lg bg-[#080E36] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#CDAD60] hover:text-[#080E36]">
+            {{ textoTodos }}
+          </a>
+        }
+        <a routerLink="/"
+          class="rounded-lg border border-[#080E36] px-6 py-3 font-semibold text-[#080E36] transition-colors hover:bg-[#080E36] hover:text-white">
+          Volver al inicio
+        </a>
+      </div>
+    }
+  </section>
+</main>
+
+<app-footer></app-footer>
