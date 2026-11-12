@@ -25,7 +25,8 @@ export const propiedadResolver: ResolveFn<any> = (route) => {
   // Muestra la página "no encontrada" sin cambiar la dirección del navegador. Si es una ficha que ya no existe en
   // Domus, se le pasa su dirección para que muestre los inmuebles más parecidos (InmuebleRetiradoComponent).
   const noDisponible = (codigo: number, retirado = false) => {
-    seo.responderCon(codigo);
+    // La ficha retirada responde 200 con noindex: así WhatsApp y las redes muestran su vista previa.
+    if (!retirado) seo.responderCon(codigo);
     const state = retirado && slug ? { codigo, retirado: { slug, params: { ...route.queryParams } } } : { codigo };
     router.navigate(['/no-encontrado'], { skipLocationChange: true, state });
     return EMPTY;

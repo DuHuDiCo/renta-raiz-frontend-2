@@ -10,6 +10,7 @@
 
   import { filter } from 'rxjs/operators';
   import { SEO_AGENCIA, SEO_POR_DEFECTO, SEO_SITIO_WEB, SeoService } from './core/seo/seo.service';
+  import { seoInmuebleRetirado } from './shared/inmueble-retirado/inmueble-retirado.component';
   import { AsistenteChatComponent } from './shared/asistente-chat/asistente-chat.component';
 
   declare let fbq: Function; // Importante para que TypeScript no dé error
@@ -59,6 +60,13 @@
       let ruta = this.router.routerState.snapshot.root;
       while (ruta.firstChild) ruta = ruta.firstChild;
       if (ruta.data['seoDinamico']) return;
+
+      // Ficha de un inmueble retirado (propiedad.resolver): su propio título, descripción e imagen para compartir.
+      const retirado = this.router.lastSuccessfulNavigation?.extras.state?.['retirado'];
+      if (retirado?.slug) {
+        this.seo.actualizar(seoInmuebleRetirado(retirado.slug, retirado.params));
+        return;
+      }
 
       const url = this.router.url.split(/[?#]/)[0];
       this.seo.actualizar({

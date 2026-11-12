@@ -11,7 +11,8 @@ import {
   LugarRetirado,
   ubicarInmuebleRetirado,
 } from '../../core/listados/inmueble-retirado';
-import { encabezadoListado, rutaListado } from '../../core/listados/listados';
+import { encabezadoListado, rutaListado, slugListado } from '../../core/listados/listados';
+import { DatosSeo, SEO_DOMINIO } from '../../core/seo/seo.service';
 import { NavbarComponent } from '../navbar/navbar.component';
 import { FooterComponent } from '../footer/footer.component';
 import { TarjetaInmuebleComponent } from '../tarjeta-inmueble/tarjeta-inmueble.component';
@@ -23,10 +24,37 @@ const CANTIDAD_PARECIDOS = 6;
 /** Cuántos se piden en cada búsqueda. */
 const POR_BUSQUEDA = 12;
 
+/** "las-orquideas" → "Las Orquideas". */
+function nombreDeSlug(slug: string): string {
+  return slug.split('-').filter(Boolean).map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+}
+
+/**
+ * SEO de la ficha de un inmueble retirado. Responde 200 con noindex: los buscadores la retiran del índice y
+ * WhatsApp y las redes sí muestran la vista previa (con 404 no la muestran), con la imagen og-inmueble-no-disponible.
+ */
+export function seoInmuebleRetirado(slug: string, params: Record<string, string> = {}): DatosSeo {
+  const datos = leerInmuebleRetirado(slug, params);
+  let lugar = '';
+  if (datos) {
+    const ciudad = datos.ciudadSlug && datos.zonaSlug.endsWith(datos.ciudadSlug) ? datos.ciudadSlug : '';
+    const barrio = ciudad ? datos.zonaSlug.slice(0, -ciudad.length).replace(/-$/, '') : datos.zonaSlug;
+    lugar = [nombreDeSlug(barrio), nombreDeSlug(ciudad)].filter(Boolean).join(', ');
+  }
+  const que = datos ? `${datos.tipoNombre ?? 'Inmueble'} en ${datos.negocio}${lugar ? ` en ${lugar}` : ''}` : 'Inmueble';
+  return {
+    titulo: `${que}: ya no está disponible | Renta Raíz`,
+    descripcion: `Este inmueble ya no está disponible. En Renta Raíz te mostramos las opciones más parecidas que tenemos ahora.`,
+    ruta: `/inmueble/${slug}`,
+    imagen: `${SEO_DOMINIO}/assets/images/og-inmueble-no-disponible.jpg`,
+    noindex: true,
+  };
+}
+
 /**
  * Ficha de un inmueble que ya no existe en Domus: en lugar de un error, dice qué era (con lo que trae la
- * dirección) y muestra los inmuebles más parecidos, con un enlace al listado. La página responde 404 (lo pone
- * la página "no encontrada") para que los buscadores la retiren.
+ * dirección) y muestra los inmuebles más parecidos, con un enlace al listado. Responde 200 con noindex (ver
+ * seoInmuebleRetirado).
  */
 @Component({
   selector: 'app-inmueble-retirado',

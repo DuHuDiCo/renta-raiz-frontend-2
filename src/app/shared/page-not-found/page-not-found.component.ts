@@ -22,12 +22,12 @@ export class PageNotFoundComponent {
   readonly retirado: { slug: string; params: Record<string, string> } | null = this.estado?.['retirado'] ?? null;
 
   constructor() {
-    inject(SeoService).responderCon(this.temporal ? 503 : 404);
+    // La ficha retirada responde 200 con noindex (seoInmuebleRetirado); el resto, 503 o 404.
+    if (!this.retirado) inject(SeoService).responderCon(this.temporal ? 503 : 404);
     // El SEO de la ruta pone "Página no encontrada" al terminar la navegación; en el caso temporal se corrige después.
     const titulo = inject(Title);
     afterNextRender(() => {
       if (this.temporal) titulo.setTitle('No pudimos cargar esta página | Renta Raíz');
-      else if (this.retirado) titulo.setTitle('Inmueble no disponible | Renta Raíz');
     });
   }
 
