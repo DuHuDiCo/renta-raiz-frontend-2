@@ -1,4 +1,4 @@
-import { afterNextRender, Component, inject, Input, OnInit } from '@angular/core';
+import { afterNextRender, Component, inject, Input, NgZone, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom, forkJoin } from 'rxjs';
 import { InmueblesService } from '../../core/Inmuebles/inmuebles.service';
@@ -65,6 +65,7 @@ export function seoInmuebleRetirado(slug: string, params: Record<string, string>
 export class InmuebleRetiradoComponent implements OnInit {
   private inmuebles = inject(InmueblesService);
   private favoritos = inject(WishlistServiceService);
+  private zona = inject(NgZone);
 
   /** Texto de la dirección: "casa-arriendo-la-intermedia-envigado-7590". */
   @Input({ required: true }) slug = '';
@@ -82,7 +83,9 @@ export class InmuebleRetiradoComponent implements OnInit {
   constructor() {
     // Los parecidos se buscan solo en el navegador: el servidor responde rápido el 404 y la búsqueda no
     // retrasa la página (la ve el visitante, no el buscador).
-    afterNextRender(() => this.buscarParecidos());
+    // afterNextRender corre fuera de la zona de Angular: sin zona.run los resultados no se pintan hasta que algo
+    // (por ejemplo, hacer scroll) dispara la detección de cambios.
+    afterNextRender(() => this.zona.run(() => this.buscarParecidos()));
   }
 
   ngOnInit(): void {
@@ -94,8 +97,20 @@ export class InmuebleRetiradoComponent implements OnInit {
     if (!this.datos) return 'Este inmueble';
     const nombre = this.datos.tipoNombre?.toLowerCase();
     const tipo = nombre ? `${FEMENINOS.has(nombre) ? 'Esta' : 'Este'} ${nombre}` : 'Este inmueble';
-    const lugar = [this.barrio?.nombre, this.ciudad?.nombre].filter(Boolean).join(', ');
+    const lugar = [this.barrio?.nombre ?? this.barrioDeLaDireccion(), this.ciudad?.nombre].filter(Boolean).join(', ');
     return `${tipo} en ${this.datos.negocio}${lugar ? ` en ${this.capitalizar(lugar)}` : ''}`;
+  }
+
+  /**
+   * El catálogo de barrios solo trae los que tienen inmuebles: si el retirado era el único, su barrio ya no está.
+   * Entonces se usa el que trae la dirección ("las-orquideas" → "Las Orquideas").
+   */
+  private barrioDeLaDireccion(): string | undefined {
+    if (!this.datos || !this.ciudad) return undefined;
+    const ciudadSlug = slugListado(this.ciudad.nombre);
+    if (!this.datos.zonaSlug.endsWith(`-${ciudadSlug}`)) return undefined;
+    const barrio = this.datos.zonaSlug.slice(0, -ciudadSlug.length - 1);
+    return barrio ? nombreDeSlug(barrio) : undefined;
   }
 
   private async buscarParecidos(): Promise<void> {
