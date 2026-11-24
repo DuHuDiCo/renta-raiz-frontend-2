@@ -17,14 +17,14 @@ export const environment = {
   busquedaIaMock: false,
   /** Formulario propio de disponibilidad para el recorrido (POST /recorridos) en lugar del widget de LeadConnector. */
   /** false: "Mi recorrido" desactivado temporalmente (sin botones de agregar, píldora, panel ni carrito). */
-  recorridoActivo: false,
+  recorridoActivo: true,
   recorridoPropio: true,
   /** Simula la respuesta de POST /recorridos, sin llamar al backend (mientras no exista el endpoint). */
   recorridoMock: false,
   /** Formulario propio de contacto en la ficha del inmueble (POST de contacto) en lugar del iframe de LeadConnector. */
-  contactoPropio: false,
+  contactoPropio: true,
   /** Formulario propio "Consigna tu propiedad" (POST /captaciones) en lugar del iframe de LeadConnector. */
-  captacionPropia: false,
+  captacionPropia: true,
   /** Simula la respuesta de POST /captaciones, sin llamar al backend (mientras no exista el endpoint). */
   captacionMock: false,
   /** Pruebas: el formulario de captación conserva lo escrito (también al recargar) y no se borra tras enviar. */
