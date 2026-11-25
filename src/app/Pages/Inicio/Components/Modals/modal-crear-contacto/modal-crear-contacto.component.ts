@@ -29,8 +29,8 @@ type Accion = 'whatsapp' | 'email';
 type TipoNegocio = 'arriendo' | 'compra';
 type Estado = 'formulario' | 'enviando' | 'exito' | 'error';
 
-/** Número de WhatsApp comercial al que se redirige tras enviar el formulario (solo dígitos, con indicativo). */
-const WHATSAPP_COMERCIAL = '15556503779';
+/** Número de WhatsApp al que se redirige tras enviar el formulario: la línea de LÍA (Contact Center), solo dígitos con indicativo. */
+const WHATSAPP_COMERCIAL = '573007088061';
 
 @Component({
   selector: 'app-modal-crear-contacto',
